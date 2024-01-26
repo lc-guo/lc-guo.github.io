@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://example.com/about/index.html</loc>
+    
+    <lastmod>2024-01-26</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B18-DAC-DMA%E8%BE%93%E5%87%BA%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A2%E5%BD%A2/</loc>
     
     <lastmod>2024-01-26</lastmod>
@@ -273,15 +282,6 @@
   
   <url>
     <loc>http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B19-I2C-MPU6050%E9%A9%B1%E5%8A%A8/</loc>
-    
-    <lastmod>2024-01-26</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://example.com/about/index.html</loc>
     
     <lastmod>2024-01-26</lastmod>
     
