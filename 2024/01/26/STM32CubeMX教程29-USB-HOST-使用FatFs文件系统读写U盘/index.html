@@ -17,12 +17,12 @@
   <meta name="author" content="OSnotes">
   <meta name="keywords" content="">
   
-    <meta name="description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板USB_OTG_FS为工作在Mass Storage Host Class">
+    <meta name="description" content="使用STM32CubeMX软件配置STM32F407开发板USB_OTG_FS为工作在Mass Storage Host Class（大容量存储主机类）模式下的USB_HOST（USB主机），并使用FatFs文件系统对插入开发板的U盘进行读写等操作">
 <meta property="og:type" content="article">
 <meta property="og:title" content="STM32CubeMX教程29 USB_HOST - 使用FatFs文件系统读写U盘">
 <meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B29-USB-HOST-%E4%BD%BF%E7%94%A8FatFs%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AF%BB%E5%86%99U%E7%9B%98/index.html">
 <meta property="og:site_name" content="OSnotes">
-<meta property="og:description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板USB_OTG_FS为工作在Mass Storage Host Class">
+<meta property="og:description" content="使用STM32CubeMX软件配置STM32F407开发板USB_OTG_FS为工作在Mass Storage Host Class（大容量存储主机类）模式下的USB_HOST（USB主机），并使用FatFs文件系统对插入开发板的U盘进行读写等操作">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.1.png">
 <meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.2.png">
@@ -44,7 +44,7 @@
 <meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.18.gif">
 <meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.19.png">
 <meta property="article:published_time" content="2024-01-26T04:06:37.000Z">
-<meta property="article:modified_time" content="2024-01-26T04:14:15.859Z">
+<meta property="article:modified_time" content="2024-01-26T08:49:57.178Z">
 <meta property="article:author" content="OSnotes">
 <meta property="article:tag" content="STM32CubeMX">
 <meta name="twitter:card" content="summary_large_image">
