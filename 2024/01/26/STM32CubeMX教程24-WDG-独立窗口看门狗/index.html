@@ -1,0 +1,800 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） 野火DAP仿真器 keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 XCOM V2.6串口助手 逻辑分析仪nanoDLA 2、实验目标使用STM32CubeMX软件配置STM32F407开发板的独立看门狗（IWDG）和窗口看门狗（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程24 WDG - 独立窗口看门狗">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B24-WDG-%E7%8B%AC%E7%AB%8B%E7%AA%97%E5%8F%A3%E7%9C%8B%E9%97%A8%E7%8B%97/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） 野火DAP仿真器 keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 XCOM V2.6串口助手 逻辑分析仪nanoDLA 2、实验目标使用STM32CubeMX软件配置STM32F407开发板的独立看门狗（IWDG）和窗口看门狗（">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.15.gif">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.17.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.18.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.19.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.20.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.21.gif">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.22.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.23.png">
+<meta property="article:published_time" content="2024-01-26T04:05:59.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:12:54.740Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程24 WDG - 独立窗口看门狗 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程24 WDG - 独立窗口看门狗"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:05" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          25 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程24 WDG - 独立窗口看门狗</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p>开发板（<a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a>）</p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html" title="野火DAP仿真器">野火DAP仿真器</a></p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html" title="XCOM V2.6串口助手">XCOM V2.6串口助手</a></p>
+<p>逻辑分析仪<a target="_blank" rel="noopener" href="https://github.com/wuxx/nanoDLA" title="nanoDLA">nanoDLA</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板的<font color="#fe2c24"><strong>独立看门狗（IWDG）和窗口看门狗（WWDG）并了解其功能实现</strong></font></p>
+<h1 id="3、WWDG实验流程"><a href="#3、WWDG实验流程" class="headerlink" title="3、WWDG实验流程"></a>3、WWDG实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>STM32F407拥有两个看门狗，分别为独立看门狗和窗口看门狗，这两个看门狗的作用都是监控程序运行，程序死机或跑飞就使系统复位，值得注意的是，一旦开启看门狗就无法停止，除非系统复位</p>
+<p>窗口看门狗的结构不复杂，其结构框图上描述了有关窗口看门狗的所有内容，首先WDG的时钟来自于PCLK1（STM32F407最高42MHz）的4096次分频后再进行可选的1&#x2F;2&#x2F;4&#x2F;8分频，其内部有一个7位的递减计数器T[6:0]，还有一个WWDG_CFR配置寄存器，该寄存器位6：0包含了用于与递减计数器进行比较的窗口值W[6:0]</p>
+<p><font color="#fe2c24"><strong>当出现以下两种情况时会产生窗口看门狗复位操作</strong></font></p>
+<ol>
+<li><p>当看门狗激活（WDGA&#x3D;1）且T6位由1变为0时（也即T[6:0]&lt;0X3F时）</p>
+</li>
+<li><p>当看门狗激活且T[6:0]&gt;W[6:0]时用户写WWDG_CR寄存器的值（也即刷新T[6:0]值）</p>
+</li>
+</ol>
+<p>如下所示为窗口看门狗逻辑框图 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>通过上述的描述，<font color="#fe2c24"><strong>可知窗口看门狗要想不产生复位操作，必须将其计数器的计数值控制在W[6:0]和0x3F之间才能喂狗（刷新T[6:0]值）</strong></font>，当 “计数器的值小于0x3F” 或者 “当计数器的值T[6:0]&gt;W[6:0]时用户喂狗” 都会产生Reset操作，这也是为什么叫窗口看门狗的原因，如下图所示为窗口看门狗的工作时序图（注释1）</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>窗口看门狗可设置的参数只有三个</p>
+<p><font color="#be191c" style="background: #fef2f0"> WWDG counter clockprescaler </font>（时钟分频）：可以设置为1&#x2F;2&#x2F;4&#x2F;8分频</p>
+<p><font color="#be191c" style="background: #fef2f0"> WWDG window value </font>（窗口W[6:0]值）：可设置范围T[6:0]~127</p>
+<p><font color="#be191c" style="background: #fef2f0"> WWDG down-counter reload value </font>（递减计数器重装值）：可设置范围63-127（7位最大值127且不能小于0x3F）</p>
+<p>注意本实验由于独立看门狗较为简单，所以选择将独立&#x2F;窗口看门狗放在一篇文章里，但是读者复现实验的时候应该分开做，不要同时启用窗口看门狗和独立看门狗（不是不可以同时启用，而是对于本实验例子同时启用不方便理解）</p>
+<p>另外需要提醒的是，<font color="#fe2c24"><strong>独立&#x2F;窗口看门狗只要被初始化就会自动启动，用户只需喂狗即可</strong></font></p>
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号）选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>由于窗口看门狗递减定时器为7位且递减到0x3F就会产生复位，因此最大计数值也才127-63&#x3D;64，因此其时钟频率尽可能低一点，否则超时时间太短，实验现象不太好观察，这里将PCLK1设置为了21MHz，具体时钟配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>本实验需要初始化开发板上GREEN_LED和RED_LED，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937704">STM32CubeMX教程2 GPIO输出 - 点亮LED灯</a>”</p>
+<p>本实验需要初始化开发板上KEY2用户按键，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17938621">STM32CubeMX教程3 GPIO输入 - 按键响应</a>”</p>
+<p>本实验需要初始化USART1作为输出信息渠道，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”</p>
+<p>单击Pinout &amp; Configuration页面左边的System Core的WWDG进入窗口看门狗的设置，在Mode中勾选Activated，在下方配置其分频系数为8，窗口值为90，计数器重装值为最大值127，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>现在我们来计算一下窗口看门狗的超时时间</strong></font></p>
+<p>首先PCLK1设置为了21MHz，然后该时钟经过4096次分频，在经过设置的8分频得到的频率为640.869140625Hz</p>
+<p>则其超时时间可以计算得到为（127-63）&#x2F;640.869140625≈0.09986s≈99.86ms</p>
+<p>其不允许喂狗的时间可以计算得到为（127-90）&#x2F;640.869140625≈57.734ms</p>
+<p><font color="#fe2c24"><strong>即当窗口定时器被初始化启动后，如果在57.734ms-100ms之间没有进行喂狗操作，那么窗口看门狗将超时导致程序复位</strong></font></p>
+<h3 id="3-1-3、外设中断配置"><a href="#3-1-3、外设中断配置" class="headerlink" title="3.1.3、外设中断配置"></a>3.1.3、外设中断配置</h3><p>在Pinout &amp; Configuration页面左边System Core&#x2F;NVIC中勾选Window watchdog interrupt全局中断，然后选择合适的中断优先级即可</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>在生成的工程主函数main()中调用MX_WWDG_Init()函数对WWDG参数配置，并调用了HAL_WWDG_Init()初始化函数</p>
+<p>在HAL_WWDG_Init()函数中对WWDG做了初始化，并调用了HAL_WWDG_MspInit()函数对WWDG的时钟、中断优先级和中断使能做了配置</p>
+<p>WWDG具体初始化调用流程如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-2、外设中断调用流程"><a href="#3-2-2、外设中断调用流程" class="headerlink" title="3.2.2、外设中断调用流程"></a>3.2.2、外设中断调用流程</h3><p>在STM32CubeMX中勾选了WWDG的中断后，会在stm32f4xx_it.c文件中出现串口看门狗中断服务函数WWDG_IRQHandler()</p>
+<p>该中断服务函数WWDG_IRQHandler()调用了HAL库WWDG中断统一管理函数HAL_WWDG_IRQHandler()</p>
+<p><font color="#fe2c24"><strong>最终在HAL_WWDG_IRQHandler()函数中调用了早期唤醒回调函数HAL_WWDG_EarlyWakeupCallback()，该函数为虚函数，需要用户重新实现</strong></font></p>
+<p>WWDG具体中断调用流程如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p>在wwdg.c中重新实现早唤醒回调函数HAL_WWDG_EarlyWakeupCallback()，当递减计数器递减到0x40，下次递减即将产生看门狗复位时，就会进入到该早唤醒回调函数中，但是该函数只能执行一个时钟节拍，然后系统就复位了，因此该函数内部执行不了复杂的程序，笔者这里也只是输出了一个字符‘1’，源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*早唤醒回调函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_WWDG_EarlyWakeupCallback</span><span class="hljs-params">(WWDG_HandleTypeDef *hwwdg)</span><br>&#123;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;1\r\n&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<p>在主函数中初始化完毕拉低PF9引脚，主循环中延时喂狗，并闪烁GREEN_LED，当系统喂狗及时，用户就可以看到GREEN_LED闪烁，当喂狗不及时，系统反复复位，就看不到GREEN_LED闪烁</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.14.png" srcset="/img/loading.gif" lazyload  ></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*主循环外代码*/</span><br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Reset\r\n&quot;</span>);<br>HAL_GPIO_WritePin(RED_LED_GPIO_Port,RED_LED_Pin,GPIO_PIN_RESET);<br> <br> <br><span class="hljs-comment">/*主循环内代码*/</span><br>HAL_Delay(<span class="hljs-number">70</span>);<br><span class="hljs-comment">//HAL_Delay(40);</span><br>HAL_WWDG_Refresh(&amp;hwwdg);<br>HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port,GREEN_LED_Pin);<br></code></pre></td></tr></table></figure>
+
+<h1 id="4、常用函数"><a href="#4、常用函数" class="headerlink" title="4、常用函数"></a>4、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*独立看门狗喂狗函数*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_IWDG_Refresh</span><span class="hljs-params">(IWDG_HandleTypeDef *hiwdg)</span><br> <br><span class="hljs-comment">/*窗口看门狗喂狗函数*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_IWDG_Refresh</span><span class="hljs-params">(IWDG_HandleTypeDef *hiwdg)</span><br> <br><span class="hljs-comment">/*窗口看门狗早唤醒中断回调函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_WWDG_EarlyWakeupCallback</span><span class="hljs-params">(WWDG_HandleTypeDef *hwwdg)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><p>将程序修改为延时110ms，烧录程序，单片机上电后通过串口可以发现每隔一段时间都会发生进入早唤醒中断和复位操作，此时开发板上只有RED_LED被点亮，GREEN_LED呈现熄灭状态，使用逻辑分析仪捕获PF9引脚的电平，可以发现复位间隔时间大概为99ms，与我们设置预期的99.864ms大致一致，如下图所示为串口输出数据和逻辑分析仪捕获PF9引脚电平图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.15.gif" srcset="/img/loading.gif" lazyload></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.16.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>使用PF9引脚的状态来判断复位时间间隔不太严谨，因此我们将WWDG的参数做修改二次测试，分频不变仍为8，窗口值修改为80，重装值修改为100，此时通过计算可知递减到63大约需要57.734ms，将程序修改为延时70ms，然后使用逻辑分析仪再次捕获PF9引脚的电平，可以发现复位间隔时间大概为57ms，经过这两次测试，可知虽然不严谨但可以验证，如下图所示为逻辑分析仪捕获的PF9引脚电平图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.17.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>WWDG复原回原来参数，分频8，窗口值90，重装值127，将程序修改为延时70ms，然后烧录程序，单片机上电后通过串口可以发现不会频繁的输出复位信息，也不会进入早唤醒中断回调函数中，此时开发板上RED_LED被点亮，GREEN_LED呈现闪烁状态，证明喂狗比较及时，没有产生窗口看门狗复位</p>
+<h1 id="6、IWDG实验流程简述"><a href="#6、IWDG实验流程简述" class="headerlink" title="6、IWDG实验流程简述"></a>6、IWDG实验流程简述</h1><h2 id="6-0、前提知识"><a href="#6-0、前提知识" class="headerlink" title="6.0、前提知识"></a>6.0、前提知识</h2><p><font color="#fe2c24"><strong>独立看门狗很简单，本质就是一个12位的递减计数器</strong></font>，当递减到0之后就产生看门狗复位操作，<font color="#fe2c24"><strong>其时钟来源于单片机内部的LSI RC（32KHz）且不可更换</strong></font>，该内部RC震荡产生的时钟信号频率误差较大，因此在设置看门狗复位时间时最好留有余量，如下图所示为其时钟来源</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.18.png" srcset="/img/loading.gif" lazyload ></div>
+
+<p>独立看门狗可设置的参数只有两个</p>
+<p><font color="#be191c" style="background: #fef2f0"> IWDG counter clockprescaler </font>（时钟分频）：可以设置为4&#x2F;8&#x2F;16&#x2F;…&#x2F;256分频</p>
+<p><font color="#be191c" style="background: #fef2f0"> IWDG down-counter reload value </font>（递减计数器重装值）：可设置范围0-4095（12位）</p>
+<p>当其重装值设置为最大值4095，根据时钟分频的不同，看门狗的超时时间也不同，最长可达32.768s，最短只有0.512s，具体超时时间如下表所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.19.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="6-1、CubeMX相关配置"><a href="#6-1、CubeMX相关配置" class="headerlink" title="6.1、CubeMX相关配置"></a>6.1、CubeMX相关配置</h2><p>只需在Pinout ＆ Configuration页面左边功能分类栏目System Core中单击其中IWDG，在Mode中勾选Activated，最后在下方配置两个参数即可，时钟使用LSI配置不可调，IWDG无中断，具体步骤如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.20.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="6-2、添加其他必要代码"><a href="#6-2、添加其他必要代码" class="headerlink" title="6.2、添加其他必要代码"></a>6.2、添加其他必要代码</h2><p>程序初始化完毕后拉低PF9引脚，在主循环中实现按键响应，按下KEY2按键执行喂狗操作</p>
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*主函数初始化完后将PF9引脚拉低*/</span><br>HAL_GPIO_WritePin(RED_LED_GPIO_Port,RED_LED_Pin,GPIO_PIN_RESET);<br> <br><span class="hljs-comment">/*主循环中程序/</span><br><span class="hljs-comment">/*按键KEY2被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>&#123;<br>    HAL_Delay(<span class="hljs-number">50</span>);<br>    <span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>    &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Now feed the dog\r\n&quot;</span>);<br>        HAL_IWDG_Refresh(&amp;hiwdg);<br>        <span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="6-3、实验现象"><a href="#6-3、实验现象" class="headerlink" title="6.3、实验现象"></a>6.3、实验现象</h2><p>烧录程序，单片机上电后通过串口可以发现每隔一段时间都会发生复位操作，当按下KEY2按键在该间隔时间内喂狗，就不会产生复位操作，而一旦停止喂狗，超时后又会产生复位操作，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.21.gif" srcset="/img/loading.gif" lazyload ></div>
+
+<p>当单片机复位后会首先执行一系列初始化操作，然后手动将PF9引脚设置为低电平（该引脚默认为高），直到由于没有喂狗产生看门狗复位为止，通过逻辑分析仪捕获PF9引脚的电平，可以发现其两次复位间隔时间与我们所设置预期的看门狗超时时间大致一致，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.22.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/24.23.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h1 id="7、注释详解"><a href="#7、注释详解" class="headerlink" title="7、注释详解"></a>7、注释详解</h1><p><em>注释1</em>：图片来源于 STM32F4xx 参考手册 RM0090</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程24 WDG - 独立窗口看门狗</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程24-WDG-独立窗口看门狗/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B25-PWR-%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86-%E7%9D%A1%E7%9C%A0%E3%80%81%E5%81%9C%E6%AD%A2%E5%92%8C%E5%BE%85%E6%9C%BA%E6%A8%A1%E5%BC%8F/" title="STM32CubeMX教程25 PWR 电源管理 - 睡眠、停止和待机模式">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程25 PWR 电源管理 - 睡眠、停止和待机模式</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B23-FSMC-IS62WV51216-SRAM-%E9%A9%B1%E5%8A%A8/" title="STM32CubeMX教程23 FSMC - IS62WV51216(SRAM)驱动">
+                        <span class="hidden-mobile">STM32CubeMX教程23 FSMC - IS62WV51216(SRAM)驱动</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

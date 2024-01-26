@@ -1,0 +1,751 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板SDIO使用FatFs中间件读写4线SD卡，并实现以轮询方式读写SD卡或以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B28-SDIO-%E4%BD%BF%E7%94%A8FatFs%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AF%BB%E5%86%99SD%E5%8D%A1/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板SDIO使用FatFs中间件读写4线SD卡，并实现以轮询方式读写SD卡或以">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.8.gif">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.12.png">
+<meta property="article:published_time" content="2024-01-26T04:06:30.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:14:03.898Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:06" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          21 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p><a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a></p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html">野火DAP仿真器</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html">XCOM V2.6串口助手</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板<font color="#fe2c24"><strong>SDIO使用FatFs中间件读写4线SD卡，并实现以轮询方式读写SD卡或以DMA方式读取SD卡</strong></font></p>
+<h1 id="3、FatFs轮询读取SD卡流程"><a href="#3、FatFs轮询读取SD卡流程" class="headerlink" title="3、FatFs轮询读取SD卡流程"></a>3、FatFs轮询读取SD卡流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>FatFs文件系统相关知识请读者阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验”3.0、前提知识“、”3.2.1、外设初始化调用流程”和”3.2.3、添加其他必要代码”三个小节内容</p>
+<p>SD卡及SDIO接口相关知识请读者阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17972264">STM32CubeMX教程27 SDIO - 读写SD卡</a>实验”3.0、前提知识“小节内容</p>
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>按照<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17972264">STM32CubeMX教程27 SDIO - 读写SD卡</a>实验配置，主锁相环参数Q配置为7，48MHz时钟频率配置为48MHz，其余时钟频率均设置为其能达到的最高频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>本实验需要初始化开发板上WK_UP、KEY2、KEY1和KEY0用户按键，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17938621">STM32CubeMX教程3 GPIO输入 - 按键响应</a>”</p>
+<p>本实验需要初始化USART1作为输出信息渠道，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”</p>
+<p><font color="#fe2c24"><strong>本实验对SDIO的初始化配置与上一实验</strong></font><a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17972264">STM32CubeMX教程27 SDIO - 读写SD卡</a><font color="#fe2c24"><strong>3.1小节一致，无需做任何修改，只需要增加本实验需要的中间件FatFs即可</strong></font></p>
+<p>单击Pinout ＆ Configuration页面左边功能分类栏目最下面的Middleware and SoftwarePacks，<font color="#fe2c24"><strong>单击其中FatFs，在右侧模式设置中选择SD卡，下方的Configuration中参数大多保持默认即可</strong></font>，需要使用到的时候可以再修改</p>
+<p>对Set Defines页面的参数不理解的读者，请阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验”3.1.2、外设参数配置”小节，<font color="#fe2c24"><strong>这里只需将</strong></font><font color="#be191c" style="background: #fef2f0"> CODE_PAGE </font><font color="#fe2c24"><strong>参数配置为简体中文即可</strong></font>，具体配置如下图所示 </p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>在Advanced Settings配置页面中，参数<font color="#be191c" style="background: #fef2f0"> SDIO instance </font>只可选SDIO，无SPI选项，因为STM32F407的SDIO接口不支持SPI；当SDIO配置了DMA时，如果希望FatFs使用SDIO的DMA，那么可以将参数<font color="#be191c" style="background: #fef2f0"> Use dma template </font>配置为Enable；参数<font color="#be191c" style="background: #fef2f0"> BSP code for SD </font>不可选，只能为通用模式</p>
+<p>在Platform Settings配置页面中，需要配置SD卡的插入检测引脚<font color="#be191c" style="background: #fef2f0"> Detect SDIO </font>，如果不配置该参数，则默认认为SD卡插在SD卡槽中，并且在生成工程代码时也会出现警告，这里由于硬件上并不支持插入检测因此并未配置该选项，警告内容如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.5.png" srcset="/img/loading.gif" lazyload></div>
+
+
+<h3 id="3-1-3、外设中断配置"><a href="#3-1-3、外设中断配置" class="headerlink" title="3.1.3、外设中断配置"></a>3.1.3、外设中断配置</h3><p>FatFs轮询读取SD卡无需配置任何中断</p>
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>SDIO外设初始化调用流程请读者阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17972264">STM32CubeMX教程27 SDIO - 读写SD卡</a>实验对应小节</p>
+<p>FatFs文件系统初始化调用流程请阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验对应小节</p>
+<p>在之前<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验中笔者提到过，<font color="#fe2c24"><strong>对于Extemal SRAM、SD Card和USB Disk这三种固定类型的存储，则无需用户在App文件夹和Target文件夹中重新实现FatFs的底层IO读写等操作函数，CubeMX生成的工程代码中会自动实现</strong></font></p>
+<p>将本实验生成的工程代码与<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验做对比，可以发现，FatFs在Target目录下多生成了一个名为bsp_driver_xxx.c的文件，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.7.png" srcset="/img/loading.gif" lazyload></div>
+
+<p>该bsp_driver_xxx.c文件就是将对应内存设备底层读写等操作函数进行了封装，同时在sd_diskio.c文件中，本该在移植FatFs时由用户自己手动实现的初始化、状态、读&#x2F;写和IO控制等函数也被直接调用了bsp_driver_xxx.c里的函数进行了自动实现，无需用户的任何操作，极为方便</p>
+<p>这部分实现的原始代码读者可以自行生成工程查看，也可以和<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验中笔者手动实现的几个函数做对比，更加容易发现其中共性</p>
+<h3 id="3-2-2、外设中断调用流程"><a href="#3-2-2、外设中断调用流程" class="headerlink" title="3.2.2、外设中断调用流程"></a>3.2.2、外设中断调用流程</h3><p>FatFs轮询读取SD卡无配置任何中断</p>
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p><font color="#fe2c24"><strong>STM32CubeMX工程生成工程代码后，读者应注意手动修改MX_SDIO_SD_Init()函数中SD卡数据总线宽度从默认的4位手动修改为1位，否则SD卡将初始化失败</strong></font></p>
+<p>在生成的工程代码中增加使用FatFs库中API进行文件操作的函数，包括挂载文件系统、显示SD卡信息、读&#x2F;写TXT文件、获取文件信息、扫描文件列表和删除文件等函数，笔者将其封装在了file_operate.c &#x2F; file_operate.h文件中，具体的源代码如下所示</p>
+<p><strong>file_operate.c文件</strong></p>
+<p>与<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验中实现的file_operate.c文件一致，除了测试写的函数FatFs_WriteTXTFile()中写入SD卡的内容修改为了“Line1: Hello, FatFs***\n”</p>
+<p><strong>file_operate.h文件</strong></p>
+<p>与<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验中实现的file_operate.h文件一致，除了下面三个宏定义需要修改为本实验的SD卡相关内容，修改内容如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*定义自己的存储设备*/</span><br><span class="hljs-comment">/*用户存储设备扇区字节数*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> User_Sector 512</span><br><span class="hljs-comment">/*用户存储设备FatFs对象*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> User_FatFs 	SDFatFS</span><br><span class="hljs-comment">/*用户存储设备卷路径*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> User_SDPath SDPath</span><br></code></pre></td></tr></table></figure>
+
+<p>向工程中添加.c&#x2F;.h文件的步骤请阅读“<a target="_blank" rel="noopener" href="https://blog.csdn.net/lc_guo/article/details/135380334?spm=1001.2014.3001.5501">STM32CubeMX教程19 I2C - MPU6050驱动</a>”实验3.2.3小节</p>
+<p>在main.c文件中添加 ”file_operate.h“ 头文件，然后在主函数 main() 中添加文件系统挂载函数及按键控制逻辑函数，具体源代码与<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验中实现的一模一样，无需任何修改</p>
+<h1 id="4、烧录验证"><a href="#4、烧录验证" class="headerlink" title="4、烧录验证"></a>4、烧录验证</h1><p>烧录程序，开发板上电后会尝试在SD卡上挂载文件系统，挂载成功后会输出读取到的SD卡的信息，接下来按照下面几个步骤使用FatFs文件系统对SD卡进行读写等测试</p>
+<ol>
+<li>按下开发板上的WK_UP按键，扫描SD卡根目录下所有文件，并通过串口将文件列表输出</li>
+<li>按下开发板上的KEY2按键，在SD卡根目录创建一个”test.txt“文件，将一个字符串”Line1: Hello, FatFs***“写入该文件中，该字符串大小为24个字节（该字符串中有2个空格，末尾包括一个’\n‘和一个‘\0’）</li>
+<li>按下开发板上的KEY1按键，读取SD卡根目录下名为”test.txt“的文件，将其中的内容通过串口输出，然后读取该文件的信息（大小，属性，名称），并通过串口输出</li>
+<li>按下开发板上的KEY0按键，删除SD卡根目录下名为”test.txt“的文件</li>
+</ol>
+<p>整个实验过程串口具体的输出情况如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.8.gif" srcset="/img/loading.gif" lazyload></div>
+
+<h1 id="5、FatFs-DMA读写SD卡流程简述"><a href="#5、FatFs-DMA读写SD卡流程简述" class="headerlink" title="5、FatFs DMA读写SD卡流程简述"></a>5、FatFs DMA读写SD卡流程简述</h1><h2 id="5-1、CubeMX相关配置"><a href="#5-1、CubeMX相关配置" class="headerlink" title="5.1、CubeMX相关配置"></a>5.1、CubeMX相关配置</h2><p>参考上一实验<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17972264">STM32CubeMX教程27 SDIO - 读写SD卡</a>的”6.1、CubeMX相关配置“小节对SDIO的DMA进行配置，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>在System Core&#x2F;NVIC中<font color="#fe2c24"><strong>勾选SDIO全局中断、DMA2 stream3 全局中断和 DMA2 stream6 全局中断</strong></font>，然后选择合适的中断优先级即可，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>最后只需在FatFs的Configuration页面Advanced Settings选项卡中将参数</strong></font><font color="#be191c" style="background: #fef2f0"> Use dma template </font><font color="#fe2c24"><strong>修改为Enable即可</strong></font>，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="5-2、生成代码"><a href="#5-2、生成代码" class="headerlink" title="5.2、生成代码"></a>5.2、生成代码</h2><p><font color="#fe2c24"><strong>修改STM32CubeMX工程重新生成工程代码后，读者应注意再次手动修改MX_SDIO_SD_Init()函数中SD卡数据总线宽度从默认的4位手动修改为1位</strong></font></p>
+<p>除了上述修改外，在轮询读取SD卡基础上生成的代码无需做任何改动，可以直接编译后烧录到开发板上，程序应该直接可以运行，不需要额外添加任何代码</p>
+<p>启用SDIO的DMA之后，对应生成的bsp_driver_xxx.c文件中所有的以轮询方式读写等操作SD卡的底层驱动函数都将被相应的替换为以DMA的方式对SD卡进行读写等操作的底层驱动函数，如下图所示以sd_diskio.c文件中的读函数为例简单展示区别</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/28.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="5-3、烧录验证"><a href="#5-3、烧录验证" class="headerlink" title="5.3、烧录验证"></a>5.3、烧录验证</h2><p>FatFs DMA读写SD卡的实验现象与FatFs 轮询读取SD卡的实验现象一致，只不过底层SDIO读写SD卡的方式由轮询读写修改为了以DMA方式的读写，对上层FatFs应用无任何影响</p>
+<h1 id="6、常用函数"><a href="#6、常用函数" class="headerlink" title="6、常用函数"></a>6、常用函数</h1><p>请读者阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验 ”常用函数“ 小节</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UBc85046ed7208">STM32Cube高效开发教程（高级篇）</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程28-SDIO-使用FatFs文件系统读写SD卡/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B29-USB-HOST-%E4%BD%BF%E7%94%A8FatFs%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AF%BB%E5%86%99U%E7%9B%98/" title="STM32CubeMX教程29 USB_HOST - 使用FatFs文件系统读写U盘">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程29 USB_HOST - 使用FatFs文件系统读写U盘</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B27-SDIO-%E8%AF%BB%E5%86%99SD%E5%8D%A1/" title="STM32CubeMX教程27 SDIO - 读写SD卡">
+                        <span class="hidden-mobile">STM32CubeMX教程27 SDIO - 读写SD卡</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,806 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 逻辑分析仪nanoDLA 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板SDIO读写4线SD卡，实现轮询方式读写SD卡、">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程27 SDIO - 读写SD卡">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B27-SDIO-%E8%AF%BB%E5%86%99SD%E5%8D%A1/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 逻辑分析仪nanoDLA 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板SDIO读写4线SD卡，实现轮询方式读写SD卡、">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.13.gif">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.15.gif">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.17.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.18.gif">
+<meta property="article:published_time" content="2024-01-26T04:06:22.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:13:44.827Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程27 SDIO - 读写SD卡 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程27 SDIO - 读写SD卡"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:06" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          37 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程27 SDIO - 读写SD卡</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p><a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a></p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p>逻辑分析仪<a target="_blank" rel="noopener" href="https://github.com/wuxx/nanoDLA">nanoDLA</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html">野火DAP仿真器</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html">XCOM V2.6串口助手</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板<font color="#fe2c24"><strong>SDIO读写4线SD卡，实现轮询方式读写SD卡、以中断方式读取SD卡和以DMA方式读取SD卡</strong></font></p>
+<h1 id="3、轮询方式读取SD卡流程"><a href="#3、轮询方式读取SD卡流程" class="headerlink" title="3、轮询方式读取SD卡流程"></a>3、轮询方式读取SD卡流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>安全数码卡（Secure Digital Memory Card），简称SD卡，是嵌入式设备上常用的一种存储介质，通常可以将SD卡分为标准SD卡、miniSD卡和microSD卡（TF卡）三种类型，每种卡形状大小不一，除标准SD卡卡身上拥有一个写保护开关外，其他的功能三张卡一致，如今miniSD卡正逐渐被microSD卡所取代，如下图所示为三种不同类型SD卡形状 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>按照SD卡容量大小的不同可以将其分为SD、SDHC、SDXC等型号，按照SD卡读写机制速度的不同又可以将其分为Standard、High-speed、UHS-I等型号，具体如下表所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>STM32F407提供了一个SDIO接口可以直接通过HAL库来驱动1&#x2F;4位总线宽度的SD卡或1&#x2F;4&#x2F;8位总线宽度的多媒体卡，其完全兼容SD卡规范版本2.0，<font color="#fe2c24"><strong>但只支持高速SD卡，也即与SD卡进行数据传输最大速度为25MHz</strong></font></p>
+<p>SDIO由APB2接口和SDIO适配器两部分组成，SDIO适配器提供了驱动SD&#x2F;MMC卡的全部功能，APB2接口则可以访问SDIO适配器寄存器在适当时候向内核发起中断&#x2F;DMA请求</p>
+<p>SDIO适配器由48MHz的SDIOCLK驱动，根据SDIOCLK时钟频率、<font color="#be191c" style="background: #fef2f0"> SDIO Clock divider bypass </font>参数和<font color="#be191c" style="background: #fef2f0"> SDIOCLK clock divide factor </font>参数就可以确定与SD卡通信时SDIO_CLK的时钟频率，当时钟分频器旁路使能时，SDIO_CLK&#x3D;SDIOCLK；当时钟分频器旁路不使能时，SDIO_CLK&#x3D;SDIOCLK &#x2F; (2+时钟分频因子)；</p>
+<p>根据上面的描述，由于STM32F407的SDIO只支持高速SD卡，因此时钟分频器旁路常常不使能，这样当时钟分频因子为0时，SDIO_CLK则达到最大速度48MHz &#x2F; 2 &#x3D; 24Mhz，但在实际的使用中往往稍微降低该时钟频率，否则可能会出现读写SD卡失败的现象</p>
+<p><font color="#fe2c24"><strong>另外值得提醒的是SD卡初始化的时候应该以不超过400KHz的速率，1位总线宽度进行初始化，否则将初始化失败</strong></font></p>
+<p>如下图所示为STM32F407内部的SDIO接口结构框图 <em>（注释2）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>笔者使用的开发板上SD卡槽设计为了4位总线宽度，在硬件设计时需要注意MCU与SD卡通信的1&#x2F;4根数据线SDIO_D0&#x2F;1&#x2F;2&#x2F;3和命令线SDIO_CMD均需外部上拉，硬件原理图如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>当在STM32CubeMX中启用SDIO功能后，时钟树中48MHz时钟便可以进行调节，该时钟一般如其名字一样配置为48MHz即可，也即将Main PLL（主锁相环）的Q参数调节为7即可，其他HCLK、PCLK1和PCLK2时钟仍然设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>本实验需要初始化开发板上WK_UP、KEY2、KEY1和KEY0用户按键，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17938621">STM32CubeMX教程3 GPIO输入 - 按键响应</a>”</p>
+<p>本实验需要初始化USART1作为输出信息渠道，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”</p>
+<p>单击Pinout ＆ Configuration页面左边功能分类栏目<font color="#fe2c24"><strong>Connectivity&#x2F;SDIO，将其模式选择为4位宽总线SD卡</strong></font></p>
+<p><font color="#be191c" style="background: #fef2f0"> Clock transition on which the bit capture is made </font>（时钟跳变沿捕获数据配置）：数据捕获边沿设置，可设置为上升沿&#x2F;下降沿</p>
+<p><font color="#be191c" style="background: #fef2f0"> SDIO Clock divider bypass </font>（时钟分频器旁路使能）：使能该参数时，SDIO_CLK&#x3D;SDIOCLK；否则SDIO_CLK频率由时钟分频因子决定</p>
+<p><font color="#be191c" style="background: #fef2f0"> SDIO Clock output enable when the bus is idle </font>（空闲模式时钟输出使能）：节能模式，此实验不使能</p>
+<p><font color="#be191c" style="background: #fef2f0"> SDIO hardware flow control </font>（硬件流控）：设置是否使能SDIO的硬件流控，此处不使能</p>
+<p><font color="#be191c" style="background: #fef2f0"> SDIOCLK clock divide factor </font>（时钟分频因子）：当不使能时钟分频器旁路时，SDIO_CLK&#x3D;SDIOCLK &#x2F; (2+时钟分频因子)</p>
+<p><font color="#fe2c24"><strong>SDIO驱动4位宽总线SD卡的参数配置大多按照默认参数配置即可，但是要注意SD卡读写频率过高可能会导致读写失败，因此这里设置SD_CLK频率为8MHz</strong></font>，另外需要注意默认的SDIO复用引脚和开发板上的实际控制SD的引脚是否一致，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-3、外设中断配置"><a href="#3-1-3、外设中断配置" class="headerlink" title="3.1.3、外设中断配置"></a>3.1.3、外设中断配置</h3><p>轮询方式读写SD卡无需配置中断</p>
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>在main.c文件main()函数中调用MX_SDIO_SD_Init()对SDIO参数配置，并调用HAL_SD_Init()函数对SD卡初始化，最后将SD卡切换到4位宽总线模式</p>
+<p>在stm32f4xx_hal_sd.c文件HAL_SD_Init()中调用HAL_SD_MspInit()函数对SDIO时钟使能和所使用到的引脚功能复用，如果配置了中断或DMA，该函数中还会相应的出现NVIC&#x2F;DMA相关配置，最后在真正的SD卡初始化函数HAL_SD_InitCard()中对SD卡初始化完毕</p>
+<p>具体外设初始化函数调用流程如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>初始化配置中时钟分频因子为4，SD_CLK&#x3D;8MHz，为什么SD卡还可以初始化成功？</strong></font></p>
+<p>这里读者需要搞清楚真正对SD卡初始化时使用的参数配置是不是我们设置的参数，上面提到真正的SD卡初始化函数为HAL_SD_InitCard()，进入该函数发现实际初始化SD卡时用到的并不是用户配置的参数，而是使用的默认初始化参数，这里时钟分频因子被设置为了0x76，也即118，根据上面提到的公式计算可知48MHz &#x2F; (118 + 2) &#x3D; 400KHz，满足SD卡的初始化频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-2、外设中断调用流程"><a href="#3-2-2、外设中断调用流程" class="headerlink" title="3.2.2、外设中断调用流程"></a>3.2.2、外设中断调用流程</h3><p>轮询方式读写SD卡无配置中断</p>
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p>笔者使用的STM32CubeMX版本为6.10.0，<font color="#fe2c24"><strong>在生成的SDIO初始化函数MX_SDIO_SD_Init()中需要将参数配置中的SD卡数据总线宽度从默认的4位手动修改为1位（STM32CubeMX软件BUG？）</strong></font>，在SD卡初始化时应该以不超过400KHz的速率，1位总线宽度进行初始化，如果不修改这里SD卡将无法成功初始化，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>在sdio.c中添加SD卡读、写、擦除和输出SD卡信息测试函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*显示SD卡的信息*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_ShowInfo</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-comment">//SD卡信息结构体变量</span><br>	HAL_SD_CardInfoTypeDef cardInfo;  <br>	HAL_StatusTypeDef res = HAL_SD_GetCardInfo(&amp;hsd, &amp;cardInfo);<br><br>	<span class="hljs-keyword">if</span>(res!=HAL_OK)<br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;HAL_SD_GetCardInfo() error\r\n&quot;</span>);<br>		<span class="hljs-keyword">return</span>;<br>	&#125;<br><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** HAL_SD_GetCardInfo() info ***\r\n&quot;</span>);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Card Type= %d\r\n&quot;</span>, cardInfo.CardType);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Card Version= %d\r\n&quot;</span>, cardInfo.CardVersion);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Card Class= %d\r\n&quot;</span>, cardInfo.Class);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Relative Card Address= %d\r\n&quot;</span>, cardInfo.RelCardAdd);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Block Count= %d\r\n&quot;</span>, cardInfo.BlockNbr);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Block Size(Bytes)= %d\r\n&quot;</span>, cardInfo.BlockSize);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;LogiBlockCount= %d\r\n&quot;</span>, cardInfo.LogBlockNbr);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;LogiBlockSize(Bytes)= %d\r\n&quot;</span>, cardInfo.LogBlockSize);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;SD Card Capacity(MB)= %d\r\n&quot;</span>, cardInfo.BlockNbr&gt;&gt;<span class="hljs-number">1</span>&gt;&gt;<span class="hljs-number">10</span>);<br>&#125;<br><br><span class="hljs-comment">//获取SD卡当前状态</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_ShowStatus</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-comment">//SD卡状态结构体变量</span><br>	HAL_SD_CardStatusTypeDef cardStatus;<br>	HAL_StatusTypeDef res = HAL_SD_GetCardStatus(&amp;hsd, &amp;cardStatus);<br><br>	<span class="hljs-keyword">if</span>(res!=HAL_OK)<br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;HAL_SD_GetCardStatus() error\r\n&quot;</span>);<br>		<span class="hljs-keyword">return</span>;<br>	&#125;<br><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** HAL_SD_GetCardStatus() info ***\r\n&quot;</span>);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;DataBusWidth= %d\r\n&quot;</span>, cardStatus.DataBusWidth);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;CardType= %d\r\n&quot;</span>, cardStatus.CardType);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;SpeedClass= %d\r\n&quot;</span>, cardStatus.SpeedClass);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;AllocationUnitSize= %d\r\n&quot;</span>, cardStatus.AllocationUnitSize);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;EraseSize= %d\r\n&quot;</span>, cardStatus.EraseSize);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;EraseTimeout= %d\r\n&quot;</span>, cardStatus.EraseTimeout);<br>&#125;<br><br><span class="hljs-comment">/*SD卡擦除测试*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_EraseBlocks</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-type">uint32_t</span> BlockAddrStart=<span class="hljs-number">0</span>;<br>	<span class="hljs-type">uint32_t</span> BlockAddrEnd=<span class="hljs-number">10</span>;<br>	<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** Erasing blocks ***\r\n&quot;</span>);<br><br>	<span class="hljs-keyword">if</span>(HAL_SD_Erase(&amp;hsd, BlockAddrStart, BlockAddrEnd)==HAL_OK)<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Erasing blocks,OK\r\n&quot;</span>);<br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Erasing blocks,fail\r\n&quot;</span>);<br><br>	HAL_SD_CardStateTypeDef cardState=HAL_SD_GetCardState(&amp;hsd);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;GetCardState()= %d\r\n&quot;</span>, cardState);<br><br>	<span class="hljs-keyword">while</span>(cardState != HAL_SD_CARD_TRANSFER)<br>	&#123;<br>		HAL_Delay(<span class="hljs-number">1</span>);<br>		cardState=HAL_SD_GetCardState(&amp;hsd);<br>	&#125;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Blocks 0-10 is erased.\r\n&quot;</span>);<br>&#125;<br><br><span class="hljs-comment">/*SD卡写入测试函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestWrite</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** Writing blocks ***\r\n&quot;</span>);<br>	<br>	<span class="hljs-comment">// BLOCKSIZE为512，在stm32f4xx_hal_sd.h中被定义</span><br>	<span class="hljs-type">uint8_t</span> pData[BLOCKSIZE]=<span class="hljs-string">&quot;Hello, welcome to UPC\0&quot;</span>;  <br>	<span class="hljs-type">uint32_t</span> BlockAddr=<span class="hljs-number">5</span>; 	<br>	<span class="hljs-type">uint32_t</span> BlockCount=<span class="hljs-number">1</span>; <br>	<span class="hljs-type">uint32_t</span> TimeOut=<span class="hljs-number">1000</span>;	<br><br>	<span class="hljs-keyword">if</span>(HAL_SD_WriteBlocks(&amp;hsd,pData,BlockAddr,BlockCount,TimeOut) == HAL_OK)<br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Write to block 5, OK\r\n&quot;</span>);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The string is: %s\r\n&quot;</span>, pData);<br>	&#125;<br>	<span class="hljs-keyword">else</span><br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Write to block 5, fail ***\r\n&quot;</span>);<br>		<span class="hljs-keyword">return</span>;<br>	&#125;<br><br>	<span class="hljs-keyword">for</span>(<span class="hljs-type">uint16_t</span> i=<span class="hljs-number">0</span>;i&lt;BLOCKSIZE; i++)<br>		pData[i]=i; 	<br><br>	BlockAddr=<span class="hljs-number">6</span>;<br>	<span class="hljs-keyword">if</span>(HAL_SD_WriteBlocks(&amp;hsd,pData,BlockAddr,BlockCount,TimeOut) == HAL_OK) <br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Write block 6, OK\r\n&quot;</span>);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Data in [10:15] is: &quot;</span>);<br>		<span class="hljs-keyword">for</span> (<span class="hljs-type">uint16_t</span> j=<span class="hljs-number">11</span>; j&lt;=<span class="hljs-number">15</span>;j++)<br>		&#123;<br>			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d,&quot;</span>, pData[j]);<br>		&#125;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n&quot;</span>);<br>	&#125;<br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Write to block 6, fail ***\r\n&quot;</span>);<br>&#125;<br><br><span class="hljs-comment">/*SD卡读取测试函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestRead</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>	<br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** Reading blocks ***\r\n&quot;</span>);<br><br>	<span class="hljs-type">uint8_t</span> pData[BLOCKSIZE];<br>	<span class="hljs-type">uint32_t</span> BlockAddr=<span class="hljs-number">5</span>;<br>	<span class="hljs-type">uint32_t</span> BlockCount=<span class="hljs-number">1</span>;<br>	<span class="hljs-type">uint32_t</span> TimeOut=<span class="hljs-number">1000</span>;<br><br>	<span class="hljs-keyword">if</span>(HAL_SD_ReadBlocks(&amp;hsd,pData,BlockAddr,BlockCount,TimeOut) == HAL_OK)<br>	<span class="hljs-comment">//if(HAL_SD_ReadBlocks_IT(&amp;hsd,pData,BlockAddr,BlockCount) == HAL_OK)</span><br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Read block 5, OK\r\n&quot;</span>);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The string is: %s\r\n&quot;</span>, pData);<br>	&#125;<br>	<span class="hljs-keyword">else</span><br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Read block 5, fail ***\r\n&quot;</span>);<br>		<span class="hljs-keyword">return</span>;<br>	&#125;<br><br>	BlockAddr=<span class="hljs-number">6</span>;<br>	<span class="hljs-keyword">if</span>(HAL_SD_ReadBlocks(&amp;hsd,pData,BlockAddr,BlockCount,TimeOut)== HAL_OK)<br>	<span class="hljs-comment">//if(HAL_SD_ReadBlocks_IT(&amp;hsd,pData,BlockAddr,BlockCount) == HAL_OK)</span><br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Read block 6, OK\r\n&quot;</span>);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Data in [10:15] is: &quot;</span>);<br><br>		<span class="hljs-keyword">for</span> (<span class="hljs-type">uint16_t</span> j=<span class="hljs-number">11</span>; j&lt;=<span class="hljs-number">15</span>;j++)<br>		&#123;<br>			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d,&quot;</span>, pData[j]);<br>		&#125;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n&quot;</span>);<br>	&#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>在sdio.h中声明定义的这些测试函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*在sdio.h中声明*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestRead</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestWrite</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_ShowInfo</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_EraseBlocks</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>在main.c文件主循环中添加按键逻辑控制程序，WK_UP按键按下输出SD卡信息，KEY2按键按下擦除SD卡块0-10，KEY1按键按下测试SD卡写功能，KEY0按键按下测试SD卡读功能</p>
+<p>具体源代码如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*WK_UP按键按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == GPIO_PIN_SET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == GPIO_PIN_SET)<br>	&#123;<br>		SDCard_ShowInfo();<br>		<span class="hljs-keyword">while</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin));<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*KEY2按键按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>	&#123;<br>		SDCard_EraseBlocks();<br>		<span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin));<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*KEY1按键按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin) == GPIO_PIN_RESET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin) == GPIO_PIN_RESET)<br>	&#123;<br>		SDCard_TestWrite();<br>		<span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin));<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*KEY0按键按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin) == GPIO_PIN_RESET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin) == GPIO_PIN_RESET)<br>	&#123;<br>		SDCard_TestRead();<br>		<span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin));<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="4、烧录验证"><a href="#4、烧录验证" class="headerlink" title="4、烧录验证"></a>4、烧录验证</h1><p>烧录程序，开发板复位后按下WK_UP按键会输出SD卡信息，按下KEY2按键会擦除SD卡的块0-10数据，按下KEY0按键会读取SD卡块5和块6的数据，按下KEY1按键会写入一段字符串到SD卡块5，写入块6从1-256整形数字，具体串口输出信息如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.13.gif" srcset="/img/loading.gif" lazyload></div>
+
+<h1 id="5、中断方式读取SD卡流程简述"><a href="#5、中断方式读取SD卡流程简述" class="headerlink" title="5、中断方式读取SD卡流程简述"></a>5、中断方式读取SD卡流程简述</h1><h2 id="5-1、CubeMX相关配置"><a href="#5-1、CubeMX相关配置" class="headerlink" title="5.1、CubeMX相关配置"></a>5.1、CubeMX相关配置</h2><p>工程、时钟树、外设参数等配置与轮询方式读取SD卡一致，中断方式读取SD卡只需要在CubeMX软件中启动SDIO的全局中断</p>
+<p>在Pinout &amp; Configuration页面左边System Core&#x2F;NVIC中<font color="#fe2c24"><strong>勾选SDIO全局中断</strong></font>，然后选择合适的中断优先级即可，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="5-2、生成代码"><a href="#5-2、生成代码" class="headerlink" title="5.2、生成代码"></a>5.2、生成代码</h2><p><font color="#fe2c24"><strong>修改STM32CubeMX工程重新生成工程代码后，读者应注意再次手动修改MX_SDIO_SD_Init()函数中SD卡数据总线宽度从默认的4位手动修改为1位</strong></font></p>
+<p>在sdio.c中增加以中断方式读写SD卡的测试函数，具体代码如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*SD卡中断写入测试函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestWrite_IT</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** IT Writing blocks ***\r\n&quot;</span>);<br>	<span class="hljs-type">uint32_t</span> BlockCount=<span class="hljs-number">1</span>; <br>	<span class="hljs-type">uint16_t</span> BlockAddr=<span class="hljs-number">5</span>;<br>	<br>	HAL_SD_WriteBlocks_IT(&amp;hsd, TX, BlockAddr, BlockCount);<br>&#125;<br><br><span class="hljs-comment">/*SD卡中断读取测试函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestRead_IT</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>	<br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** IT Reading blocks ***\r\n&quot;</span>);<br>	<span class="hljs-type">uint32_t</span> BlockCount=<span class="hljs-number">1</span>;<br>	<span class="hljs-type">uint16_t</span> BlockAddr=<span class="hljs-number">5</span>;<br>	<br>	HAL_SD_ReadBlocks_IT(&amp;hsd, RX, BlockAddr, BlockCount);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在sdio.c中新增加SD卡Tx&#x2F;Rx传输完成回调函数HAL_SD_TxCpltCallback()和HAL_SD_RxCpltCallback()，具体代码如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*SD Tx传输完成回调*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_SD_TxCpltCallback</span><span class="hljs-params">(SD_HandleTypeDef *hsd)</span><br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;IT Write to block 5, OK\r\n&quot;</span>);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The string is: %s\r\n&quot;</span>, TX);<br>&#125;<br><br><span class="hljs-comment">/*SD Rx传输完成回调*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_SD_RxCpltCallback</span><span class="hljs-params">(SD_HandleTypeDef *hsd)</span><br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;IT Read block 5, OK\r\n&quot;</span>);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The string is: %s\r\n&quot;</span>, RX);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在sdio.c中定义全部变量发送缓存数组TX和接收缓存数组RX，并在sdio.h中声明修改后的中断方式的SD卡写入测试函数和SD卡读取测试函数，源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*sdio.c中定义的发送、接收缓存数组*/</span><br><span class="hljs-type">uint8_t</span> TX[BLOCKSIZE] = <span class="hljs-string">&quot;Hello, welcome to UPC\0&quot;</span>;  <br><span class="hljs-type">uint8_t</span> RX[BLOCKSIZE];  <br><br><span class="hljs-comment">/*sdio.h中对函数声明*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestRead_IT</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestWrite_IT</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>最后在main.c文件主循环中实现与轮询读写SD时一致的按键逻辑程序，并用修改后的以中断方式读写SD卡的函数替换以轮询方式读写SD卡的函数即可</p>
+<h2 id="5-3、烧录验证"><a href="#5-3、烧录验证" class="headerlink" title="5.3、烧录验证"></a>5.3、烧录验证</h2><p>烧录程序，开发板复位后按下WK_UP按键会输出SD卡信息，按下KEY2按键会擦除SD卡的块0-10数据，与轮询方式读写SD卡时现象一致</p>
+<p>按下KEY0按键以中断方式读取SD卡的块5数据，读取完成后会进入Rx传输完成回调中，在该回调函数中会从串口输出读取到的SD卡块5的数据</p>
+<p>按下KEY1按键会以中断方式写入一段字符串到SD卡块5，写入完成后会进入Tx传输完成回调中，在该回调函数中会从串口输出写入到SD卡块5中的数据</p>
+<p>具体串口输出信息如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.15.gif" srcset="/img/loading.gif" lazyload ></div>
+
+<h1 id="6、DMA方式读取SD卡流程简述"><a href="#6、DMA方式读取SD卡流程简述" class="headerlink" title="6、DMA方式读取SD卡流程简述"></a>6、DMA方式读取SD卡流程简述</h1><h2 id="6-1、CubeMX相关配置"><a href="#6-1、CubeMX相关配置" class="headerlink" title="6.1、CubeMX相关配置"></a>6.1、CubeMX相关配置</h2><p><font color="#fe2c24"><strong>工程、时钟树、外设参数等配置与轮询方式读取SD卡一致，以DMA方式读取SD卡只需要在CubeMX软件中增加SDIO的DMA请求即可</strong></font></p>
+<p>在Pinout &amp; Configuration页面单击Connectivity&#x2F;SDIO页面，在Configuration配置页面中点击DMA Settings选项卡对SDIO的DMA进行配置，单击ADD增加SDIO的RX&#x2F;TX两个DMA请求，SDIO的两个DMA请求除了内存地址递增可以设置外，其他的包括Mode、Use Fifo、Data Width和Burst Size等参数都不可以设置</p>
+<p>对DMA参数不理解的可以阅读”<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17957875">STM32CubeMX教程12 DMA 直接内存读取</a>“实验，SDIO的具体DMA配置参数如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.16.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>在System Core&#x2F;NVIC中<font color="#fe2c24"><strong>勾选SDIO全局中断、DMA2 stream3 全局中断和 DMA2 stream6 全局中断</strong></font>，然后选择合适的中断优先级即可，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.17.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="6-2、生成代码"><a href="#6-2、生成代码" class="headerlink" title="6.2、生成代码"></a>6.2、生成代码</h2><p><font color="#fe2c24"><strong>修改STM32CubeMX工程重新生成工程代码后，读者应注意再次手动修改MX_SDIO_SD_Init()函数中SD卡数据总线宽度从默认的4位手动修改为1位</strong></font></p>
+<p>在sdio.c中增加以DMA方式读写SD卡的测试函数，具体代码如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*SD卡DMA写入测试函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestWrite_DMA</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** DMA Writing blocks ***\r\n&quot;</span>);<br>	<span class="hljs-type">uint32_t</span> BlockCount=<span class="hljs-number">1</span>; <br>	<span class="hljs-type">uint16_t</span> BlockAddr=<span class="hljs-number">6</span>;<br>	<br>	<span class="hljs-keyword">for</span>(<span class="hljs-type">uint16_t</span> i=<span class="hljs-number">0</span>;i&lt;BLOCKSIZE; i++)<br>		TX[i]=i; <br>	<br>	HAL_SD_WriteBlocks_DMA(&amp;hsd, TX, BlockAddr, BlockCount);<br>&#125;<br><br><span class="hljs-comment">/*SD卡DMA读取测试函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestRead_DMA</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>	<br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** DMA Reading blocks ***\r\n&quot;</span>);<br>	<span class="hljs-type">uint32_t</span> BlockCount=<span class="hljs-number">1</span>;<br>	<span class="hljs-type">uint16_t</span> BlockAddr=<span class="hljs-number">6</span>;<br>	<br>	HAL_SD_ReadBlocks_DMA(&amp;hsd, RX, BlockAddr, BlockCount);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在sdio.h中对增加的函数声明</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*sdio.h中对函数声明*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestWrite_DMA</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">SDCard_TestRead_DMA</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>DMA的回调函数使用的是外设的中断回调函数</p>
+<p>当启用了SDIO TX DMA请求和SDIO全局中断，并以 HAL_SD_WriteBlocks_DMA() 写入SD卡块数据完成之后，会调用传输完成回调 HAL_SD_TxCpltCallback()</p>
+<p>当启用了SDIO RX DMA请求和SDIO全局中断，并以 HAL_SD_ReadBlocks_DMA() 从SD卡块读取数据完毕之后，会调用读取完成回调函数 HAL_SD_RxCpltCallback()</p>
+<p>故直接重新实现HAL_SD_RxCpltCallback&#x2F;HAL_SD_TxCpltCallback两个函数即可，源代码如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*DMA Tx传输完成回调*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_SD_TxCpltCallback</span><span class="hljs-params">(SD_HandleTypeDef *hsd)</span><br>&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;DMA Write to block 6, OK\r\n&quot;</span>);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Data in [10:15] is: &quot;</span>);<br><br>		<span class="hljs-keyword">for</span> (<span class="hljs-type">uint16_t</span> j=<span class="hljs-number">10</span>; j&lt;=<span class="hljs-number">15</span>;j++)<br>		&#123;<br>			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d,&quot;</span>, TX[j]);<br>		&#125;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n&quot;</span>);<br>&#125;<br><br><span class="hljs-comment">/*DMA Rx传输完成回调*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_SD_RxCpltCallback</span><span class="hljs-params">(SD_HandleTypeDef *hsd)</span><br>&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;DMA Read block 6, OK\r\n&quot;</span>);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Data in [10:15] is: &quot;</span>);<br><br>		<span class="hljs-keyword">for</span> (<span class="hljs-type">uint16_t</span> j=<span class="hljs-number">10</span>; j&lt;=<span class="hljs-number">15</span>;j++)<br>		&#123;<br>			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d,&quot;</span>, RX[j]);<br>		&#125;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>最后在main.c文件主循环中实现与轮询读写SD时一致的按键逻辑程序，并用修改后的以DMA方式读写SD卡的函数替换以中断方式读写SD卡的函数即可</p>
+<h2 id="6-3、实验现象"><a href="#6-3、实验现象" class="headerlink" title="6.3、实验现象"></a>6.3、实验现象</h2><p>烧录程序，开发板复位后按下WK_UP按键会输出SD卡信息，按下KEY2按键会擦除SD卡的块0-10数据，与轮询方式读写SD卡时现象一致</p>
+<p>按下KEY0按键以DMA的方式读取SD卡块6数据，读取完成后会进入Rx传输完成回调中，在该回调函数中会从串口输出读取到的SD卡块6的数据</p>
+<p>按下KEY1按键会以DMA的方式写入1-256的数字到SD卡块6（一个字节写入一个数字），写入完成后会进入Tx传输完成回调中，在该回调函数中会从串口输出写入到SD卡块6中的数据</p>
+<p>具体串口输出信息如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/27.18.gif" srcset="/img/loading.gif" lazyload ></div>
+
+<h1 id="7、常用函数"><a href="#7、常用函数" class="headerlink" title="7、常用函数"></a>7、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*读块*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SD_ReadBlocks</span><span class="hljs-params">(SD_HandleTypeDef *hsd, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint32_t</span> BlockAdd, <span class="hljs-type">uint32_t</span> NumberOfBlocks, <span class="hljs-type">uint32_t</span> Timeout)</span><br><br><span class="hljs-comment">/*写块*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SD_WriteBlocks</span><span class="hljs-params">(SD_HandleTypeDef *hsd, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint32_t</span> BlockAdd, <span class="hljs-type">uint32_t</span> NumberOfBlocks, <span class="hljs-type">uint32_t</span> Timeout)</span><br><br><span class="hljs-comment">/*擦除块*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SD_Erase</span><span class="hljs-params">(SD_HandleTypeDef *hsd, <span class="hljs-type">uint32_t</span> BlockStartAdd, <span class="hljs-type">uint32_t</span> BlockEndAdd)</span><br><br><span class="hljs-comment">/*获取SD卡信息*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SD_GetCardInfo</span><span class="hljs-params">(SD_HandleTypeDef *hsd, HAL_SD_CardInfoTypeDef *pCardInfo)</span><br><br><span class="hljs-comment">/*获取SD卡状态*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SD_GetCardStatus</span><span class="hljs-params">(SD_HandleTypeDef *hsd, HAL_SD_CardStatusTypeDef *pStatus)</span><br><br><span class="hljs-comment">/*以中断方式读块*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SD_ReadBlocks_IT</span><span class="hljs-params">(SD_HandleTypeDef *hsd, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint32_t</span> BlockAdd, <span class="hljs-type">uint32_t</span> NumberOfBlocks)</span><br><br><span class="hljs-comment">/*以中断方式写块*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SD_WriteBlocks_IT</span><span class="hljs-params">(SD_HandleTypeDef *hsd, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint32_t</span> BlockAdd, <span class="hljs-type">uint32_t</span> NumberOfBlocks)</span><br><br><span class="hljs-comment">/*以DMA方式读块*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SD_ReadBlocks_DMA</span><span class="hljs-params">(SD_HandleTypeDef *hsd, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint32_t</span> BlockAdd, <span class="hljs-type">uint32_t</span> NumberOfBlocks)</span><br><br><span class="hljs-comment">/*以DMA方式写块*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SD_WriteBlocks_DMA</span><span class="hljs-params">(SD_HandleTypeDef *hsd, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint32_t</span> BlockAdd, <span class="hljs-type">uint32_t</span> NumberOfBlocks)</span><br><br><span class="hljs-comment">/*SD卡Tx传输完成回调*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_SD_TxCpltCallback</span><span class="hljs-params">(SD_HandleTypeDef *hsd)</span><br><br><span class="hljs-comment">/*SD卡Rx传输完成回调*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_SD_RxCpltCallback</span><span class="hljs-params">(SD_HandleTypeDef *hsd)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="8、注释详解"><a href="#8、注释详解" class="headerlink" title="8、注释详解"></a>8、注释详解</h1><p><em>注释1</em>：图片来源自 <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/SD%E5%8D%A1">维基百科-SD卡 </a></p>
+<p><em>注释2</em>：图片来源自 STM32F407中文参考手册 RM009</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UBc85046ed7208">STM32Cube高效开发教程（高级篇）</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程27 SDIO - 读写SD卡</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程27-SDIO-读写SD卡/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B28-SDIO-%E4%BD%BF%E7%94%A8FatFs%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AF%BB%E5%86%99SD%E5%8D%A1/" title="STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B26-FatFs-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F-W25Q128%E8%AF%BB%E5%86%99/" title="STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写">
+                        <span class="hidden-mobile">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

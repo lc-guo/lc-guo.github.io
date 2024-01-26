@@ -1,0 +1,763 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 逻辑分析仪nanoDLA 2、实验目标使用STM32CubeMX软件配置STM32F407通用定时器生成可变占空比PWM波形，并将其输出到LED灯引脚实现呼吸灯效果 3、实验流程3.0、前提知识">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程6 TIM 通用定时器 - 生成PWM波">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B6-TIM-%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8-%E7%94%9F%E6%88%90PWM%E6%B3%A2/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 逻辑分析仪nanoDLA 2、实验目标使用STM32CubeMX软件配置STM32F407通用定时器生成可变占空比PWM波形，并将其输出到LED灯引脚实现呼吸灯效果 3、实验流程3.0、前提知识">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.15.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.17.gif">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.18.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.19.png">
+<meta property="article:published_time" content="2024-01-26T03:56:42.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:01:06.186Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程6 TIM 通用定时器 - 生成PWM波 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程6 TIM 通用定时器 - 生成PWM波"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 11:56" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          17 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程6 TIM 通用定时器 - 生成PWM波</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p>开发板（<a target="_blank" rel="noopener" href="https://www.st.com/en/evaluation-tools/stm32f4discovery.html">STM32F407G-DISC1</a>）</p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p>逻辑分析仪<a target="_blank" rel="noopener" href="https://github.com/wuxx/nanoDLA">nanoDLA</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407<font color="#fe2c24"><strong>通用定时器生成可变占空比PWM波形，并将其输出到LED灯引脚实现呼吸灯效果</strong></font></p>
+<h1 id="3、实验流程"><a href="#3、实验流程" class="headerlink" title="3、实验流程"></a>3、实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>STM32F407有10个通用定时器，其中TIM2、TIM3、TIM4和TIM5有4个捕获&#x2F;比较通道，TIM9、TIM12两个定时器有2个捕获&#x2F;比较通道，剩下的TIM10、TIM11、TIM13和TIM14只有一个捕获&#x2F;比较通道</p>
+<p>只有一个捕获&#x2F;比较通道的通用定时器在CubeMX配置页面无“Slave Mode”和“Trigger Source”的选项，也不能联合通道，相较于拥有多个捕获&#x2F;比较通道的定时器较为简单，这10个通用定时器具体特性如下表所示 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>对于通用定时器来说，其每个通道均可以实现 ① 输入捕获、② 输出比较和 ③ PWM波生成三种功能</strong></font>，接下来我将分三个实验来分别介绍通用定时器的这三个功能，本小节只介绍通用定时器如何生成PWM波</p>
+<p>在“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937704">STM32CubeMX教程2 GPIO输出 - 点亮LED灯</a>”实验中我们介绍了如何使用GPIO输出点亮开发板上的LED灯，从而知道了开发板上控制LED灯的四个引脚分别为PD12、PD13、PD14和PD15</p>
+<p>这四个引脚刚好可以配置为通用定时器TIM4的四个输出通道，<font color="#fe2c24"><strong>因此接下来我们将配置这四个引脚为通用定时器TIM4的4个通道的PWM输出引脚</strong></font></p>
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号）选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>系统时钟使用8MHz外部高速时钟HSE，HCLK、PCLK1和PCLK2均设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>在Pinout ＆ Configuration页面右边芯片引脚预览Pinout view中找到LED灯的四个控制引脚PD12、PD13、PD14和PD15，<font color="#fe2c24"><strong>依次左键单击并配置其功能为TIM4_CHx</strong></font></p>
+<p>然后在页面左侧功能分类栏目中点开Timers栏目，<font color="#fe2c24"><strong>单击栏目下的TIM4，并将其Channel1~4全部配置为PWM Generation CHx</strong></font></p>
+<p>具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>然后对启用的TIM4定时器的四个通道参数进行设置，下面对重要参数简单介绍</p>
+<p><font color="#be191c" style="background: #fef2f0"> Prescaler </font>：该参数为时钟源预分频系数，由于TIM4时钟来源为APB1 Timer clocks (MHz)，笔者这里为84MHz，因此经过8399+1&#x3D;8400次分频后的频率为10KHz；</p>
+<p><font color="#be191c" style="background: #fef2f0"> Counter Mode </font>：计数模式，可以选择向上、向下、中心对齐等计数方式；</p>
+<p><font color="#be191c" style="background: #fef2f0"> Counter Period </font>：自动重装寄存器ARR值，该参数决定了生成PWM的周期，这里设置为199，表示周期为20ms，注意这里周期不能太长 <em>（注释2）</em>；</p>
+<p><font color="#be191c" style="background: #fef2f0"> auto-reload preload </font>：预装载自动重装，设置为Enable后，当修改ARR的值时会在下一个UEV事件生效，否则表示不适用预装载，修改其值会立即生效；</p>
+<p><font color="#be191c" style="background: #fef2f0"> Mode </font>：可以选择模式1&#x2F;模式2，这两种模式区别为生成的PWM波形不一样，选择PWM模式1且向上计数时，当Pulse值&lt;计数值ARR时此时通道输出有效状态，否则为无效状态，当选择PWM模式2时刚好与模式1相反。如下面两个PWM波形中，上图为采用PWM模式1，通道极性为高电平时产生的PWM波，下图为采用PWM模式2，通道极性为高时产生的PWM波；</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#be191c" style="background: #fef2f0"> Pulse </font>：即捕获&#x2F;比较寄存器CRR的值，通过设置该参数可以决定PWM的脉冲宽度，这里设置为0，因为程序中可以动态修改该参数；</p>
+<p><font color="#be191c" style="background: #fef2f0"> Output compare preload </font>：输出比较预装载，设置为Enable后，当修改Pulse的值时会在下一个UEV事件生效，否则会立即生效；</p>
+<p><font color="#be191c" style="background: #fef2f0"> CH Polarity </font>：通道极性，设置通道有效状态；</p>
+<p>如下图所示为具体参数设置</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-3、外设中断配置"><a href="#3-1-3、外设中断配置" class="headerlink" title="3.1.3、外设中断配置"></a>3.1.3、外设中断配置</h3><p>在Pinout &amp; Configuration页面左边System Core&#x2F;NVIC中<font color="#fe2c24"><strong>勾选TIM4全局中断</strong></font>，然后选择合适的中断优先级即可</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>在工程代码主函数main()中调用MX_TIM4_Init()函数对定时器TIM4计数器参数及四个 PWM通道参数进行了配置</p>
+<p>在该MX_TIM4_Init()函数中调用了HAL_TIM_PWM_Init()对定时器PWM输出进行了初始化</p>
+<p>然后在HAL_TIM_PWM_Init()函数中调用了HAL_TIM_PWM_MspInit()函数对TIM4时钟和中断设置&#x2F;使能</p>
+<p>如下图所示为具体的TIM4四通道PWM输出初始化调用流程</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-2、外设中断调用流程"><a href="#3-2-2、外设中断调用流程" class="headerlink" title="3.2.2、外设中断调用流程"></a>3.2.2、外设中断调用流程</h3><p>勾选了TIM4的全局中断之后，在工程文件stm32f4xx_it.c中生成了TIM4全局中断服务函数TIM4_IRQHandler()</p>
+<p>该函数调用了HAL库的定时器中断统一处理函数HAL_TIM_IRQHandler()，<font color="#fe2c24"><strong>最终调用PWM脉宽调制完成回调函数 HAL_TIM_PWM_PulseFinishedCallback()，该函数为虚函数</strong></font></p>
+<p>如下图所示为TIM4四通道PWM输出中断调用流程</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p>在tim.c中重新实现PWM脉宽调制完成回调函数HAL_TIM_PWM_PulseFinishedCallback()，在该回调函数中实现了对四个通道PWM的占空比重新调节的目的，即重新配置参数里的Pulse，实现了从最低占空比逐渐到最大占空比然后再逐渐减少至最低占空比的无限循环，具体代码如下所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">uint16_t</span> pulseWidth=<span class="hljs-number">0</span>;<br><span class="hljs-type">uint8_t</span> dirInc=<span class="hljs-number">1</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_TIM_PWM_PulseFinishedCallback</span><span class="hljs-params">(TIM_HandleTypeDef *htim)</span><br>&#123;<br>    <span class="hljs-keyword">if</span>(htim-&gt;Instance != TIM4)<br>        <span class="hljs-keyword">return</span>;<br> <br>    <span class="hljs-keyword">if</span>(dirInc == <span class="hljs-number">1</span>)	<br>    &#123;<br>        pulseWidth ++;<br>        <span class="hljs-keyword">if</span>(pulseWidth &gt;= <span class="hljs-number">195</span>)<br>        &#123;<br>            pulseWidth = <span class="hljs-number">195</span>;<br>            dirInc = <span class="hljs-number">0</span>;	<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">else</span><br>    &#123;<br>        pulseWidth --;<br>        <span class="hljs-keyword">if</span>(pulseWidth &lt;= <span class="hljs-number">5</span>)<br>        &#123;<br>            pulseWidth = <span class="hljs-number">5</span>;<br>            dirInc = <span class="hljs-number">1</span>;	<br>        &#125;<br>    &#125;<br>    __HAL_TIM_SET_COMPARE(&amp;htim4, TIM_CHANNEL_1, pulseWidth);<br>    __HAL_TIM_SET_COMPARE(&amp;htim4, TIM_CHANNEL_2, pulseWidth);<br>    __HAL_TIM_SET_COMPARE(&amp;htim4, TIM_CHANNEL_3, pulseWidth);<br>    __HAL_TIM_SET_COMPARE(&amp;htim4, TIM_CHANNEL_4, pulseWidth);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>最后在主函数中以中断方式启动生成PWM即可，如下所示为启动代码</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.16.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h1 id="4、常用函数"><a href="#4、常用函数" class="headerlink" title="4、常用函数"></a>4、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*启动定时器*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_TIM_Base_Start</span><span class="hljs-params">(TIM_HandleTypeDef *htim)</span><br> <br><span class="hljs-comment">/*停止定时器*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_TIM_Base_Stop</span><span class="hljs-params">(TIM_HandleTypeDef *htim)</span><br> <br><span class="hljs-comment">/*启动PWM输出*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_TIM_PWM_Start</span><span class="hljs-params">(TIM_HandleTypeDef *htim, <span class="hljs-type">uint32_t</span> Channel)</span><br> <br><span class="hljs-comment">/*停止PWM输出*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_TIM_PWM_Stop</span><span class="hljs-params">(TIM_HandleTypeDef *htim, <span class="hljs-type">uint32_t</span> Channel)</span><br> <br><span class="hljs-comment">/*以中断方式启动定时器*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_TIM_Base_Start_IT</span><span class="hljs-params">(TIM_HandleTypeDef *htim)</span><br> <br><span class="hljs-comment">/*以中断方式停止定时器*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_TIM_Base_Stop_IT</span><span class="hljs-params">(TIM_HandleTypeDef *htim)</span><br> <br><span class="hljs-comment">/*以中断方式启动PWM输出*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_TIM_PWM_Start_IT</span><span class="hljs-params">(TIM_HandleTypeDef *htim, <span class="hljs-type">uint32_t</span> Channel)</span><br> <br><span class="hljs-comment">/*以中断方式停止PWM输出*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_TIM_PWM_Stop_IT</span><span class="hljs-params">(TIM_HandleTypeDef *htim, <span class="hljs-type">uint32_t</span> Channel)</span><br> <br><span class="hljs-comment">/*PWM输出完毕回调函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_TIM_PWM_PulseFinishedCallback</span><span class="hljs-params">(TIM_HandleTypeDef *htim)</span><br> <br><span class="hljs-comment">/*设置PWM占空比函数*/</span><br>__<span class="hljs-title function_">HAL_TIM_SET_COMPARE</span><span class="hljs-params">(__HANDLE__, __CHANNEL__, __COMPARE__)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><p>烧录程序，会发现开发板上电后四个LED灯亮度由最暗到最亮然后从最亮再到最暗循环往复，实现呼吸灯的效果</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.17.gif" srcset="/img/loading.gif" lazyload></div>
+
+<p>使用逻辑分析仪监测TIM4的四个通道输出引脚状态，可以看出TIM4的四个通道输出的PWM波型周期均为20ms，并且占空比不断地在发生变化</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.18.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/6.19.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h1 id="6、注释详解"><a href="#6、注释详解" class="headerlink" title="6、注释详解"></a>6、注释详解</h1><p><em>注释1</em>：图片来源 <a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UB77e58e05a5ea9">STM32Cube高效开发教程（基础篇）</a> 9.1小节</p>
+<p><em>注释2</em>：这里的周期设置为20ms，也即频率为50Hz，人眼睛对于80Hz以上刷新频率完全没有闪烁感，因此如果你实现LED呼吸灯效果有闪烁情况的话，频率不能设置的太低</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程6 TIM 通用定时器 - 生成PWM波</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程6-TIM-通用定时器-生成PWM波/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B7-TIM-%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8-%E8%BE%93%E5%85%A5%E6%8D%95%E8%8E%B7/" title="STM32CubeMX教程7 TIM 通用定时器 - 输入捕获">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程7 TIM 通用定时器 - 输入捕获</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B5-TIM-%E5%AE%9A%E6%97%B6%E5%99%A8%E6%A6%82%E8%BF%B0%E5%8F%8A%E5%9F%BA%E6%9C%AC%E5%AE%9A%E6%97%B6%E5%99%A8/" title="STM32CubeMX教程5 TIM 定时器概述及基本定时器">
+                        <span class="hidden-mobile">STM32CubeMX教程5 TIM 定时器概述及基本定时器</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

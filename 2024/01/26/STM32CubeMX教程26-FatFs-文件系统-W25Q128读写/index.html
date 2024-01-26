@@ -1,0 +1,769 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板使用FatFs中间件通过SPI通信协议对W25Q128芯片进行读写等操作">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B26-FatFs-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F-W25Q128%E8%AF%BB%E5%86%99/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板使用FatFs中间件通过SPI通信协议对W25Q128芯片进行读写等操作">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.10.gif">
+<meta property="article:published_time" content="2024-01-26T04:06:15.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:13:24.452Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:06" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          48 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p><a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a></p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html">野火DAP仿真器</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html">XCOM V2.6串口助手</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板<font color="#fe2c24"><strong>使用FatFs中间件通过SPI通信协议对W25Q128芯片进行读写等操作</strong></font></p>
+<h1 id="3、实验流程"><a href="#3、实验流程" class="headerlink" title="3、实验流程"></a>3、实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>关于STM32F407使用SPI通信协议对W25Q128 FLASH芯片读写等操作涉及的SPI通信协议及W25Q128芯片相关知识请读者阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17965537">STM32CubeMX教程20 SPI - W25Q128驱动</a>实验，本实验不再过多介绍</p>
+<p>对于容量较小的存储设备可以使用底层库函数直接根据内存地址对设备来进行读写，但是一旦存储设备容量稍大，直接根据地址对设备来进行读写将变得比较困难</p>
+<p>这个时候使用文件系统来对存储设备进行各种操作将比较方便，<font color="#fe2c24"><strong>FatFs是适用于小型嵌入式系统的通用 FAT&#x2F;exFAT 文件系统模块，它与磁盘I&#x2F;O层完全分离，可以独立于硬件平台，因此非常方便移植</strong></font></p>
+<p>STM32CubeMX Version 6.10.0 中在中间件和软件包 Middleware and Software Packs 中集成了R0.12c 版本的FatFs文件系统模块，这个中间件支持Extemal SRAM、SD Card、USB Disk和User-defined四种模式</p>
+<p>其中外部SRAM需要启用FSMC连接SRAM功能后才可以勾选，SD卡需要启用SDIO功能之后才可以勾选，USB Disk需要配置USB为大容量存储主机类功能后才可以勾选，User-defined则任何时候都可以勾选，将FatFs配置在User-defined模式下就可以利用FatFs使用除上述提到的三种存储之外的设备，比如SPI FLASH等</p>
+<p>我们可以通过其官网<a target="_blank" rel="noopener" href="http://elm-chan.org/fsw/ff/archives.html">FatFs历史版本记录</a>找到 R0.12c 版本的FatFs源码，将其下载下来之后观察其源码目录结构如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.1.png" srcset="/img/loading.gif" lazyload ></div>
+
+<p>其中ff.c&#x2F;ff.h为FatF模块的源码；fconf.h文件为模块配置文件，可以通过宏定义来选择哪些功能开启，哪些功能关闭；integer.h文件为变量类型重命名文件，主要是为了兼容不同的变量类型命名；option文件夹中的文件为unicode编码文件和操作系统相关函数的文件；上面提到的这些文件用户一般无需修改</p>
+<p><font color="#fe2c24"><strong>如果读者希望手动移植FatFs到自己的嵌入式系统上，则应重点关注源码中diskio.c&#x2F;diskio.h两个文件</strong></font>，这两个文件中需要根据用户使用的RAM、MMC和USB这几个不同的内存类型来实现以下几个底层函数，函数如下列表所示，完成之后就可以直接通过FatFs提供的上层应用接口（eg：f_open()）来对底层的存储设备进行操作</p>
+<ol>
+<li>存储设备状态读取函数disk_status()</li>
+<li>存储设备初始化函数disk_initialize()</li>
+<li>存储设备读函数disk_read()</li>
+<li>存储设备写函数disk_write()</li>
+<li>存储设备IO控制操作函数disk_ioctl()</li>
+</ol>
+<p><font color="#fe2c24"><strong>但是如果要使用 STM32CubeMX 配置的话就不需要自己下载和移植源码</strong></font>，通过配置 STM32CubeMX 的 FatFs ，在生成的工程代码中就已经将 FatFs 的框架准备好，用户只需在生成的 user_diskio.c 文件中添加底层驱动IO函数即可（仅仅对于 User-defined 模式需要自己添加，其他的模式底层代码会自动生成），具体请阅读本实验”3.2.3、添加其他必要代码“小节</p>
+<p>在 FatFs 中，大多数的API都拥有一个名为 FRESULT 的结构体返回值，其包含了20个枚举对象，由于该返回值对于查找错误有很大帮助，因此笔者在这里列出来所有返回值并做了简单解释，具体如下源代码所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">enum</span> &#123;</span><br>	FR_OK = <span class="hljs-number">0</span>,				<span class="hljs-comment">/* (0) 成功 */</span><br>	FR_DISK_ERR,			<span class="hljs-comment">/* (1) 在Disk IO层发生硬错误，检查user_diskio.c中代码 */</span><br>	FR_INT_ERR,				<span class="hljs-comment">/* (2) 参数检查错误 */</span><br>	FR_NOT_READY,			<span class="hljs-comment">/* (3) 物理驱动器不工作 */</span><br>	FR_NO_FILE,				<span class="hljs-comment">/* (4) 找不到文件 */</span><br>	FR_NO_PATH,				<span class="hljs-comment">/* (5) 找不到路径 */</span><br>	FR_INVALID_NAME,		<span class="hljs-comment">/* (6) 路径名称格式无效，检查是否8.3格式/是否支持长文件名 */</span><br>	FR_DENIED,				<span class="hljs-comment">/* (7) 因禁止访问或目录满导致无法访问 */</span><br>	FR_EXIST,				<span class="hljs-comment">/* (8) 因禁止访问导致无法访问 */</span><br>	FR_INVALID_OBJECT,		<span class="hljs-comment">/* (9) 文件/目录无效 */</span><br>	FR_WRITE_PROTECTED,		<span class="hljs-comment">/* (10) 物理驱动器写保护 */</span><br>	FR_INVALID_DRIVE,		<span class="hljs-comment">/* (11) 逻辑驱动器号无效 */</span><br>	FR_NOT_ENABLED,			<span class="hljs-comment">/* (12) 卷无工作区 */</span><br>	FR_NO_FILESYSTEM,		<span class="hljs-comment">/* (13) 无有效FAT卷 */</span><br>	FR_MKFS_ABORTED,		<span class="hljs-comment">/* (14) 函数f_mkfs()因为问题终止 */</span><br>	FR_TIMEOUT,				<span class="hljs-comment">/* (15) 不能在限定时间内获得访问卷的许可 */</span><br>	FR_LOCKED,				<span class="hljs-comment">/* (16) 因为文件共享策略导致操作被拒绝 */</span><br>	FR_NOT_ENOUGH_CORE,		<span class="hljs-comment">/* (17) 不能分配长文件名工作缓存区 */</span><br>	FR_TOO_MANY_OPEN_FILES,	<span class="hljs-comment">/* (18) 打开文件个数大于_FS_LOCK */</span><br>	FR_INVALID_PARAMETER	<span class="hljs-comment">/* (19) 无效参数 */</span><br>&#125; FRESULT;<br></code></pre></td></tr></table></figure>
+
+<p>下图所示为带有 FatFs 模块的嵌入式系统的典型但非特定配置的依赖关系图，其中用户只需重点关注和实现”Low level disk I&#x2F;O layer”，实现之后在实际应用中只需使用 “User Application”中提供的上层应用接口即可 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.2.png" srcset="/img/loading.gif" lazyload></div>
+
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://blog.csdn.net/lc_guo/article/details/135071885?spm=1001.2014.3001.5502">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>系统时钟使用8MHz外部高速时钟HSE，HCLK、PCLK1和PCLK2均设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>本实验需要初始化开发板上WK_UP、KEY2、KEY1和KEY0用户按键，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://blog.csdn.net/lc_guo/article/details/135103656?spm=1001.2014.3001.5502">STM32CubeMX教程3 GPIO输入 - 按键响应</a>”</p>
+<p>本实验需要初始化USART1作为输出信息渠道，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://blog.csdn.net/lc_guo/article/details/135197604?spm=1001.2014.3001.5502">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”</p>
+<p>本实验需要以<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17965537">STM32CubeMX教程20 SPI - W25Q128驱动</a>实验为基础，需要读者能够通过CubeMX软件配置STM32F407的SPI实现正常读写W25Q128芯片的功能，然后接下来只需要增加本实验需要的中间件FatFs即可</p>
+<p>在Pinout &amp; Configuration页面左边的功能分类栏中<font color="#fe2c24"><strong>单击 Middleware and SoftwarePacks&#x2F;FATFS，然后在右边的Mode下勾选 User-defined （目前只有该参数可以勾选）</strong></font>，在下方Configuration&#x2F;Set Defines对FatFs的功能进行配置，这个页面所有参数对应FatFs源码ffconf.h中的宏定义</p>
+<p>这里我们将<font color="#be191c" style="background: #fef2f0"> CODE_PAGE(Code page on target) </font><font color="#fe2c24"><strong>参数修改为 Simplified Chinese (DBCS) ，然后将</strong></font><font color="#be191c" style="background: #fef2f0"> MAX_SS (Maximum Sector Size) </font><font color="#fe2c24"><strong>参数修改为W25Q128芯片的扇区大小4096字节，其他所有参数不做修改</strong></font>，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>笔者将Set Defines页面的所有参数列为了一个表格，方便做简单介绍，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-3、外设中断配置"><a href="#3-1-3、外设中断配置" class="headerlink" title="3.1.3、外设中断配置"></a>3.1.3、外设中断配置</h3><p>本实验无需配置任何中断</p>
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，<font color="#fe2c24"><strong>接着在链接设置中将最小栈大小修改为0x2000（8KB），之前所有实验该参数都为默认的0x0400（1KB），这是因为其他实验不需要占用太多的栈空间，但是本实验需要比较大的栈空间，不增加可能会导致FatFs读写文件失败卡死或者导致MCU复位的情况发生，读者可根据自己的情况自行设置栈大小</strong></font></p>
+<p>然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://blog.csdn.net/lc_guo/article/details/135071885?spm=1001.2014.3001.5502">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>关于SPI的初始化函数调用流程请读者阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17965537">STM32CubeMX教程20 SPI - W25Q128驱动</a>实验的”3.2.1、外设初始化调用流程“小节，在此不再赘述</p>
+<p><font color="#fe2c24"><strong>重点来看看FatFs中间件是如何被初始化并与W25Q128芯片底层操作联系在一起的</strong></font>，首先在CubeMX中勾选启用FatFs中间件之后，会在生成的工程代码中增加MX_FATFS_Init()初始化函数，在该函数中只调用了FATFS_LinkDriver()一个函数</p>
+<p>这个FATFS_LinkDriver()函数将一个名为 xxx_Driver（根据所选的存储设备不同，生成的该变量名称也会改变，比如User_Driver，SD_Driver等）的 Diskio_drvTypeDef 类结构体链接到了FatFs管理的驱动器列表中，并将卷路径赋值为”0:&#x2F;“</p>
+<p><font color="#fe2c24"><strong>那么 xxx_Driver 是什么，为什么要将这个Diskio_drvTypeDef 类结构体的变量链接给FatFs管理呢？</strong></font></p>
+<p>跳转到 xxx_Driver 的定义处，我们发现该结构体变量中保存了五个函数指针，刚刚好就是我们需要实现的对存储设备进行底层读写等操作的函数，具体xxx_Driver定义如下述代码所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c">Diskio_drvTypeDef USER_Driver =<br>&#123;<br>  USER_initialize,<br>  USER_status,<br>  USER_read,<br>  USER_write,<br>  USER_ioctl,<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p><font color="#fe2c24"><strong>至此我们知道了FatFs初始化就是将用户重新实现的与存储设备底层进行读写等操作的函数链接到FatFs管理的驱动器列表中，将这些底层函数交给FatFs管理</strong></font>，用户直接使用FatFs提供的上层API函数来操作即可，对于为什么可以这样需要分析FatFs源码，本文就不涉及了</p>
+<h3 id="3-2-2、外设中断调用流程"><a href="#3-2-2、外设中断调用流程" class="headerlink" title="3.2.2、外设中断调用流程"></a>3.2.2、外设中断调用流程</h3><p>本实验无配置任何中断</p>
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p>打开整个工程之后观察其文件结构目录，在CubeMX中启用FatFs之后在生成的工程代码目录中会增加FatFs源码文件夹（该文件夹中文件无需用户修改），同时增加App和Target两个文件夹，<font color="#fe2c24"><strong>在App文件夹中的fatfs.c文件需要用户实现获取RTC时间的函数①get_fattime()，在App文件夹中的user_diskio.c中需要用户实现②USER_initialize()、③USER_status()、④USER_read()、⑤USER_write()和⑥USER_ioctl()共计六个函数</strong></font>，其中USER_initialize()，USER_status()，USER_read()三个函数必须实现，其他函数按需实现，其文件结构目录如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.9.png" srcset="/img/loading.gif" lazyload ></div>
+
+<p>对于配置为User-defined模式的FatFs来说，上面App文件夹和Target文件夹中的内容均需要用户自己实现，因为CubeMX并不知道用户想要使用的存储设备，所以也无法自动生成底层读写的IO驱动函数，但是对于Extemal SRAM、SD Card和USB Disk这三种固定类型的存储，则无需用户在App文件夹和Target文件夹中重新实现上面提到的一共六个函数，CubeMX生成的工程代码中会自动实现</p>
+<p><font color="#fe2c24"><strong>接下来我们来实现上面提到的六个函数</strong></font>，注意FatFs获取RTC时间需要开启STM32F407的RTC功能，关于RTC的具体使用方法，读者可以阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17953690">STM32CubeMX教程10 RTC 实时时钟 - 周期唤醒、闹钟AB事件和备份寄存器</a>实验，如果不需要可以直接将函数体内容注释</p>
+<p>对于Flash_ReadID()、Flash_ReadBytes()和Flash_WriteSector()三个函数是在<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17965537">STM32CubeMX教程20 SPI - W25Q128驱动</a>实验中实现的，请读者自行查阅，重新实现的六个函数源代码如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*fatfs.h文件中*/</span><br><span class="hljs-comment">/*添加RTC头文件*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;rtc.h&quot;</span></span><br><br><span class="hljs-comment">/*fatfs.c文件中*/</span><br><span class="hljs-comment">/*FatFs获取RTC时间*/</span><br>DWORD <span class="hljs-title function_">get_fattime</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>  <span class="hljs-comment">/* USER CODE BEGIN get_fattime */</span><br>	RTC_TimeTypeDef sTime;<br>	RTC_DateTypeDef sDate;<br>	<span class="hljs-comment">//获取RTC时间</span><br>	<span class="hljs-keyword">if</span>(HAL_RTC_GetTime(&amp;hrtc, &amp;sTime, RTC_FORMAT_BIN) == HAL_OK)<br>	&#123;<br>		<span class="hljs-comment">//获取RTC日期</span><br>		HAL_RTC_GetDate(&amp;hrtc, &amp;sDate, RTC_FORMAT_BIN);<br>		<br>		WORD date=(<span class="hljs-number">2000</span>+sDate.Year<span class="hljs-number">-1980</span>)&lt;&lt;<span class="hljs-number">9</span>;<br>		date = date |(sDate.Month&lt;&lt;<span class="hljs-number">5</span>) |sDate.Date;<br><br>		WORD time=sTime.Hours&lt;&lt;<span class="hljs-number">11</span>;<br>		time = time | (sTime.Minutes&lt;&lt;<span class="hljs-number">5</span>) | (sTime.Seconds&gt;<span class="hljs-number">1</span>);<br>		DWORD dt=(date&lt;&lt;<span class="hljs-number">16</span>) | time;<br>		<br>		<span class="hljs-keyword">return</span>	dt;<br>	&#125;<br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>  <span class="hljs-comment">/* USER CODE END get_fattime */</span><br>&#125;<br><br><span class="hljs-comment">/*user_diskio.c文件中*/</span><br><span class="hljs-comment">/*存储设备初始化函数*/</span><br>DSTATUS <span class="hljs-title function_">USER_initialize</span> <span class="hljs-params">(</span><br><span class="hljs-params">	BYTE pdrv           <span class="hljs-comment">/* Physical drive nmuber to identify the drive */</span></span><br><span class="hljs-params">)</span><br>&#123;<br>  <span class="hljs-comment">/* USER CODE BEGIN INIT */</span><br>		Stat = STA_NOINIT;<br>		<span class="hljs-comment">//获取驱动器状态</span><br>		Stat = USER_status(pdrv);    <br>    <span class="hljs-keyword">return</span> Stat;<br>  <span class="hljs-comment">/* USER CODE END INIT */</span><br>&#125;<br><br><span class="hljs-comment">/*获取存储设备状态*/</span><br>DSTATUS <span class="hljs-title function_">USER_status</span> <span class="hljs-params">(</span><br><span class="hljs-params">	BYTE pdrv       <span class="hljs-comment">/* Physical drive number to identify the drive */</span></span><br><span class="hljs-params">)</span><br>&#123;<br>  <span class="hljs-comment">/* USER CODE BEGIN STATUS */</span><br>		Stat = STA_NOINIT;		  <span class="hljs-comment">//驱动器未初始化，Stat=0x01</span><br>		<span class="hljs-keyword">if</span>(Flash_ReadID() != <span class="hljs-number">0</span>)   <span class="hljs-comment">//读取Flash芯片的ID,只要不是0就表示En25Q128已初始化</span><br>			Stat &amp;= ~STA_NOINIT;  <span class="hljs-comment">//Stat=0x00</span><br>		<span class="hljs-keyword">return</span> Stat;<br>  <span class="hljs-comment">/* USER CODE END STATUS */</span><br>&#125;<br><br><span class="hljs-comment">/*底层读函数*/</span><br>DRESULT <span class="hljs-title function_">USER_read</span> <span class="hljs-params">(</span><br><span class="hljs-params">	BYTE pdrv,      <span class="hljs-comment">/* Physical drive nmuber to identify the drive */</span></span><br><span class="hljs-params">	BYTE *buff,     <span class="hljs-comment">/* Data buffer to store read data */</span></span><br><span class="hljs-params">	DWORD sector,   <span class="hljs-comment">/* Sector address in LBA */</span></span><br><span class="hljs-params">	UINT count      <span class="hljs-comment">/* Number of sectors to read */</span></span><br><span class="hljs-params">)</span><br>&#123;<br>  <span class="hljs-comment">/* USER CODE BEGIN READ */</span><br>	<span class="hljs-comment">//扇区编号左移12位得绝对起始地址</span><br>	<span class="hljs-type">uint32_t</span> globalAddr = sector &lt;&lt; <span class="hljs-number">12</span>;  <br>	<span class="hljs-comment">//字节个数，左移12位就是乘4096，每个扇有4096字节</span><br>	<span class="hljs-type">uint16_t</span> byteCount = count &lt;&lt; <span class="hljs-number">12</span>;   <br>	<span class="hljs-comment">//读取数据</span><br>	Flash_ReadBytes(globalAddr, (<span class="hljs-type">uint8_t</span> *)buff, byteCount);<br>	<br>	<span class="hljs-keyword">return</span> RES_OK;<br>  <span class="hljs-comment">/* USER CODE END READ */</span><br>&#125;<br><br><span class="hljs-comment">/*底层写函数*/</span><br>DRESULT <span class="hljs-title function_">USER_write</span> <span class="hljs-params">(</span><br><span class="hljs-params">	BYTE pdrv,          <span class="hljs-comment">/* Physical drive nmuber to identify the drive */</span></span><br><span class="hljs-params">	<span class="hljs-type">const</span> BYTE *buff,   <span class="hljs-comment">/* Data to be written */</span></span><br><span class="hljs-params">	DWORD sector,       <span class="hljs-comment">/* Sector address in LBA */</span></span><br><span class="hljs-params">	UINT count          <span class="hljs-comment">/* Number of sectors to write */</span></span><br><span class="hljs-params">)</span><br>&#123;<br>  <span class="hljs-comment">/* USER CODE BEGIN WRITE */</span><br>  <span class="hljs-comment">/* USER CODE HERE */</span><br>	<span class="hljs-comment">//绝对地址</span><br>	<span class="hljs-type">uint32_t</span> globalAddr = sector&lt;&lt;<span class="hljs-number">12</span>;  <br>	<span class="hljs-comment">//字节个数</span><br>	<span class="hljs-type">uint16_t</span> byteCount  = count&lt;&lt;<span class="hljs-number">12</span>;   <br>	Flash_WriteSector(globalAddr, (<span class="hljs-type">uint8_t</span>*)buff, byteCount);<br>	<br>	<span class="hljs-keyword">return</span> RES_OK;                                                                                                                       <br>  <span class="hljs-comment">/* USER CODE END WRITE */</span><br>&#125;<br><br><span class="hljs-comment">/*底层控制操作函数*/</span><br>DRESULT <span class="hljs-title function_">USER_ioctl</span> <span class="hljs-params">(</span><br><span class="hljs-params">	BYTE pdrv,      <span class="hljs-comment">/* Physical drive nmuber (0..) */</span></span><br><span class="hljs-params">	BYTE cmd,       <span class="hljs-comment">/* Control code */</span></span><br><span class="hljs-params">	<span class="hljs-type">void</span> *buff      <span class="hljs-comment">/* Buffer to send/receive control data */</span></span><br><span class="hljs-params">)</span><br>&#123;<br>  <span class="hljs-comment">/* USER CODE BEGIN IOCTL */</span><br>	DRESULT res = RES_OK;<br>	<br>	<span class="hljs-keyword">switch</span>(cmd)<br>	&#123;<br>		<span class="hljs-comment">/*以下四个命令都是按照FatFs默认参数配置时必须需要的*/</span><br>		<span class="hljs-comment">//完成挂起的写入过程(在_FS_READONLY == 0时需要)</span><br>		<span class="hljs-keyword">case</span> CTRL_SYNC:   <br>			<span class="hljs-keyword">break</span>;<br>			<br>		<span class="hljs-comment">//获取存储介质容量(在_USE_MKFS == 1时需要)</span><br>		<span class="hljs-keyword">case</span> GET_SECTOR_COUNT:  <br>			<span class="hljs-comment">//W25Q128总的扇区个数,4096</span><br>			*(DWORD *)buff = FLASH_SECTOR_COUNT;  <br>			<span class="hljs-keyword">break</span>;<br>			<br>		<span class="hljs-comment">//获取扇区大小(_MAX_SS != _MIN_SS时需要)</span><br>		<span class="hljs-keyword">case</span> GET_SECTOR_SIZE:  <br>			<span class="hljs-comment">//W25Q128每个扇区的大小，4096字节</span><br>			*(DWORD *)buff = FLASH_SECTOR_SIZE;  <br>			<span class="hljs-keyword">break</span>;<br>			<br>		<span class="hljs-comment">//获取擦除块的大小(_USE_MKFS == 1时需要)</span><br>		<span class="hljs-keyword">case</span> GET_BLOCK_SIZE:  <br>			<span class="hljs-comment">//W25Q128每个块拥有16个扇区，按块擦除</span><br>			*(DWORD *)buff = <span class="hljs-number">16</span>;  <br>			<span class="hljs-keyword">break</span>;<br>		<br>		<span class="hljs-keyword">default</span>:<br>			res = RES_ERROR;<br>	&#125;<br><br>	<span class="hljs-keyword">return</span> res;<br>  <span class="hljs-comment">/* USER CODE END IOCTL */</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>然后增加使用FatFs库中API进行文件操作的函数，包括挂载文件系统、显示SD卡信息、读&#x2F;写TXT文件、获取文件信息、扫描文件列表和删除文件等函数，笔者将其封装在了file_operate.c&#x2F;file_operate.h文件中，具体的源代码如下所示</p>
+<p><strong>file_operate.c文件</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;file_operate.h&quot;</span></span><br><br><span class="hljs-comment">//定义用于格式化的工作区缓存</span><br>BYTE workBuffer[<span class="hljs-number">4</span>*User_Sector];<br><br><span class="hljs-comment">/*挂载FatFs文件系统*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Mount_FatFs</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-comment">//挂载文件系统</span><br>	FRESULT retUSER = f_mount(&amp;User_FatFs, User_SDPath, <span class="hljs-number">1</span>);<br>	<span class="hljs-comment">//发生错误</span><br>	<span class="hljs-keyword">if</span>(retUSER != FR_OK)<br>	&#123;<br>		<span class="hljs-comment">//没有文件系统，需要格式化</span><br>		<span class="hljs-keyword">if</span>(retUSER == FR_NO_FILESYSTEM)<br>		&#123;<br>			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n没有文件系统,开始格式化\r\n&quot;</span>);<br>			<span class="hljs-comment">//创建文件系统</span><br>			retUSER = f_mkfs(User_SDPath, FM_FAT32, <span class="hljs-number">0</span>, workBuffer, <span class="hljs-number">4</span>*User_Sector);<br>			<span class="hljs-comment">//格式化失败</span><br>			<span class="hljs-keyword">if</span>(retUSER != FR_OK)<br>			&#123;<br>				<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;格式化失败，错误代码 = %d\r\n&quot;</span>, retUSER);<br>			&#125;<br>			<span class="hljs-comment">//格式化成功</span><br>			<span class="hljs-keyword">else</span><br>			&#123;<br>				<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;格式化成功，开始重新挂载\r\n&quot;</span>);<br>				<span class="hljs-comment">//有文件系统后重新挂载</span><br>				retUSER = f_mount(&amp;User_FatFs, User_SDPath, <span class="hljs-number">1</span>);<br>				<span class="hljs-comment">//挂载失败</span><br>				<span class="hljs-keyword">if</span>(retUSER != FR_OK)<br>				&#123;<br>					<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;发生错误，错误代码 = %d\r\n&quot;</span>, retUSER);<br>				&#125;<br>				<span class="hljs-comment">//挂载成功</span><br>				<span class="hljs-keyword">else</span><br>				&#123;<br>					<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;*** 文件系统挂载成功 ***\r\n&quot;</span>);<br>				&#125;<br>			&#125;<br>		&#125;<br>		<span class="hljs-comment">//不是没有文件系统，而是发生其他错误</span><br>		<span class="hljs-keyword">else</span><br>		&#123;<br>			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;发生其他错误，错误代码 = %d\r\n&quot;</span>, retUSER);<br>		&#125;<br>	&#125;<br>	<span class="hljs-comment">//有文件系统直接挂在成功</span><br>	<span class="hljs-keyword">else</span><br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;文件系统挂载成功\r\n&quot;</span>);<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*获取磁盘信息并在LCD上显示*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_GetDiskInfo</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    FATFS *fs;<br>	<span class="hljs-comment">//定义剩余簇个数变量</span><br>    DWORD fre_clust; <br>	<span class="hljs-comment">//获取剩余簇个数</span><br>    FRESULT res = f_getfree(<span class="hljs-string">&quot;0:&quot;</span>, &amp;fre_clust, &amp;fs); <br>	<span class="hljs-comment">//获取失败</span><br>    <span class="hljs-keyword">if</span>(res != FR_OK)<br>    &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;f_getfree() error\r\n&quot;</span>);<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** FAT disk info ***\r\n&quot;</span>);<br>		<br>	<span class="hljs-comment">//总的扇区个数</span><br>    DWORD tot_sect = (fs-&gt;n_fatent - <span class="hljs-number">2</span>) * fs-&gt;csize;  <br>		<br>	<span class="hljs-comment">//剩余的扇区个数 = 剩余簇个数 * 每个簇的扇区个数</span><br>    DWORD fre_sect = fre_clust * fs-&gt;csize;    <br>		<br>	<span class="hljs-comment">//对于SD卡和U盘, _MIN_SS=512字节</span><br><span class="hljs-meta">#<span class="hljs-keyword">if</span>  _MAX_SS == _MIN_SS  </span><br>    <span class="hljs-comment">//SD卡的_MIN_SS固定为512，右移11位相当于除以2048</span><br>	<span class="hljs-comment">//剩余空间大小，单位：MB，用于SD卡，U盘</span><br>    DWORD freespace= (fre_sect&gt;&gt;<span class="hljs-number">11</span>); <br>		<span class="hljs-comment">//总空间大小，单位：MB，用于SD卡，U盘		</span><br>    DWORD totalSpace= (tot_sect&gt;&gt;<span class="hljs-number">11</span>);  <br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br>	<span class="hljs-comment">//Flash存储器，小容量</span><br>	<span class="hljs-comment">//剩余空间大小，单位：KB</span><br>    DWORD freespace= (fre_sect*fs-&gt;ssize)&gt;&gt;<span class="hljs-number">10</span>;   <br>	<span class="hljs-comment">//总空间大小，单位：KB</span><br>    DWORD totalSpace= (tot_sect*fs-&gt;ssize)&gt;&gt;<span class="hljs-number">10</span>;  <br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><br>	<span class="hljs-comment">//FAT类型</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;FAT type = %d\r\n&quot;</span>,fs-&gt;fs_type);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;[1=FAT12,2=FAT16,3=FAT32,4=exFAT]\r\n&quot;</span>);<br>		<br>	<span class="hljs-comment">//扇区大小，单位字节</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Sector size(bytes) = &quot;</span>);<br>	<span class="hljs-comment">//SD卡固定512字节</span><br><span class="hljs-meta">#<span class="hljs-keyword">if</span>  _MAX_SS == _MIN_SS </span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\r\n&quot;</span>, _MIN_SS);<br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br>	<span class="hljs-comment">//FLASH存储器</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\r\n&quot;</span>, fs-&gt;ssize);<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>		<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Cluster size(sectors) = %d\r\n&quot;</span>, fs-&gt;csize);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Total cluster count = %ld\r\n&quot;</span>, fs-&gt;n_fatent<span class="hljs-number">-2</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Total sector count = %ld\r\n&quot;</span>, tot_sect);<br>		<br>	<span class="hljs-comment">//总空间</span><br><span class="hljs-meta">#<span class="hljs-keyword">if</span>  _MAX_SS == _MIN_SS </span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Total space(MB) = %ld\r\n&quot;</span>, totalSpace);<br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Total space(KB) = %ld\r\n&quot;</span>, totalSpace);<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>		<br>	<span class="hljs-comment">//空闲簇数量</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Free cluster count = %ld\r\n&quot;</span>,fre_clust);<br>	<span class="hljs-comment">//空闲扇区数量</span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Free sector count = %ld\r\n&quot;</span>, fre_sect);<br>		<br>	<span class="hljs-comment">//空闲空间</span><br><span class="hljs-meta">#<span class="hljs-keyword">if</span>  _MAX_SS == _MIN_SS </span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Free space(MB) = %ld\r\n&quot;</span>, freespace);<br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Free space(KB) = %ld\r\n&quot;</span>, freespace);<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Get FAT disk info OK\r\n&quot;</span>);<br>&#125;<br><br><span class="hljs-comment">/*创建文本文件*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_WriteTXTFile</span><span class="hljs-params">(TCHAR *filename,<span class="hljs-type">uint16_t</span> year, <span class="hljs-type">uint8_t</span> month, <span class="hljs-type">uint8_t</span> day)</span><br>&#123;<br>	FIL	file;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** Creating TXT file: %s ***\r\n&quot;</span>, filename);<br>	<br>	FRESULT res = f_open(&amp;file, filename, FA_CREATE_ALWAYS | FA_WRITE);<br>	<span class="hljs-comment">//打开/创建文件成功</span><br>	<span class="hljs-keyword">if</span>(res == FR_OK)<br>	&#123;<br>		<span class="hljs-comment">//字符串必须有换行符&quot;\n&quot;</span><br>		TCHAR str[]=<span class="hljs-string">&quot;Line1: Hello, FatFs***\n&quot;</span>;  <br>		<span class="hljs-comment">//不会写入结束符&quot;\0&quot;</span><br>		f_puts(str, &amp;file); <br>		<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Write file OK: %s\r\n&quot;</span>, filename);<br>	&#125;<br>	<span class="hljs-keyword">else</span><br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Open file error，error code: %d\r\n&quot;</span>, res);<br>	&#125;<br>	<span class="hljs-comment">//使用完毕关闭文件</span><br>	f_close(&amp;file);<br>&#125;<br><br><span class="hljs-comment">/*读取一个文本文件的内容*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_ReadTXTFile</span><span class="hljs-params">(TCHAR *filename)</span><br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** Reading TXT file: %s ***\r\n&quot;</span>, filename);<br><br>	FIL	file;<br>	<span class="hljs-comment">//以只读方式打开文件</span><br>	FRESULT res = f_open(&amp;file, filename, FA_READ);  <br>	<span class="hljs-comment">//打开成功</span><br>	<span class="hljs-keyword">if</span>(res == FR_OK)<br>	&#123;<br>		<span class="hljs-comment">//读取缓存</span><br>		TCHAR str[<span class="hljs-number">100</span>];<br>		<span class="hljs-comment">//没有读到文件内容末尾</span><br>		<span class="hljs-keyword">while</span>(!f_eof(&amp;file))<br>		&#123;<br>			<span class="hljs-comment">//读取1个字符串,自动加上结束符”\0”</span><br>			f_gets(str,<span class="hljs-number">100</span>, &amp;file);	<br>			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s&quot;</span>, str);<br>		&#125;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n&quot;</span>);<br>	&#125;<br>	<span class="hljs-comment">//如果没有该文件</span><br>	<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(res == FR_NO_FILE)<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;File does not exist\r\n&quot;</span>);<br>	<span class="hljs-comment">//打开失败</span><br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;f_open() error，error code: %d\r\n&quot;</span>, res);<br>	<span class="hljs-comment">//关闭文件</span><br>	f_close(&amp;file);<br>&#125;<br><br><span class="hljs-comment">/*扫描和显示指定目录下的文件和目录*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_ScanDir</span><span class="hljs-params">(<span class="hljs-type">const</span> TCHAR* PathName)</span><br>&#123;<br>	DIR dir;					<span class="hljs-comment">//目录对象</span><br>	FILINFO fno;				<span class="hljs-comment">//文件信息</span><br>	<span class="hljs-comment">//打开目录</span><br>	FRESULT res = f_opendir(&amp;dir, PathName);<br>	<span class="hljs-comment">//打开失败</span><br>	<span class="hljs-keyword">if</span>(res != FR_OK)<br>	&#123;<br>		<span class="hljs-comment">//关闭目录，直接退出函数</span><br>		f_closedir(&amp;dir);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\nf_opendir() error，error code: %d\r\n&quot;</span>, res);<br>		<span class="hljs-keyword">return</span>;<br>	&#125;<br>	<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** All entries in dir: %s ***\r\n&quot;</span>, PathName);<br>	<span class="hljs-comment">//顺序读取目录中的文件</span><br>	<span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>)<br>	&#123;<br>		<span class="hljs-comment">//读取目录下的一个项</span><br>		res = f_readdir(&amp;dir, &amp;fno);    <br>		<span class="hljs-comment">//文件名为空表示没有多的项可读了</span><br>		<span class="hljs-keyword">if</span>(res != FR_OK || fno.fname[<span class="hljs-number">0</span>] == <span class="hljs-number">0</span>)<br>			<span class="hljs-keyword">break</span>;  <br>		<span class="hljs-comment">//如果是一个目录</span><br>		<span class="hljs-keyword">if</span>(fno.fattrib &amp; AM_DIR)  		<br>		&#123;<br>			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;DIR: %s\r\n&quot;</span>, fno.fname);<br>		&#125;<br>		<span class="hljs-comment">//如果是一个文件</span><br>		<span class="hljs-keyword">else</span>  		<br>		&#123;<br>			<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;FILE: %s\r\n&quot;</span>,fno.fname);<br>		&#125;<br>	&#125;<br>	<span class="hljs-comment">//扫描完毕，关闭目录</span><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Scan dir OK\r\n&quot;</span>);<br>	f_closedir(&amp;dir);<br>&#125;<br><br><span class="hljs-comment">/*获取一个文件的文件信息*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_GetFileInfo</span><span class="hljs-params">(TCHAR *filename)</span><br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** File info of: %s ***\r\n&quot;</span>, filename);<br><br>	FILINFO fno;<br>	<span class="hljs-comment">//检查文件或子目录是否存在</span><br>	FRESULT fr = f_stat(filename, &amp;fno);<br>	<span class="hljs-comment">//如果存在从fno中读取文件信息</span><br>	<span class="hljs-keyword">if</span>(fr == FR_OK)<br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;File size(bytes) = %ld\r\n&quot;</span>, fno.fsize);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;File attribute = 0x%x\r\n&quot;</span>, fno.fattrib);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;File Name = %s\r\n&quot;</span>, fno.fname);<br>		<span class="hljs-comment">//输出创建/修改文件时的时间戳</span><br>		FatFs_PrintfFileDate(fno.fdate, fno.ftime);<br>	&#125;<br>	<span class="hljs-comment">//如果没有该文件</span><br>	<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (fr == FR_NO_FILE)<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;File does not exist\r\n&quot;</span>);<br>	<span class="hljs-comment">//发生其他错误</span><br>	<span class="hljs-keyword">else</span><br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;f_stat() error，error code: %d\r\n&quot;</span>, fr);<br>&#125;<br><br><span class="hljs-comment">/*删除文件*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_DeleteFile</span><span class="hljs-params">(TCHAR *filename)</span><br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;\r\n*** Delete File: %s ***\r\n&quot;</span>, filename);<br>	FIL	file;<br>	<span class="hljs-comment">//打开文件</span><br>	FRESULT res = f_open(&amp;file, filename, FA_OPEN_EXISTING);  <br>	<span class="hljs-keyword">if</span>(res == FR_OK)<br>	&#123;<br>		<span class="hljs-comment">//关闭文件</span><br>		f_close(&amp;file);<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;open successfully!\r\n&quot;</span>);<br>	&#125;<br>	<span class="hljs-comment">//删除文件</span><br>	res = f_unlink(filename);<br>	<span class="hljs-comment">//删除成功</span><br>	<span class="hljs-keyword">if</span>(res == FR_OK)<br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;The file was deleted successfully!\r\n&quot;</span>);<br>	&#125;<br>	<span class="hljs-comment">//删除失败</span><br>	<span class="hljs-keyword">else</span><br>	&#123;<br>		<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;File deletion failed, error code：%d\r\n&quot;</span>, res);<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*打印输出文件日期*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_PrintfFileDate</span><span class="hljs-params">(WORD date, WORD time)</span><br>&#123;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;File data = %d/%d/%d\r\n&quot;</span>, ((date&gt;&gt;<span class="hljs-number">9</span>)&amp;<span class="hljs-number">0x7F</span>)+<span class="hljs-number">1980</span>, (date&gt;&gt;<span class="hljs-number">5</span>)&amp;<span class="hljs-number">0xF</span>, date&amp;<span class="hljs-number">0x1F</span>);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;File time = %d:%d:%d\r\n&quot;</span>, (time&gt;&gt;<span class="hljs-number">11</span>)&amp;<span class="hljs-number">0x1F</span>, (time&gt;&gt;<span class="hljs-number">5</span>)&amp;<span class="hljs-number">0x3F</span>, time&amp;<span class="hljs-number">0x1F</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>file_operate.h文件</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> FILE_OPERATE_H</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> FILE_OPERATE_H</span><br><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;main.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;FatFs.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;stdio.h&quot;</span></span><br><br><span class="hljs-comment">/*定义自己的存储设备*/</span><br><span class="hljs-comment">/*用户存储设备扇区字节数*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> User_Sector 4096</span><br><span class="hljs-comment">/*用户存储设备FatFS对象*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> User_FatFs 	USERFatFS</span><br><span class="hljs-comment">/*用户存储设备卷路径*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> User_SDPath USERPath</span><br><br><span class="hljs-comment">/*函数声明*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Mount_FatFs</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_GetDiskInfo</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_ScanDir</span><span class="hljs-params">(<span class="hljs-type">const</span> TCHAR* PathName)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_ReadTXTFile</span><span class="hljs-params">(TCHAR *filename)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_WriteTXTFile</span><span class="hljs-params">(TCHAR *filename,<span class="hljs-type">uint16_t</span> year, <span class="hljs-type">uint8_t</span> month, <span class="hljs-type">uint8_t</span> day)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_GetFileInfo</span><span class="hljs-params">(TCHAR *filename)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_DeleteFile</span><span class="hljs-params">(TCHAR *filename)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">FatFs_PrintfFileDate</span><span class="hljs-params">(WORD date, WORD time)</span>;<br><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+
+<p>向工程中添加.c&#x2F;.h文件的步骤请阅读“<a target="_blank" rel="noopener" href="https://blog.csdn.net/lc_guo/article/details/135380334?spm=1001.2014.3001.5501">STM32CubeMX教程19 I2C - MPU6050驱动</a>”实验3.2.3小节</p>
+<p>最后在main.c文件中添加 ”file_operate.h“ 头文件，然后在主函数 main() 中调用文件系统挂载函数，实现按键控制逻辑程序，具体源代码如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*main.c中添加头文件*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;file_operate.h&quot;</span> </span><br><br><span class="hljs-comment">/*外输初始化完进入主循环前*/</span><br><span class="hljs-comment">//检测SPI与W25Q128通信是否正常</span><br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Reset,ID:0x%x\r\n&quot;</span>, Flash_ReadID());<br><span class="hljs-comment">//挂载文件系统</span><br>Mount_FatFs();<br><span class="hljs-comment">//获取磁盘信息</span><br>FatFs_GetDiskInfo();<br><br><span class="hljs-comment">/*主循环中按键逻辑*/</span><br><span class="hljs-comment">/*按键WK_UP被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == GPIO_PIN_SET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == GPIO_PIN_SET)<br>	&#123;<br>		FatFs_ScanDir(<span class="hljs-string">&quot;0:/&quot;</span>);<br>		<span class="hljs-keyword">while</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin));<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*按键KEY2被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>	&#123;<br>		FatFs_WriteTXTFile(<span class="hljs-string">&quot;test.txt&quot;</span>,<span class="hljs-number">2016</span>,<span class="hljs-number">11</span>,<span class="hljs-number">15</span>);<br>		<span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin));<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*按键KEY1被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin) == GPIO_PIN_RESET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin) == GPIO_PIN_RESET)<br>	&#123;<br>		FatFs_ReadTXTFile(<span class="hljs-string">&quot;test.txt&quot;</span>);<br>		FatFs_GetFileInfo(<span class="hljs-string">&quot;test.txt&quot;</span>);<br>		<span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin));<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*按键KEY0被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin) == GPIO_PIN_RESET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin) == GPIO_PIN_RESET)<br>	&#123;<br>		FatFs_DeleteFile(<span class="hljs-string">&quot;test.txt&quot;</span>);<br>		<span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin));<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<h1 id="4、烧录验证"><a href="#4、烧录验证" class="headerlink" title="4、烧录验证"></a>4、烧录验证</h1><p>烧录程序，开发板上电后会尝试在W25Q128 FLASH芯片上挂载文件系统，挂载成功后会输出读取到的 FLASH芯片的信息，接下来按照下面几个步骤使用FatFs文件系统对 FLASH芯片进行读写等测试</p>
+<ol>
+<li>按下开发板上的WK_UP按键，扫描FLASH芯片根目录下所有文件，并通过串口将文件列表输出</li>
+<li>按下开发板上的KEY2按键，在 FLASH芯片根目录创建一个”test.txt“文件，将一个字符串 ”Hello,OSnotes“ 写入该文件中，该字符串大小为15个字节（该字符串中末尾包括了一个’\n‘和一个‘\0’）</li>
+<li>按下开发板上的KEY1按键，读取FLASH芯片根目录下名为”test.txt“的文件，将其中的内容通过串口输出，然后读取该文件的信息（大小，属性，名称），并通过串口输出</li>
+<li>按下开发板上的KEY0按键，删除FLASH芯片根目录下名为”test.txt“的文件</li>
+</ol>
+<p>整个实验过程串口具体的输出情况如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/26.10.gif" srcset="/img/loading.gif" lazyload ></div>
+
+<h1 id="5、常用函数"><a href="#5、常用函数" class="headerlink" title="5、常用函数"></a>5、常用函数</h1><p>FatFs的所有API函数详细介绍请参看FatFs官网 <a target="_blank" rel="noopener" href="http://elm-chan.org/fsw/ff/00index_e.html">FatFs - Generic FAT Filesystem Module</a>，如下所示为笔者对其常用应用接口及其功能做简单介绍</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*注册/取消注册卷的工作区域*/</span><br>FRESULT <span class="hljs-title function_">f_mount</span><span class="hljs-params">(FatFs* fs, <span class="hljs-type">const</span> TCHAR* path, BYTE opt)</span><br><span class="hljs-comment">/*在逻辑驱动器上创建FAT卷*/</span><br>FRESULT <span class="hljs-title function_">f_mkfs</span><span class="hljs-params">(<span class="hljs-type">const</span> TCHAR* path, BYTE opt, DWORD au, <span class="hljs-type">void</span>* work, UINT len)</span><br><span class="hljs-comment">/*获取卷上的可用空间*/</span><br>FRESULT <span class="hljs-title function_">f_getfree</span><span class="hljs-params">(<span class="hljs-type">const</span> TCHAR* path, DWORD* nclst, FatFs** FatFs)</span><br><span class="hljs-comment">/*打开/创建文件*/</span><br>FRESULT <span class="hljs-title function_">f_open</span><span class="hljs-params">(FIL* fp, <span class="hljs-type">const</span> TCHAR* path, BYTE mode)</span><br><span class="hljs-comment">/*写入一个字符串*/</span><br><span class="hljs-type">int</span> <span class="hljs-title function_">f_puts</span><span class="hljs-params">(<span class="hljs-type">const</span> TCHAR* str, FIL* fp)</span><br><span class="hljs-comment">/*写入格式化字符串*/</span><br><span class="hljs-type">int</span> <span class="hljs-title function_">f_printf</span><span class="hljs-params">(FIL* fp, <span class="hljs-type">const</span> TCHAR* fmt, ...)</span><br><span class="hljs-comment">/*关闭打开的文件*/</span><br>FRESULT <span class="hljs-title function_">f_close</span><span class="hljs-params">(FIL* fp)</span><br><span class="hljs-comment">/*读取字符串*/</span><br>TCHAR* <span class="hljs-title function_">f_gets</span><span class="hljs-params">(TCHAR* buff, <span class="hljs-type">int</span> len, FIL* fp)</span><br><span class="hljs-comment">/*打开目录*/</span><br>FRESULT <span class="hljs-title function_">f_opendir</span><span class="hljs-params">(DIR* dp, <span class="hljs-type">const</span> TCHAR* path)</span><br><span class="hljs-comment">/*读取目录项*/</span><br>FRESULT <span class="hljs-title function_">f_readdir</span><span class="hljs-params">(DIR* dp, FILINFO* fno)</span><br><span class="hljs-comment">/*关闭打开的目录*/</span><br>FRESULT <span class="hljs-title function_">f_closedir</span><span class="hljs-params">(DIR *dp)</span><br><span class="hljs-comment">/*检查文件或子目录是否存在*/</span><br>FRESULT <span class="hljs-title function_">f_stat</span><span class="hljs-params">(<span class="hljs-type">const</span> TCHAR* path, FILINFO* fno)</span><br><span class="hljs-comment">/*删除文件或子目录*/</span><br>FRESULT <span class="hljs-title function_">f_unlink</span><span class="hljs-params">(<span class="hljs-type">const</span> TCHAR* path)</span><br><span class="hljs-comment">/*重命名/移动文件或子目录*/</span><br>FRESULT <span class="hljs-title function_">f_rename</span><span class="hljs-params">(<span class="hljs-type">const</span> TCHAR* path_old, <span class="hljs-type">const</span> TCHAR* path_new)</span><br><span class="hljs-comment">/*创建子目录*/</span><br>FRESULT <span class="hljs-title function_">f_mkdir</span><span class="hljs-params">(<span class="hljs-type">const</span> TCHAR* path)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="6、注释详解"><a href="#6、注释详解" class="headerlink" title="6、注释详解"></a>6、注释详解</h1><p><em>注释1</em>：图片来源 <a target="_blank" rel="noopener" href="http://elm-chan.org/fsw/ff/doc/appnote.html">FatFs Module Application Note (elm-chan.org)</a></p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UBc85046ed7208">STM32Cube高效开发教程（高级篇）</a></p>
+<p><strong>更多内容请浏览</strong> <a target="_blank" rel="noopener" href="https://blog.csdn.net/lc_guo/article/details/135349375?spm=1001.2014.3001.5502">STM32CubeMX+STM32F4系列教程文章汇总贴</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程26-FatFs-文件系统-W25Q128读写/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B27-SDIO-%E8%AF%BB%E5%86%99SD%E5%8D%A1/" title="STM32CubeMX教程27 SDIO - 读写SD卡">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程27 SDIO - 读写SD卡</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B25-PWR-%E7%94%B5%E6%BA%90%E7%AE%A1%E7%90%86-%E7%9D%A1%E7%9C%A0%E3%80%81%E5%81%9C%E6%AD%A2%E5%92%8C%E5%BE%85%E6%9C%BA%E6%A8%A1%E5%BC%8F/" title="STM32CubeMX教程25 PWR 电源管理 - 睡眠、停止和待机模式">
+                        <span class="hidden-mobile">STM32CubeMX教程25 PWR 电源管理 - 睡眠、停止和待机模式</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,809 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 逻辑分析仪nanoDLA 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板USART1与PC进行异步通信（阻塞传">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程9 USART UART 异步通信">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B9-USART-UART-%E5%BC%82%E6%AD%A5%E9%80%9A%E4%BF%A1/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 逻辑分析仪nanoDLA 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板USART1与PC进行异步通信（阻塞传">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.23_add.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.15.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.17.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.18.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.19.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.20.gif">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.21.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.22.png">
+<meta property="article:published_time" content="2024-01-26T04:04:11.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:07:44.676Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程9 USART UART 异步通信 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程9 USART UART 异步通信"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:04" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.2k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          36 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程9 USART UART 异步通信</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p>开发板（<a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a>）</p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p>逻辑分析仪<a target="_blank" rel="noopener" href="https://github.com/wuxx/nanoDLA">nanoDLA</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html">野火DAP仿真器</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html">XCOM V2.6串口助手</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板<font color="#fe2c24"><strong>USART1与PC进行异步通信（阻塞传输方式、中断传输方式）</strong></font>，具体为 使用WK_UP按键触发串口输出，每按下一次WK_UP按键就以中断方式发送一次数据，并在串口传输完成中断回调函数中输出提示信息和翻转RED_LED灯的状态，同时使用串口中断接收回调函数完成对用户发来的命令解析，发送命令“#1;”则点亮GREEN_LED，发送命令“#0;”则熄灭GREEN_LED。</p>
+<h1 id="3、实验流程"><a href="#3、实验流程" class="headerlink" title="3、实验流程"></a>3、实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>USART为通用同步异步收发器，是一种串行通信接口，类似的通信协议还有USB、RS232和RS485等，他们之间电平不同因此不可以直接通信，但是可以通过转换芯片进行逻辑电平的相互转换，从而实现在不同的串行通信方式下的信息传输</p>
+<p>对于STM32F4系列来说，USART的高电平1表示的电压范围为2.0V~3.3V（通常VDD电源电压的大约70-100%），低电平0的电压范围为0V~0.3V；<font color="#fe2c24"><strong>USART通信中一般需要设置波特率、数据字长、校验位和停止位四个参数</strong></font>，如下图所示位串行数据发送时序图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#be191c" style="background: #fef2f0"> Baud Rate </font>（波特率）：由于本实验的串口工作在异步通信模式，因此需要规定一个特定的传输速率，这样收发双方都以该速率解析发送的内容，才能不出错的进行通信，常见波特率9600&#x2F;115200等，当然也可自定义波特率</p>
+<p><font color="#be191c" style="background: #fef2f0"> Word Length </font>（数据字长）：可选8&#x2F;9位，即一帧数据中传输的数据位数，由于一字节为8位，因此该参数默认为8位</p>
+<p><font color="#be191c" style="background: #fef2f0"> Parity </font>（校验位）：可选无&#x2F;奇&#x2F;偶校验</p>
+<p><font color="#be191c" style="background: #fef2f0"> Stop Bits </font>（停止位）：可选1&#x2F;2个停止位，一般选择1个停止位</p>
+<p>设置波特率为115200，8位字长，无校验位，1个停止位，利用单片机串口发送“Reset\r\n”信息，然后利用逻辑分析仪对TX引脚电平进行捕获，如下图所示为TX引脚捕获电平波形图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>STM32F407ZGT6一共有6组串口，包括4组通用同步&#x2F;异步收发器USART1、2、3、6和2组通用异步收发器UART4、5</p>
+<p>通用异步收发器可以工作在异步通信、单线半双工、多处理器通信、红外和局域互连网络（LIN）等模式</p>
+<p>通用同步&#x2F;异步收发器除可以工作在上述模式外还具有同步通信和智能卡等工作模式，<font color="#fe2c24"><strong>本文只介绍这6组串口的异步通信模式（最常用的模式），其他模式均不涉及</strong></font>，如下图示为USART1可选工作模式列表</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.3.png" srcset="/img/loading.gif" lazyload></div>
+
+<p>单片机的串口并不能直接和电脑的USB端口通信，因而需要在单片机和电脑之间利用串口芯片搭建沟通的桥梁，常用的串口芯片有CH34XX和CP210X，对于串口芯片一般需要安装驱动程序，请自行查看开发板串口所示用的串口芯片，然后下载对应驱动程序</p>
+<p>一般来说能够实现电脑和单片机正常串口通信需要满足“电脑USB接口 ⇔ 开发板USB接口 ⇔ 串口芯片 ⇔ 单片机串口RX&#x2F;TX引脚”的物理连接 <em>（注释1）</em>，当其他的一切均正常使用USB线连接电脑与开发板，在Windows的设备管理器页面，端口栏目下会出现对应串口芯片识别成功的端口号，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>如下图所示为正点原子stm32f407探索者开发板V2.4开发板上使用串口的硬件原理图，开发板上的USB接口经过串口芯片CH340G然后利用跳线帽将TXD&#x2F;RXD与单片机上的PA9&#x2F;10连接了起来，<font color="#fe2c24"><strong>读者在开发时应注意检查开发板上USART1的两个引脚是否利用跳线帽与TXD&#x2F;RXD进行了短接</strong></font></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.23_add.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>串口通信中数据传输一般可以分为阻塞式数据传输和非阻塞式数据传输两种</strong></font>，而阻塞模式也即轮询模式，在此模式下，串口发送或者接收数据都会产生阻塞，单片机只能一直等待接收&#x2F;发送完成或者达到设定的超时时间；非阻塞模式是使用中断或者DMA的方式来传输数据，顾名思义，不会产生阻塞现象，发送&#x2F;接收数据的同时单片机还可以处理其他任务。<font color="#fe2c24"><strong>本文不涉及DMA，因此非阻塞模式仅仅介绍使用中断的传输方式</strong></font></p>
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU，（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>系统时钟使用8MHz外部高速时钟HSE，HCLK、PCLK1和PCLK2均设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>在Pinout ＆ Configuration页面左边功能分类栏目Connectivity中<font color="#fe2c24"><strong>单击其中USART1</strong></font></p>
+<p>页面中间USART1 Mode and Configuration中<font color="#fe2c24"><strong>将串口模式设置为异步通信工作模式，无硬件流控制</strong></font></p>
+<p>然后在Configuration页面中设置USART1的相关参数，主要有波特率、字长、奇偶校验位、停止位、数据方向和过采样率6个参数，一般采用默认即可，但要确保接收端设置与发送端一致</p>
+<p>其他5个串口在异步通信模式下与USART1一致，唯一区别在于RX&#x2F;TX引脚不同，具体参数解释可以阅读本实验“3.0、前提知识”小节</p>
+<p>具体设置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-3、外设中断配置"><a href="#3-1-3、外设中断配置" class="headerlink" title="3.1.3、外设中断配置"></a>3.1.3、外设中断配置</h3><p>在页面左边功能分类栏目中单击System Core&#x2F;NVIC，<font color="#fe2c24"><strong>勾选USART1全局中断</strong></font>，并设置合适的中断优先级</p>
+<p><font color="#fe2c24"><strong>如果在串口中断中会使用到HAL库的延时函数，注意不要与滴答定时器优先级一致</strong></font> <em>（注释2）</em></p>
+<p>具体设置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化函数调用流程"><a href="#3-2-1、外设初始化函数调用流程" class="headerlink" title="3.2.1、外设初始化函数调用流程"></a>3.2.1、外设初始化函数调用流程</h3><p>在工程代码主函数main()中调用MX_USART1_UART_Init()函数对串口1相关参数进行了配置</p>
+<p>在该MX_USART1_UART_Init()函数中调用了HAL_UART_Init()函数对串口1进行了初始化</p>
+<p>在该初始化HAL_UART_Init()函数中又调用了HAL_UART_MspInit()函数对串口1时钟，中断，引脚复用做了相关配置</p>
+<p>如下图所示为具体的USART1初始化调用流程</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>此时我们就可以让串口工作在阻塞模式下，通过如下所示的两个函数阻塞式的发送或接收数据</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*串口阻塞发送数据*/</span><br>HAL_UART_Transmit(UART_HandleTypeDef *huart, <span class="hljs-type">const</span> <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size, <span class="hljs-type">uint32_t</span> Timeout)<br><span class="hljs-comment">/*串口阻塞接收数据*/</span><br>HAL_UART_Receive(UART_HandleTypeDef *huart, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size, <span class="hljs-type">uint32_t</span> Timeout)<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-2-2、外设中断函数调用流程"><a href="#3-2-2、外设中断函数调用流程" class="headerlink" title="3.2.2、外设中断函数调用流程"></a>3.2.2、外设中断函数调用流程</h3><p>勾选USART1全局中断后，在工程文件stm32f4xx_it.c中生成了USART1全局中断服务函数USART1_IRQHandler()</p>
+<p>该函数调用了HAL库的串口统一中断处理函数HAL_UART_IRQHandler()，在该函数中通过一系列的判断，最终根据不同的串口事件调用不同的回调函数</p>
+<p>当串口以中断方式发送完成数据时会调用串口完成中断传输回调函数HAL_UART_TxCpltCallback()</p>
+<p>当串口以中断方式接收完成数据时会调用串口中断接收完毕回调函数HAL_UART_RxCpltCallback()</p>
+<p>如下图所示为具体的USART1串口Tx传输完成中断调用流程</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>同理，感兴趣的可以自己找一找中断接收完毕回调函数HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)的调用流程</p>
+<p>读者只需记住经过上述3.1.2和3.1.3所做的配置生成的代码，重新实现以下两个函数即可</p>
+<ol>
+<li><p><font color="#fe2c24"><strong>HAL_UART_TxCpltCallback()：串口中断发送完毕回调函数，使用HAL_UART_Transmit_IT函数传输数据完毕之后就会进入该函数</strong></font></p>
+</li>
+<li><p><font color="#fe2c24"><strong>HAL_UART_RxCpltCallback()：串口中断接收完毕回调函数，使用HAL_UART_Receive_IT接收数据时，一旦数据接收完毕之后就会进入该函数</strong></font></p>
+</li>
+</ol>
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p><font color="#fe2c24"><strong>需要提到一点是，使用中断的方式接收指定长度数据时，一旦接收一次完毕，第二次不会自动启动接收</strong></font>，此时需要用户手动调用以中断方式接收串口数据的函数HAL_UART_Receive_IT。而一个串口往往有三种状态，要么在发送数据，要么在接收数据，要么在偷懒处于空闲状态，因此在空闲状态时重新启动中断串口接收是比较正确的选择，<font color="#fe2c24"><strong>这里就需要我们自己设置一个串口的空闲中断回调函数on_UART_IDLE</strong></font>，当接受完一次数据后，将空闲中断使能，在空闲的时候进入空闲中断回调函数，处理刚刚接收到的数据并重新启动串口中断接收</p>
+<p>接下来我们来实现串口的空闲中断回调函数，将其放在串口1的中断服务函数中，这样串口1的任何中断都会调用该函数，然后在usart.c中实现该函数，在该函数中首先判断是否是空闲中断，如果不判断则任何关于串口1的中断都会执行空闲中断回调函数函数体内容，然后清除空闲中断标志及禁用空闲中断，<font color="#fe2c24"><strong>保证空闲中断回调函数只在串口接收中断完成后才能被触发，接着对串口接收到的数据进行处理，具体处理函数为CMD_PROCESS函数，最后重新启动串口中断接收</strong></font>，具体函数代码如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.16.png" srcset="/img/loading.gif" lazyload ></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.17.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>串口完成中断传输回调函数和中断接收完毕回调函数重新实现在usart.c中，每次接收完数据都会进入中断接收完毕回调函数，在该回调函数中启动了空闲中断，此时才可以执行空闲中断函数体内的代码，也就是处理命令、重新启动串口中断接收，<font color="#fe2c24"><strong>值得提醒的是在串口完成中断传输回调函数中使用的串口输出是阻塞的方式输出信息的，不可以使用中断的方式输出提示信息，否则将无限套娃</strong></font>，具体代码如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.18.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*串口结束传输中断*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_UART_TxCpltCallback</span><span class="hljs-params">(UART_HandleTypeDef *huart)</span><br>&#123;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Into HAL_UART_TxCpltCallback Function\r\n&quot;</span>);<br>    HAL_GPIO_TogglePin(RED_LED_GPIO_Port,RED_LED_Pin);<br>&#125;<br> <br><span class="hljs-comment">/*串口接收完成中断*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_UART_RxCpltCallback</span><span class="hljs-params">(UART_HandleTypeDef *huart)</span><br>&#123;<br>    <span class="hljs-keyword">if</span> (huart-&gt;Instance == USART1)<br>    &#123;<br>        <span class="hljs-comment">//接收到固定长度数据后使能UART_IT_IDLE中断，在UART_IT_IDLE中断里再次接收</span><br>        <span class="hljs-comment">//接收完成标志</span><br>        rxCompleted=SET;	<br>        <span class="hljs-comment">//复制接收到的数据到缓冲区</span><br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">uint16_t</span> i=<span class="hljs-number">0</span>;i&lt;RX_CMD_LEN;i++)<br>            proBuffer[i] = rxBuffer[i];<br> <br>        <span class="hljs-comment">//接收到数据后才开启IDLE中断</span><br>        __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE); <br>    &#125;<br>&#125;<br> <br><span class="hljs-comment">/*串口空闲回调函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">on_UART_IDLE</span><span class="hljs-params">(UART_HandleTypeDef *huart)</span><br>&#123;<br>    <span class="hljs-comment">//判断IDLE中断是否被开启</span><br>    <span class="hljs-keyword">if</span>(__HAL_UART_GET_IT_SOURCE(huart, UART_IT_IDLE) == RESET) <br>        <span class="hljs-keyword">return</span>;<br> <br>    <span class="hljs-comment">//清除IDLE标志</span><br>    __HAL_UART_CLEAR_IDLEFLAG(huart); 	<br>    <span class="hljs-comment">//禁止IDLE中断</span><br>    __HAL_UART_DISABLE_IT(huart, UART_IT_IDLE); 	<br>    <span class="hljs-comment">//接收完成</span><br>    <span class="hljs-keyword">if</span>(rxCompleted)	<br>    &#123;<br>        <span class="hljs-comment">//上传接收到的指令</span><br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Receive CMD is %s\r\n&quot;</span>,proBuffer);<br>        <span class="hljs-comment">//处理指令</span><br>        CMD_PROCESS();<br>        <span class="hljs-comment">//再次接收</span><br>        rxCompleted = RESET;<br>        <span class="hljs-comment">//再次启动串口接收</span><br>        HAL_UART_Receive_IT(huart, rxBuffer, RX_CMD_LEN); <br>    &#125;<br>&#125;<br> <br><span class="hljs-comment">/*接收命令处理函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">CMD_PROCESS</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    <span class="hljs-comment">//非法的命令格式</span><br>    <span class="hljs-keyword">if</span>(proBuffer[<span class="hljs-number">0</span>] != <span class="hljs-string">&#x27;#&#x27;</span> &amp;&amp; proBuffer[<span class="hljs-number">2</span>] != <span class="hljs-string">&#x27;;&#x27;</span>)<br>    &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Unlawful Orders\r\n&quot;</span>);<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br>    <span class="hljs-comment">//解析命令</span><br>    <span class="hljs-type">uint8_t</span>	CMD = proBuffer[<span class="hljs-number">1</span>]<span class="hljs-number">-0x30</span>;<br>    <span class="hljs-comment">//控制GREEN_LED</span><br>    <span class="hljs-keyword">if</span>(CMD == <span class="hljs-number">1</span>)<br>    &#123;<br>        HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_RESET);<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;GREEN_LED ON\r\n&quot;</span>);<br>    &#125;<br>    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(CMD == <span class="hljs-number">0</span>) <br>    &#123;<br>        HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_SET);<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;GREEN_LED OFF\r\n&quot;</span>);<br>    &#125;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p>最后我们在主函数中以中断方式启动串口接收，然后编写WK_UP按键响应函数，每按下一次按键以中断方式发送一次数据，具体的代码如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.19.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>上述代码中的一些变量均定义&#x2F;声明在了usart.c&#x2F;usart.h中，具体源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*usart.c中定义的变量*/</span><br><span class="hljs-type">uint8_t</span>	rxBuffer[<span class="hljs-number">3</span>]=<span class="hljs-string">&quot;#0;&quot;</span>;	<span class="hljs-comment">//数据接收缓冲区</span><br><span class="hljs-type">uint8_t</span> proBuffer[<span class="hljs-number">3</span>]=<span class="hljs-string">&quot;#1;&quot;</span>;	<span class="hljs-comment">//数据处理缓冲区</span><br><span class="hljs-type">uint8_t</span>	rxCompleted=RESET;	<span class="hljs-comment">//数据接收完成标志</span><br> <br><span class="hljs-comment">/*usart.h中声明的变量*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> RX_CMD_LEN 3              <span class="hljs-comment">//数据接收长度</span></span><br><span class="hljs-keyword">extern</span> <span class="hljs-type">uint8_t</span> rxBuffer[];        <span class="hljs-comment">//外部声明</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">on_UART_IDLE</span><span class="hljs-params">(UART_HandleTypeDef *huart)</span>;     <span class="hljs-comment">//函数声明</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">CMD_PROCESS</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;                           <span class="hljs-comment">//函数声明</span><br> <br><span class="hljs-comment">/*main()函数按键WK_UP控制代码*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == GPIO_PIN_SET)<br>&#123;<br>    HAL_Delay(<span class="hljs-number">50</span>);<br>    <span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == GPIO_PIN_SET)<br>    &#123;<br>        HAL_UART_Transmit_IT(&amp;huart1, (<span class="hljs-type">uint8_t</span> *)<span class="hljs-string">&quot;Key WK_UP Pressed!\r\n&quot;</span>, <span class="hljs-number">20</span>);<br>        <span class="hljs-keyword">while</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="4、常用函数"><a href="#4、常用函数" class="headerlink" title="4、常用函数"></a>4、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*串口阻塞接收数据*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_UART_Receive</span><span class="hljs-params">(UART_HandleTypeDef *huart, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size, <span class="hljs-type">uint32_t</span> Timeout)</span><br> <br><span class="hljs-comment">/*串口阻塞发送数据*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_UART_Transmit</span><span class="hljs-params">(UART_HandleTypeDef *huart, <span class="hljs-type">const</span> <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size, <span class="hljs-type">uint32_t</span> Timeout)</span><br> <br><span class="hljs-comment">/*串口中断接收数据*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_UART_Receive_IT</span><span class="hljs-params">(UART_HandleTypeDef *huart, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size)</span><br> <br><span class="hljs-comment">/*串口中断发送数据*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_UART_Transmit_IT</span><span class="hljs-params">(UART_HandleTypeDef *huart, <span class="hljs-type">const</span> <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size)</span><br> <br><span class="hljs-comment">/*串口中断接收数据完毕回调函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_UART_RxCpltCallback</span><span class="hljs-params">(UART_HandleTypeDef *huart)</span><br> <br><span class="hljs-comment">/*串口中断发送数据完毕回调函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_UART_TxCpltCallback</span><span class="hljs-params">(UART_HandleTypeDef *huart)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><p>烧录程序，开发板上电，此时按键WK_UP被按下，串口会同时输出信息，输出完毕后进入串口结束传输中断回调函数，输出提示信息并将RED_LED状态翻转</p>
+<p>PC发送 “#1;” 给MCU，串口输出接收到的信息，然后解析命令，打开GREEN_LED</p>
+<p>PC发送 “#0;” 给MCU，串口输出接收到的信息，然后解析命令，熄灭GREEN_LED</p>
+<p>按键WK_UP又被按下，串口输出信息，输出完毕后进入串口结束传输中断回调函数，输出提示信息并将RED_LED状态翻转 <em>（注释3）</em>，如下图所示为串口的详细输出信息</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.20.gif" srcset="/img/loading.gif" lazyload></div>
+
+<h1 id="6、串口printf重定向"><a href="#6、串口printf重定向" class="headerlink" title="6、串口printf重定向"></a>6、串口printf重定向</h1><p>用户阻塞式的发送一条数据时使用的HAL_UART_Transmit函数需要指定发送数据的字节数，非常的不方便，因此简单使用串口传输数据时有必要将其重定向到我们熟悉的printf函数，以下为具体步骤</p>
+<p>首先需要<font color="#fe2c24"><strong>在工程设置页面勾选“Use MicroLIB”</strong></font>，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.21.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>然后在工程main.c文件中<font color="#fe2c24"><strong>加入printf函数所需的头文件“#include &lt;stdio.h&gt; ”</strong></font>，并在主函数上方添加重定向函数，如下图所示，红框中的串口实例可以替换成任何正常的串口实例</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/9.22.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;stdio.h&quot;</span> </span><br> <br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> __GNUC__</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> PUTCHAR_PROTOTYPE int __io_putchar(int ch)</span><br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>PUTCHAR_PROTOTYPE<br>&#123;<br>    HAL_UART_Transmit(&amp;huart1, (<span class="hljs-type">uint8_t</span> *)&amp;ch, <span class="hljs-number">1</span>, HAL_MAX_DELAY);<br>    <span class="hljs-keyword">return</span> ch;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>之后在工程任何文件处均可使用printf函数用作串口函数阻塞输出从而替代HAL_UART_Transmit函数（在其它文件使用记得添加头文件#include &lt;stdio.h&gt;）</p>
+<h1 id="7、注释详解"><a href="#7、注释详解" class="headerlink" title="7、注释详解"></a>7、注释详解</h1><p><em>注释1</em>：如果你觉得自己的一切配置都没有问题，但是串口就是没有任何字符输出，可以用串口模块尝试开发板上其他的串口引脚，因为有时候开发板的某一个串口引脚可能被其他外设使用，物理上造成了冲突，无法用软件解决，比如笔者之前使用的STM32F407G-DISC1开发板其USART1就不能正常使用</p>
+<p><em>注释2</em>：<font color="#fe2c24">如果设置串口中断优先级与系统滴答定时器优先级一致，那么在串口中断服务函数中使用HAL库的延时函数HAL_Delay的话，系统滴答定时器不能抢占串口中断，因此会出现程序卡死在HAL_Delay函数的情况</font></p>
+<p><em>注释3</em>：注意笔者此实验只是简单介绍每个功能的使用方法，这里的代码其实是有BUG的，如果用户不按照”#1;”&#x2F;“#0;”的命令格式发送数据，而是只发送1个字符，比如”q”，然后再按照”#1;”&#x2F;“#0;”的命令格式发送数据，那么程序接收到的命令将错乱，导致不能正常解析命令</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UB77e58e05a5ea9">STM32Cube高效开发教程（基础篇）</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程9 USART UART 异步通信</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程9-USART-UART-异步通信/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B10-RTC-%E5%AE%9E%E6%97%B6%E6%97%B6%E9%92%9F-%E5%91%A8%E6%9C%9F%E5%94%A4%E9%86%92%E3%80%81%E9%97%B9%E9%92%9FAB%E4%BA%8B%E4%BB%B6%E5%92%8C%E5%A4%87%E4%BB%BD%E5%AF%84%E5%AD%98%E5%99%A8/" title="STM32CubeMX教程10 RTC 实时时钟 - 周期唤醒、闹钟AB事件和备份寄存器">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程10 RTC 实时时钟 - 周期唤醒、闹钟AB事件和备份寄存器</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B8-TIM-%E9%80%9A%E7%94%A8%E5%AE%9A%E6%97%B6%E5%99%A8-%E8%BE%93%E5%87%BA%E6%AF%94%E8%BE%83/" title="STM32CubeMX教程8 TIM 通用定时器 - 输出比较">
+                        <span class="hidden-mobile">STM32CubeMX教程8 TIM 通用定时器 - 输出比较</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

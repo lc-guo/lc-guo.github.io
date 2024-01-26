@@ -1,0 +1,771 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板上串口USART1以DMA方式传输数据，然后实现与实验“STM3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程12 DMA 直接内存读取">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B12-DMA-%E7%9B%B4%E6%8E%A5%E5%86%85%E5%AD%98%E8%AF%BB%E5%8F%96/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板上串口USART1以DMA方式传输数据，然后实现与实验“STM3">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.15.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.17.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.18.png">
+<meta property="article:published_time" content="2024-01-26T04:04:38.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:08:47.554Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程12 DMA 直接内存读取 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程12 DMA 直接内存读取"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:04" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          20 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程12 DMA 直接内存读取</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p>开发板（<a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a>）</p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html">野火DAP仿真器</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html">XCOM V2.6串口助手</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板上<font color="#fe2c24"><strong>串口USART1以DMA方式传输数据</strong></font>，然后实现与实验“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”相同的目标</p>
+<h1 id="3、实验流程"><a href="#3、实验流程" class="headerlink" title="3、实验流程"></a>3、实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>直接存储器访问（DMA）是实现存储器与外设、存储器与存储器之间高效传输数据的一种方法，<font color="#fe2c24"><strong>其拥有① 从外设到存储器、② 从存储器到外设和③ 从存储器到存储器 三种传输模式</strong></font></p>
+<p>STM32F407有DMA1和DMA2两个DMA控制器，<font color="#fe2c24"><strong>其中DMA2可以实现上述三种传输模式，DMA1仅可以实现前两种传输模式</strong></font></p>
+<p><font color="#fe2c24"><strong>每个DMA均有8个流（stream），每个流又有8个通道，但是每个流只能同时使用8个通道中的一个</strong></font>，支持DMA的外设一般可以选择8个流共64个通道中的某2个通道发起DMA请求</p>
+<p><font color="#fe2c24"><strong>当多个流共同发起DMA请求时，由DMA仲裁器来决定谁先发送</strong></font>（软件可以配置DMA流的优先级），如下图所示为STM32F407的DMA1&#x2F;2具体的外设请求映射表 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>以USART1_TX为例举个例子</strong></font></p>
+<p>当使用USART1_TX发起DMA请求时，USART1_TX可以选择的DMA通道只有DMA2 Stream7 CH4，因此DMA请求从DMA2 Stream7 CH4发起，然后经过仲裁器到存储器端口处取要发送的数据，然后经过FIFO（可以配置不使用），最后将数据送到外设端口USART1，上述描述如下图中黄色标注所示 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>在使用DMA传输数据时一般需要设置① DMA请求和② DMA流两个主要参数</strong></font>，其中DMA请求就是存储器或者外设发起的传输需求，而DMA流就是进行DMA传输的数据链路（上图黄色链路）</p>
+<p>使用某个外设的DMA传输时，一般流程为“添加外设具体的DMA请求 -&gt; 选择该DMA请求的流Stream -&gt;设置DMA优先级 -&gt; 设置DMA请求模式 -&gt; 设置地址递增（一般为外设地址不变，内存地址递增） -&gt; 配置FIFO -&gt; 配置传输数据的数据宽度 -&gt; 启动DMA流全局中断 -&gt; 在程序中以DMA方式启动外设”</p>
+<p><font color="#fe2c24"><strong>先入先出（FIFO）可以想象成一个缓存区</strong></font>，启用FIFO之后，可以将输出暂存在该缓存区中，然后当数据量一旦达到了FIFO设置的阈值才会从缓存区中取出来发送出去，<font color="#fe2c24"><strong>当DMA传输的源和目标的数据宽度不同时，FIFO将变得非常有用（可以在FIFO中改变传输数据的宽度）</strong></font></p>
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>系统时钟使用8MHz外部高速时钟HSE，HCLK、PCLK1和PCLK2均设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>以下标号与USART1 DMA配置图片中的标号对应</p>
+<p>① 在Pinout ＆ Configuration页面左边功能分类栏目Connectivity中单击其中USART1，配置串口模式及参数，具体的USART1基本参数配置与实验“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”相同，在页面下方的参数配置栏上面会有很多标签，当前处于的位置为Parameter Settings（参数设置）</p>
+<p><font color="#fe2c24"><strong>② 单击DMA Settings进入USART1的DMA Settings（DMA配置）页面</strong></font>，支持DMA功能的外设在这里都会有DMA Settings页面</p>
+<p><font color="#fe2c24"><strong>③ 单击ADD按键来增加外设的DMA</strong></font>，如果有可以使用的DMA流则会以列表形式供用户选择，这里可以选择发送TX和接收RX两个串口的DMA请求</p>
+<p>④ 选择可用的DMA流，DMA的方向会根据用户选择的DMA请求自动推断，一般只有一个选项，接着选择DMA流的优先级（注意与DMA中断优先级区分）</p>
+<p><font color="#fe2c24"><strong>⑤ USART1_RX DMA请求</strong></font><font color="#be191c" style="background: #fef2f0"> Mode </font><font color="#fe2c24"><strong>（模式）设置为循环模式，并设置内存地址递增</strong></font>，由于外设USART1的地址固定，因此不需要地址递增，而接收的数据存储到内存里需要地址递增</p>
+<p><font color="#fe2c24"><strong>⑦ USART1_TX DMA请求</strong></font> <font color="#be191c" style="background: #fef2f0"> Mode </font> <font color="#fe2c24"><strong>（模式）设置为普通模式</strong></font>，其他参数与USART1_RX DMA请求一致‘</p>
+<p>还以一些未标号的其他参数如下配置</p>
+<p><font color="#be191c" style="background: #fef2f0"> Use Fifo </font>（使用FIFO配置）：如果使用则需要配置阈值 Threshold </p>
+<p><font color="#be191c" style="background: #fef2f0"> Data Width </font>（传输数据宽度）：用于配置外设和内存的数据宽度，由于串口传输和存储数据均是以字节方式传输，因此这里均选择Byte</p>
+<p><font color="#be191c" style="background: #fef2f0"> Burst Size </font>（突发传输设置）：当不使用FIFO时只能为单次传输，而当使用FIFO时，突发传输可以配置为4、8或16增量突发传输</p>
+<p>具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-3、外设中断配置"><a href="#3-1-3、外设中断配置" class="headerlink" title="3.1.3、外设中断配置"></a>3.1.3、外设中断配置</h3><p>在Pinout &amp; Configuration页面左边System Core&#x2F;NVIC中<font color="#fe2c24"><strong>勾选USART1和DMA2 stream2&#x2F;7全局中断</strong></font>，然后选择合适的中断优先级即可，步骤如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>在生成的工程主函数main()中调用MX_DMA_Init()函数对USART1 RX&#x2F;TX用到的DMA时钟及其流的中断进行了配置</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>在MX_USART1_UART_Init()函数中相比较于“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”实验增加了USART1 RX&#x2F;TX DMA相关的参数配置及初始化</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-2、外设中断调用流程"><a href="#3-2-2、外设中断调用流程" class="headerlink" title="3.2.2、外设中断调用流程"></a>3.2.2、外设中断调用流程</h3><p>勾选DMA2 stream2&#x2F;7全局中断后，会在生成的工程文件stm32f4xx_it.c中新增全局中断函数DMA2_Stream2_IRQHandler()和DMA2_Stream7_IRQHandler()</p>
+<p>这两个中断服务函数均调用了HAL库的DMA中断统一管理函数HAL_DMA_IRQHandler()，该函数中根据各种标志判断DMA传输完成&#x2F;失败&#x2F;一半完成等事件，然后根据不同的事件调用不同的回调函数，<font color="#fe2c24"><strong>这里DMA传输完成之后调用了hdma-&gt;-&gt;XferCpltCal1back()，这是个函数指针</strong></font></p>
+<p>上述过程如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>这个函数指针在以DMA方式启动USART1发送或者接收数据时被指向DMA传输完成回调UART_DMATransmitCpl()函数</p>
+<p>在该DMA传输完成回调UART_DMATransmitCplt()函数中最终调用了USART1_TX传输完成回调HAL_UART_TxCpltCallback()函数，该函数在串口实验中我们重新实现过，<font color="#fe2c24"><strong>也就是说DMA最终的传输完成中断回调函数使用了外设的中断回调函数</strong></font></p>
+<p>其他的中断事件回调流程类似，上述过程如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.16.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p>本实验与 “<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”实验代码一致，除以下三个方面需要修改</p>
+<ol>
+<li>将主函数开始的以中断方式启动的串口接收函数修改为以DMA方式启动的HAL_UART_Receive_DMA()函数</li>
+<li>主循环中将以中断方式启动的串口发送函数修改为以DMA方式启动的HAL_UART_Transmit_DMA()函数</li>
+<li>删除空闲回调函数中的再次启动串口接收函数HAL_UART_Receive_IT()</li>
+</ol>
+<p>其他所有代码无需修改，具体修改后的代码如下所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.17.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/12.18.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>为什么删除再次启动串口接收中断的函数？</strong></font></p>
+<p><font color="#fe2c24"><strong>在串口章节的实验中，我们提到当以中断方式启动串口接收之后，串口接收完毕一次就不能自动接收第二次了</strong></font>，用户必须手动再次调用中断接收函数才可以重新接收，因此我们才在串口空闲回调函数里重新启用，以此来实现无限次的自动接收</p>
+<p><font color="#fe2c24"><strong>但是在本实验中，我们已经配置了串口USART1的DMA接收模式为循环模式，在该模式下其接收完毕一次之后能够继续接收</strong></font>，因此不需要我们在空闲回调函数中重新启用</p>
+<p>如果将串口USART1的DMA发送模式配置为循环模式，当按下按键触发时，会出现一直发送的情况，读者可以尝试尝试，这显然不符合我们的预想，因此串口USART1_TX的DMA请求模式配置为了普通模式</p>
+<h1 id="4、常用函数"><a href="#4、常用函数" class="headerlink" title="4、常用函数"></a>4、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*以DMA方式启动USART接收*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_UART_Receive_DMA</span><span class="hljs-params">(UART_HandleTypeDef *huart, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size)</span><br> <br><span class="hljs-comment">/*以DMA方式启动USART传输*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_UART_Transmit_DMA</span><span class="hljs-params">(UART_HandleTypeDef *huart, <span class="hljs-type">const</span> <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><p>实验现象与“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”实验现象一致</p>
+<h1 id="6、注释详解"><a href="#6、注释详解" class="headerlink" title="6、注释详解"></a>6、注释详解</h1><p><em>注释1</em>：图片来自STM32F4xx中文参考手册 RM0090</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UB77e58e05a5ea9">STM32Cube高效开发教程（基础篇）</a></p>
+<p><strong>更多内容请浏览</strong> <a target="_blank" rel="noopener" href="https://blog.csdn.net/lc_guo/article/details/135349375?spm=1001.2014.3001.5502">STM32CubeMX+STM32F4系列教程文章汇总贴</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程12 DMA 直接内存读取</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程12-DMA-直接内存读取/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B13-ADC-%E5%8D%95%E9%80%9A%E9%81%93%E8%BD%AC%E6%8D%A2/" title="STM32CubeMX教程13 ADC - 单通道转换">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程13 ADC - 单通道转换</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B11-RTC-%E5%AE%9E%E6%97%B6%E6%97%B6%E9%92%9F-%E5%85%A5%E4%BE%B5%E6%A3%80%E6%B5%8B%E5%92%8C%E6%97%B6%E9%97%B4%E6%88%B3/" title="STM32CubeMX教程11 RTC 实时时钟 - 入侵检测和时间戳">
+                        <span class="hidden-mobile">STM32CubeMX教程11 RTC 实时时钟 - 入侵检测和时间戳</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

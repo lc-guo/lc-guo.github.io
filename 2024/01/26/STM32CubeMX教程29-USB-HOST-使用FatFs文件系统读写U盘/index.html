@@ -1,0 +1,812 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板USB_OTG_FS为工作在Mass Storage Host Class">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程29 USB_HOST - 使用FatFs文件系统读写U盘">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B29-USB-HOST-%E4%BD%BF%E7%94%A8FatFs%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AF%BB%E5%86%99U%E7%9B%98/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料正点原子stm32f407探索者开发板V2.4 STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板USB_OTG_FS为工作在Mass Storage Host Class">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.15.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.17.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.18.gif">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.19.png">
+<meta property="article:published_time" content="2024-01-26T04:06:37.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:14:15.859Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程29 USB_HOST - 使用FatFs文件系统读写U盘 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程29 USB_HOST - 使用FatFs文件系统读写U盘"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:06" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          40 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程29 USB_HOST - 使用FatFs文件系统读写U盘</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p><a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a></p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html">野火DAP仿真器</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html">XCOM V2.6串口助手</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板<font color="#fe2c24"><strong>USB_OTG_FS为工作在Mass Storage Host Class（大容量存储主机类）模式下的USB_HOST（USB主机），并使用FatFs文件系统对插入开发板的U盘进行读写等操作</strong></font></p>
+<h1 id="3、USB概述"><a href="#3、USB概述" class="headerlink" title="3、USB概述"></a>3、USB概述</h1><h2 id="3-1、USB协议"><a href="#3-1、USB协议" class="headerlink" title="3.1、USB协议"></a>3.1、USB协议</h2><p>通用串行总线（Universal Serial Bus，简称USB）是1994年提出的一种支持热插拔的外部传输总线，现在不管是在什么设备上都可以非常容易看到它，USB协议从诞生到如今经历了很多次升级换代，如下图所示为USB历史版本号及传输速度等相关信息 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>另外在USB2.0的基础上还扩展出了一种既可以工作为USB主机又可以工作为USB外设（但不能同时）的<font color="#fe2c24"><strong>协议标准USB on the go（USB_OTG），易于进行角色的转换</strong></font></p>
+<h2 id="3-2、USB设备"><a href="#3-2、USB设备" class="headerlink" title="3.2、USB设备"></a>3.2、USB设备</h2><p><font color="#fe2c24"><strong>一个USB系统包括USB主机（USB HOST）、USB外设（USB DEVICE）和USB连接三个部分，USB外设又可以分为USB功能外设（USB FUNCTION）和USB集线器（USB HUB）</strong></font></p>
+<p>一个USB系统只能有一个USB主机，但USB主机通过连接USB集线器可以扩展USB端口数量，最多可以有127个USB从机，USB主机负责控制所有的USB外设，而USB外设接受USB主机的控制来实现某个具体的功能，USB设备分类及连接方式具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-3、USB接口"><a href="#3-3、USB接口" class="headerlink" title="3.3、USB接口"></a>3.3、USB接口</h2><p>在USB协议从USB 1.0发展到今天USB4（虽然还未普及），速度有了很大的进步，接口的类型也多种多样（未来可能会暂时稳定在Type-C），有Type A&#x2F;B&#x2F;C，还有衍生出来的MINI类型接口，micro类型接口等，不同类型接口适配的USB协议也不尽相同，如下图所示为USB机械电子标准一览表 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-4、硬件原理"><a href="#3-4、硬件原理" class="headerlink" title="3.4、硬件原理"></a>3.4、硬件原理</h2><p><font color="#fe2c24"><strong>STM32F407的两个USB_OTG都内置了PHY，因此无需在外部添加额外的PHY芯片</strong></font>，当USB仅工作在主机&#x2F;从机模式下时，USB座只需要VBUS、D+、D-和Vss共4根线，其中D+&#x2F;D-负责传输差分信号，在主机模式下VBUS用于给插入主机的USB设备供电，在从机模式下VBUS可以用于监测主机提供的电源，Vss为接地端</p>
+<p>而当USB工作在双角色设备时，USB座除了需要上述的4根线外，还需要一根额外的ID信号线，该信号线用于判断插入USB接口的设备为主机设备还是从机设备，在内置的PHY中ID线拥有上拉电阻，<font color="#fe2c24"><strong>当检测到输入的ID线为高电平时，此时认为该USB设备为从机设备，否则认为该USB设备为主机设备</strong></font></p>
+<p>当USB工作在仅主机模式（A类设备）下时，对于插入主机的USB设备需要由主机提供电源，而主机提供的电源一般由某一个引脚控制，方便在不使用USB设备的时候切断电源，节省能源，如下图所示为USB_OTG工作在仅主机模式下的硬件结构框图 <em>（注释2）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>当USB工作在仅从机模式（B类设备）下时，此时开发板USB接口的电源应该由其他的主机提供，这个时候VBUS信号线可以连接STM32F407的某一个引脚（默认为PA9），通过配置该引脚为输入可以监测其他主机提供给本从机设备的电压有无，如下图所示为USB_OTG工作在仅从机模式下的硬件结构框图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>当USB工作在双角色设备（DRD）下时，通过输入的ID线决定该USB设备为主机设备还是从机设备，其硬件原理读者可以理解为A&#x2F;B两类设备的合并，ID线为高电平时，此时认为该USB设备为从机设备，否则认为该USB设备为主机设备，如下图所示为USB_OTG工作在双角色设备下的硬件结构框图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h1 id="4、实验流程"><a href="#4、实验流程" class="headerlink" title="4、实验流程"></a>4、实验流程</h1><h2 id="4-0、前提知识"><a href="#4-0、前提知识" class="headerlink" title="4.0、前提知识"></a>4.0、前提知识</h2><p>注意：由于USB协议源码比较复杂，故本实验对其源码具体内容一概不涉及，仅作应用，读者阅读本文将了解如何使用STM32CubeMX配置STM32F407作为USB主机读写SD里的内容</p>
+<p><font color="#fe2c24"><strong>STM32F407片上集成了 USB_OTG_FS（全速，最高12Mb&#x2F;s） 和 USB_OTG_HS（高速，最高480Mb&#x2F;s） 两个USB_OTG，本实验我们将使用 USB_OTG_FS</strong></font>，将其配置为大容量存储主机类，使开发板工作在主机模式下，对接入开发板主机USB接口的大容量存储设备（U盘）进行读写等操作</p>
+<p>片上集成的USB_OTG_FS挂载在APB2总线上，USB_OTG_HS直接挂载在AHB（应用总线）上，这两个USB_OTG内部均集成了PHY，硬件上无需外部重复设计，如下图所示为STM32F4XX的功能概览框图 <em>（注释2）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>USB_OTG_FS主要由OTG FS内核和PHY组成，时钟树上的48MHz时钟为其OTG FS内核提供了48MHz的USB时钟，如下图所示为其OTG_FS功能框图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>笔者使用的开发板上有一个USB_HOST接口和一个USB_SALVE接口，这两个USB接口都是使用的USB_OTG_FS实现的，<font color="#fe2c24"><strong>在使用USB主机&#x2F;从机时需要将USB&#x2F;CNA排针座上的跳线帽选择为USB</strong></font>，同时在硬件原理图中还有一个控制USB作为主机时提供给USB外设设备电源VBUS的引脚PA15，该引脚通过一个三极管和一个P-MOS管组成了开关电路，具体硬件原理图如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="4-1、CubeMX相关配置"><a href="#4-1、CubeMX相关配置" class="headerlink" title="4.1、CubeMX相关配置"></a>4.1、CubeMX相关配置</h2><h3 id="4-1-0、工程基本配置"><a href="#4-1-0、工程基本配置" class="headerlink" title="4.1.0、工程基本配置"></a>4.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="4-1-1、时钟树配置"><a href="#4-1-1、时钟树配置" class="headerlink" title="4.1.1、时钟树配置"></a>4.1.1、时钟树配置</h3><p>当在STM32CubeMX中启用USB_OTG功能后，时钟树中48MHz时钟便可以进行调节，该时钟一般如其名字一样配置为48MHz即可，也即将Main PLL（主锁相环）的Q参数调节为7即可，其他HCLK、PCLK1和PCLK2时钟仍然设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="4-1-2、外设参数配置"><a href="#4-1-2、外设参数配置" class="headerlink" title="4.1.2、外设参数配置"></a>4.1.2、外设参数配置</h3><p>本实验需要需要初始化开发板上WK_UP、KEY2、KEY1和KEY0用户按键，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937704">STM32CubeMX教程2 GPIO输出 - 点亮LED灯</a>”</p>
+<p>本实验需要需要初始化USART1作为输出信息渠道，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”</p>
+<p>单击Pinout ＆ Configuration页面左边功能分类栏目中<font color="#fe2c24"><strong>Connectivity&#x2F;USB OTG_FS，在模式配置中将其配置为Host_Only（仅主机）模式，不勾选Activate_SOF 和 Activate_VBUS</strong></font>，在下方的Configuration栏目中设置参数<font color="#be191c" style="background: #fef2f0"> Speed </font>为主机全速12MBit&#x2F;s，参数<font color="#be191c" style="background: #fef2f0"> Signal start of frame </font>选择Disabled，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#be191c" style="background: #fef2f0"> Mode&#x2F;OTG&#x2F;Dual Role_Device </font>（双角色设备模式）：工作在双角色设备模式，通过ID线切换角色</p>
+<p><font color="#be191c" style="background: #fef2f0"> Host_Only </font>（仅主机模式）：工作在主机模式下</p>
+<p><font color="#be191c" style="background: #fef2f0"> Device_Only </font>（仅外设模式）：工作在外设模式下</p>
+<p><font color="#be191c" style="background: #fef2f0"> Activate_SOF </font> （启用帧的起始信号引脚PA8）：不使能，读写SD卡无需SOF信号</p>
+<p><font color="#be191c" style="background: #fef2f0"> Activate_VBUS </font>（激活VBUS PA9控制引脚）：笔者开发板上未使用PA9引脚，因此此处不激活</p>
+<p><font color="#be191c" style="background: #fef2f0"> Speed </font>（USB主机速度设置）：可选12Mbit&#x2F;s、1.5Mbit&#x2F;s</p>
+<p><font color="#be191c" style="background: #fef2f0"> Signal start of frame </font>（帧起始信号）：不使能</p>
+<p>然后需要配置USB主机的电源控制引脚，在Pinout view（引脚功能预览）页面中找到<font color="#fe2c24"><strong>控制USB主机电源的引脚PA15，左键单击将其配置为GPIO_Output</strong></font></p>
+<p>接下来单击Pinout ＆ Configuration页面左边功能分类栏目最下面的Middleware and SoftwarePacks，当USB_OTG配置为Host_Only时该栏目下的USB_HOST将变为可选状态</p>
+<p><font color="#fe2c24"><strong>选择其中的USB_HOST，在模式配置中将Class for FS IP的模式选择为Mass Storage Host Class（大容量存储主机类）</strong></font>，下方的Configuration&#x2F;Prameter Settings无需修改，保持默认即可，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>最后需要配置FatFs文件系统，<font color="#fe2c24"><strong>单击Middleware and SoftwarePacks中的FATFS，将其模式配置为USB Disk，在下方Configuration&#x2F;Set Defines修改参数 CODE_PAGE (Code page on target) 为 Simplified Chinese (DBCS)，其他参数保持默认即可</strong></font>，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="4-1-3、外设中断配置"><a href="#4-1-3、外设中断配置" class="headerlink" title="4.1.3、外设中断配置"></a>4.1.3、外设中断配置</h3><p>当在Middleware and SoftwarePacks中配置了USB_HOST的模式不为Disable时，便会自动开启USB_OTG的全局中断，且不可关闭，用户配置合适的中断优先级即可，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.16.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="4-2、生成代码"><a href="#4-2、生成代码" class="headerlink" title="4.2、生成代码"></a>4.2、生成代码</h2><h3 id="4-2-0、配置Project-Manager页面"><a href="#4-2-0、配置Project-Manager页面" class="headerlink" title="4.2.0、配置Project Manager页面"></a>4.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.17.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读”<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="4-2-1、设初始化调用流程"><a href="#4-2-1、设初始化调用流程" class="headerlink" title="4.2.1、设初始化调用流程"></a>4.2.1、设初始化调用流程</h3><p>在生成的工程代码中增加了USB_HOST相关初始化及其他用到的外设&#x2F;中间件功能初始化函数，同时读者可以发现，在以往配置好的工程生成的工程代码中，while主循环中并无任何程序，但是在本实验USB_HOST中增加了名为 MX_USB_HOST_Process() 的函数，该函数仅调用了 USBH_Process() 函数</p>
+<p><font color="#fe2c24"><strong>USBH_Process() 函数是USB Core的后台进程函数，它负责监测USB主机接口的状态变化，在U盘热插拔的时候，可以判断出此时接口状态，同时如果定义了用户的回调函数，还会根据不同的接口状态调用对应该状态的用户定义的回调函数</strong></font></p>
+<p>CubeMX在工程代码usb_host.c中自动生成了USBH_UserProcess()用户回调函数，在该函数中用户可以根据不同状态调用自己定义的函数；当然如果读者不需要热插拔，U盘一直插在主机USB接口上，接口状态不会发生变化，那么注释掉该后台进程函数也可以</p>
+<hr>
+<p>接下来我们来根据生成的工程代码，<font color="#fe2c24"><strong>给读者详细介绍USB_HOST工作流程</strong></font>，读者简单了解即可</p>
+<p>在开发板上电进入主循环后会执行USB_HOST的初始化函数MX_USB_HOST_Init()，在该函数中分别调用了以下三个函数（三个函数位于usb_host.c中）</p>
+<ol>
+<li>USBH_Init(&amp;hUsbHostFS, USBH_UserProcess, HOST_FS)</li>
+<li>USBH_RegisterClass(&amp;hUsbHostFS, USBH_MSC_CLASS)</li>
+<li>USBH_Start(&amp;hUsbHostFS)</li>
+</ol>
+<p>第一个函数<font color="#fe2c24"><strong>用于USB_HOST的初始化</strong></font>，对我们实例化的USBH_HandleTypeDef结构体对象内部参数进行了配置，并且将名为USBH_UserProcess的函数指针赋值给USBH_HandleTypeDef结构体对象内部最后一个函数指针参数</p>
+<p>第二个函数<font color="#fe2c24"><strong>用于注册当前USB_HOST工作的类别</strong></font>，开发板上的USB_HOST只能工作在一种模式下，不能同时工作在不同模式下，因此在该函数中判断注册的类数量是否超过最大值1，没有超过就设置USBH_HandleTypeDef结构体中ClassNumber为0，pClass为函数参数中指定的工作类别，这里为大容量主机存储类USBH_MSC_CLASS</p>
+<p>第三个函数<font color="#fe2c24"><strong>用于启动USB_HOST内核，同时激活VBUS电源端口</strong></font></p>
+<hr>
+<p>执行完上述三个函数后退出USB_HOST的初始化函数MX_USB_HOST_Init()后，<font color="#fe2c24"><strong>如果之前就在开发板USB口插入了U盘，此时USB接口的状态应该为APPLICATION_START</strong></font>，这个时候还不能够对插入的U盘进行FatFs文件系统的挂载</p>
+<p>需要进入while主循环中不断执行USB Core的后台进程函数MX_USB_HOST_Process()<font color="#fe2c24"><strong>直到接口状态变为APPLICATION_READY才可以挂载文件系统并通过上层API对U盘文件进行操作，此时如果拔掉U盘，接口状态会改变为APPLICATION_DISCONNECT</strong></font></p>
+<p>读者可以将usb_host.c文件中的用户回调函数USBH_UserProcess()增加串口打印信息的功能，然后编译烧录程序到开发板并插拔U盘，观察串口助手接收到开发板传来的消息就可以清楚的看到这一变化，具体源代码如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * user callback definition</span><br><span class="hljs-comment"> */</span><br><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">USBH_UserProcess</span>  <span class="hljs-params">(USBH_HandleTypeDef *phost, <span class="hljs-type">uint8_t</span> id)</span><br>&#123;<br>  <span class="hljs-comment">/* USER CODE BEGIN CALL_BACK_1 */</span><br>  <span class="hljs-keyword">switch</span>(id)<br>  &#123;<br>  <span class="hljs-keyword">case</span> HOST_USER_SELECT_CONFIGURATION:<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;HOST_USER_SELECT_CONFIGURATION\r\n&quot;</span>);<br>  <span class="hljs-keyword">break</span>;<br><br>  <span class="hljs-keyword">case</span> HOST_USER_DISCONNECTION:<br>  Appli_state = APPLICATION_DISCONNECT;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Appli_state = APPLICATION_DISCONNECT\r\n&quot;</span>);<br>  <span class="hljs-keyword">break</span>;<br><br>  <span class="hljs-keyword">case</span> HOST_USER_CLASS_ACTIVE:<br>  Appli_state = APPLICATION_READY;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Appli_state = APPLICATION_READY\r\n&quot;</span>);<br>  <span class="hljs-keyword">break</span>;<br><br>  <span class="hljs-keyword">case</span> HOST_USER_CONNECTION:<br>  Appli_state = APPLICATION_START;<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Appli_state = APPLICATION_START\r\n&quot;</span>);<br>  <span class="hljs-keyword">break</span>;<br><br>  <span class="hljs-keyword">default</span>:<br>  <span class="hljs-keyword">break</span>;<br>  &#125;<br>  <span class="hljs-comment">/* USER CODE END CALL_BACK_1 */</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>另外关于FatFs的初始化已经被CubeMX软件自动完成，读者可以阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983322">STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡</a>实验“3.2.1、外设初始化调用流程”小节了解此过程</p>
+<h3 id="4-2-2、外设中断调用流程"><a href="#4-2-2、外设中断调用流程" class="headerlink" title="4.2.2、外设中断调用流程"></a>4.2.2、外设中断调用流程</h3><p>在CubeMX中配置了USB_HOST的模式不为Disable时，便会强制自动开启USB_OTG的全局中断，在生成的工程文件stm32f4xx_it.c中将增加OTG_FS_IRQHandler()这个USB全局中断处理函数</p>
+<p>读者对于其调用内容无需了解，也不需要任何修改（也不希望读者修改），<font color="#fe2c24"><strong>在使用USB的一系列回调函数时仅需要在usb_host.c文件中的用户回调函数USBH_UserProcess()处修改即可</strong></font></p>
+<h3 id="4-2-3、添加其他必要代码"><a href="#4-2-3、添加其他必要代码" class="headerlink" title="4.2.3、添加其他必要代码"></a>4.2.3、添加其他必要代码</h3><p>在生成的工程代码中增加使用FatFs库中API进行文件操作的函数，包括挂载文件系统、显示存储设备信息、读&#x2F;写TXT文件、获取文件信息、扫描文件列表和删除文件等函数，笔者将其封装在了file_operate.c &#x2F; file_operate.h文件中，具体的源代码如下所示</p>
+<p><strong>file_operate.c文件</strong></p>
+<p>与<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验中实现的file_operate.c文件一致，除了测试写的函数FatFs_WriteTXTFile()中写入SD卡的内容修改为了“Hello,USB_HOST!\n”</p>
+<p><strong>file_operate.h文件</strong></p>
+<p>与<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验中实现的file_operate.h文件一致，除了下面三个宏定义需要修改为本实验的SD卡相关内容，修改内容如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*定义自己的存储设备*/</span><br><span class="hljs-comment">/*用户存储设备扇区字节数*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> User_Sector 512</span><br><span class="hljs-comment">/*用户存储设备FatFs对象*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> User_FatFs 	USBHFatFS</span><br><span class="hljs-comment">/*用户存储设备卷路径*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> User_SDPath USBHPath</span><br></code></pre></td></tr></table></figure>
+
+<p>向工程中添加.c&#x2F;.h文件的步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17965519">STM32CubeMX教程19 I2C - MPU6050驱动</a>”实验3.2.3小节</p>
+<p>这里需要读者<font color="#fe2c24"><strong>重点理解U盘在插入开发板主机的时候状态的变化过程</strong></font>，存在的四种状态是在usb_host.h文件中一个ApplicationTypeDef结构体中定义的，如下源码所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/** Status of the application. */</span><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">enum</span> &#123;</span><br>  APPLICATION_IDLE = <span class="hljs-number">0</span>,      <span class="hljs-comment">/*空闲*/</span><br>  APPLICATION_START,         <span class="hljs-comment">/*开始*/</span><br>  APPLICATION_READY,         <span class="hljs-comment">/*已准备好*/</span><br>  APPLICATION_DISCONNECT     <span class="hljs-comment">/*断开连接*/</span><br>&#125;ApplicationTypeDef;<br></code></pre></td></tr></table></figure>
+
+<p>首先开发板上电复位，假设此时U盘还未插入开发板主机，在调用MX_USB_HOST_Init()对USB_HOST初始化之后应该不断执行USB Core的后台进程函数MX_USB_HOST_Process()，此时接口状态应该一直为APPLICATION_DISCONNECT状态</p>
+<p>然后将U盘插入开发板主机，此时由于不断执行USB Core的后台进程函数，接口状态立马改变为APPLICATION_START状态 </p>
+<p>当接口状态变为APPLICATION_START状态后，紧接着再执行几次USB Core的后台进程函数MX_USB_HOST_Process()，如果一切正常，接口状态应该改变为APPLICATION_READY，此时便可以在U盘上挂载FatFs文件系统，最后利用FatFs上层API对U盘进行读写等操作了</p>
+<p>根据以上描述，构建的测试程序源代码如下所示，主循环中的按键逻辑控制程序与<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验中的一致</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*主函数初始化完进入主循环前*/</span><br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Reset\r\n&quot;</span>);<br><span class="hljs-keyword">while</span>(<span class="hljs-number">1</span>)<br>&#123;<br>	<span class="hljs-comment">//初始化完毕应不断执行该函数更新接口状态</span><br>	MX_USB_HOST_Process();<br>	<span class="hljs-comment">//当接口状态Ready便可以退出循环</span><br>	<span class="hljs-keyword">if</span>(Appli_state == APPLICATION_READY) <span class="hljs-keyword">break</span>;<br>&#125;<br><span class="hljs-comment">//挂载文件系统</span><br>Mount_FatFs();<br>FatFs_GetDiskInfo();<br><br><span class="hljs-comment">/*主函数主循环中*/</span><br><span class="hljs-comment">/*按键WK_UP被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == GPIO_PIN_SET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == GPIO_PIN_SET)<br>	&#123;<br>		FatFs_ScanDir(<span class="hljs-string">&quot;0:/&quot;</span>);<br>		<span class="hljs-keyword">while</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin));<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*按键KEY2被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>	&#123;<br>		FatFs_WriteTXTFile(<span class="hljs-string">&quot;test.txt&quot;</span>,<span class="hljs-number">2016</span>,<span class="hljs-number">11</span>,<span class="hljs-number">15</span>);<br>		<span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin));<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*按键KEY1被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin) == GPIO_PIN_RESET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin) == GPIO_PIN_RESET)<br>	&#123;<br>		FatFs_ReadTXTFile(<span class="hljs-string">&quot;test.txt&quot;</span>);<br>		FatFs_GetFileInfo(<span class="hljs-string">&quot;test.txt&quot;</span>);<br>		<span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin));<br>	&#125;<br>&#125;<br><br><span class="hljs-comment">/*按键KEY0被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin) == GPIO_PIN_RESET)<br>&#123;<br>	HAL_Delay(<span class="hljs-number">50</span>);<br>	<span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin) == GPIO_PIN_RESET)<br>	&#123;<br>		FatFs_DeleteFile(<span class="hljs-string">&quot;test.txt&quot;</span>);<br>		<span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin));<br>	&#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><p>烧录程序，开发板上电后将U盘插入开发板主机中，当接口状态变为APPLICATION_READY后，在U盘上挂载文件系统，挂载成功后会输出读取到的U盘的信息，接下来按照下面几个步骤使用FatFs文件系统对U盘进行读写等测试</p>
+<ol>
+<li>按下开发板上的WK_UP按键，扫描U盘根目录下所有文件，并通过串口将文件列表输出</li>
+<li>按下开发板上的KEY2按键，在U盘根目录创建一个”test.txt“文件，将一个字符串”Hello,USB_HOST!”写入该文件中，该字符串大小为17个字节（该字符串末尾包括了一个’\n‘和一个‘\0’）</li>
+<li>按下开发板上的KEY1按键，读取U盘根目录下名为”test.txt“的文件，将其中的内容通过串口输出，然后读取该文件的信息（大小，属性，名称，创建时间），并通过串口输出</li>
+<li>按下开发板上的KEY0按键，删除U盘根目录下名为”test.txt“的文件</li>
+</ol>
+<p>最后将U盘从开发板主机USB接口拔出，整个实验过程串口具体的输出情况如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.18.gif" srcset="/img/loading.gif" lazyload></div>
+
+<p>写入”test.txt“文件信息到U盘后不删除，将U盘插入Windows电脑USB接口，利用第三方软件（笔者使用了 DiskGenius 软件）查看U盘中的内容（U盘被挂载了FatFs文件系统，所以Windows无法正常读取卷），发现U盘根目录下有一个名为“test.txt”的文件夹，其中内容为”Hello,USB_HOST!”，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/29.19.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h1 id="6、常用函数"><a href="#6、常用函数" class="headerlink" title="6、常用函数"></a>6、常用函数</h1><p>由于U盘往往内存较大，因此本实验没有使用按照根据地址对U盘进行读写等操作的函数，而是直接使用FatFs的上层API来对U盘进行读写等操作，对于FatFs的上层API常用函数读者可以阅读<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17983168">STM32CubeMX教程26 FatFs 文件系统 - W25Q128读写</a>实验“5、常用函数”小节，以下列出了一些最常用的按照地址对U盘读写等操作的函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*检查lun是否已准备好*/</span><br><span class="hljs-type">uint8_t</span> <span class="hljs-title function_">USBH_MSC_UnitIsReady</span><span class="hljs-params">(USBH_HandleTypeDef *phost, <span class="hljs-type">uint8_t</span> lun)</span><br><span class="hljs-comment">/*读*/</span><br>USBH_StatusTypeDef <span class="hljs-title function_">USBH_MSC_Read</span><span class="hljs-params">(USBH_HandleTypeDef *phost,</span><br><span class="hljs-params">                                 <span class="hljs-type">uint8_t</span> lun,</span><br><span class="hljs-params">                                 <span class="hljs-type">uint32_t</span> address,</span><br><span class="hljs-params">                                 <span class="hljs-type">uint8_t</span> *pbuf,</span><br><span class="hljs-params">                                 <span class="hljs-type">uint32_t</span> length)</span><br><span class="hljs-comment">/*写*/</span><br>USBH_StatusTypeDef <span class="hljs-title function_">USBH_MSC_Write</span><span class="hljs-params">(USBH_HandleTypeDef *phost,</span><br><span class="hljs-params">                                  <span class="hljs-type">uint8_t</span> lun,</span><br><span class="hljs-params">                                  <span class="hljs-type">uint32_t</span> address,</span><br><span class="hljs-params">                                  <span class="hljs-type">uint8_t</span> *pbuf,</span><br><span class="hljs-params">                                  <span class="hljs-type">uint32_t</span> length)</span><br><span class="hljs-comment">/*获取lun信息*/</span><br>USBH_StatusTypeDef <span class="hljs-title function_">USBH_MSC_GetLUNInfo</span><span class="hljs-params">(USBH_HandleTypeDef *phost, <span class="hljs-type">uint8_t</span> lun, MSC_LUNTypeDef *info)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="7、注释详解"><a href="#7、注释详解" class="headerlink" title="7、注释详解"></a>7、注释详解</h1><p><em>注释1</em>：图片来源 <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/USB">维基百科 - USB</a></p>
+<p><em>注释2</em>：图片来源 STM32F4XX 中文参考手册 RM009</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UBc85046ed7208">STM32Cube高效开发教程（高级篇）</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程29 USB_HOST - 使用FatFs文件系统读写U盘</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程29-USB-HOST-使用FatFs文件系统读写U盘/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B30-USB-DEVICE-MSC%E5%A4%96%E8%AE%BE-%E8%AF%BB%E5%8D%A1%E5%99%A8/" title="STM32CubeMX教程30 USB_DEVICE - MSC外设_读卡器">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程30 USB_DEVICE - MSC外设_读卡器</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B28-SDIO-%E4%BD%BF%E7%94%A8FatFs%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E8%AF%BB%E5%86%99SD%E5%8D%A1/" title="STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡">
+                        <span class="hidden-mobile">STM32CubeMX教程28 SDIO - 使用FatFs文件系统读写SD卡</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

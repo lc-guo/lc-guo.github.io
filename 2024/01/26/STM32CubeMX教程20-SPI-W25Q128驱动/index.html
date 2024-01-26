@@ -1,0 +1,774 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） 野火DAP仿真器 keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 XCOM V2.6串口助手 逻辑分析仪nanoDLA 2、实验目标使用STM32CubeMX软件配置STM32F407开发板的SPI1与W25Q128芯片通信，以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程20 SPI - W25Q128驱动">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B20-SPI-W25Q128%E9%A9%B1%E5%8A%A8/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） 野火DAP仿真器 keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 XCOM V2.6串口助手 逻辑分析仪nanoDLA 2、实验目标使用STM32CubeMX软件配置STM32F407开发板的SPI1与W25Q128芯片通信，以">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.15.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.17.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.18.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.19.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.20.gif">
+<meta property="article:published_time" content="2024-01-26T04:05:33.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:11:21.858Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程20 SPI - W25Q128驱动 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程20 SPI - W25Q128驱动"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:05" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          48 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程20 SPI - W25Q128驱动</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p>开发板（<a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a>）</p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html" title="野火DAP仿真器">野火DAP仿真器</a></p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html" title="XCOM V2.6串口助手">XCOM V2.6串口助手</a></p>
+<p>逻辑分析仪<a target="_blank" rel="noopener" href="https://github.com/wuxx/nanoDLA" title="nanoDLA">nanoDLA</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板的<font color="#fe2c24"><strong>SPI1与W25Q128芯片通信，以轮询方式读写W25Q128 FLASH芯片，并通过USART1输出相关信息</strong></font>，具体为使用开发板上的三个用户按键KEY0&#x2F;1&#x2F;2，分别实现对W25Q128芯片写数据&#x2F;读数据&#x2F;擦除数据的操作，操作过程中与用户的交互由USART1输出信息来实现</p>
+<h1 id="3、实验流程"><a href="#3、实验流程" class="headerlink" title="3、实验流程"></a>3、实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p><font color="#fe2c24"><strong>本实验重点是理解标准SPI通信协议</strong></font>，而STM32CubeMX的配置则相对简单，这里不会过于详细全面的介绍SPI通信协议，但是会对所有需要知道的知识做介绍</p>
+<p><font color="#fe2c24"><strong>标准SPI通信协议由时钟信号线SCK、主设备输出从设备输入MOSI和主设备输入从设备输出MISO三根线组成</strong></font>，与I2C通信协议不同，挂载在SPI总线上的外围器件不需要有从设备地址，而是由片选CS&#x2F;SS信号选择从机设备，<font color="#fe2c24"><strong>当片选信号为低电平时，表示该从设备被选中</strong></font>，此时主设备通过SCK、MOSI与MISO三根线与该从设备之间进行通信和数据传输，如下所示为SPI总线连接图 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>本实验所使用的开发板上有一颗FLASH芯片W25Q128，STM32F407通过PB3（SPI1_SCK）、PB4（SPI1_MISO）和PB5（SPI1_MOSI）三个引脚利用标准SPI协议与其进行通信和数据传输，W25Q128的片选信号选择了MCU的PB14引脚，如下图所示为其硬件原理图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>SPI通信协议的时序根据CPOL（时钟极性）和CPHA（时钟相位）两个寄存器位的不同一共有四种组合模式</strong></font></p>
+<p>时钟极性CPOL位用来控制SCK引脚在空闲状态时的电平，当该位为0时则表示空闲时刻SCK为低电平，反之为高电平</p>
+<p>时钟相位CPHA位用来控制在SCK信号的第几个边沿处采集信号，当该位为0时表示在SCK型号的第一个边沿处采集信号，反之则表示在第二个边沿处采集信号</p>
+<p>如下图所示为根据CPOL和CPHA位取不同值时SPI通信协议的四种时序图 <em>（注释2）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>使用逻辑分析仪对STM32F407 SPI1通信SCLK、MISO、MOSI和CS四个引脚进行逻辑电平监测，可以发现在执行读取W25Q128芯片ID操作的过程中，其四个引脚的时序与我们所介绍的一致</p>
+<p>如下图所示为执行读取W25Q128芯片ID操作所使用的程序、CPOL&#x3D;0 CPHA&#x3D;0时SPI通信采集到的时序和CPOL&#x3D;1 CPHA&#x3D;1时SPI通信采集到的时序</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>系统时钟使用8MHz外部高速时钟HSE，HCLK、PCLK1和PCLK2均设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>此实验主要是利用SPI通信协议与W25Q128芯片进行通信和数据传输，并且需要串口将读取的数据输出给用户，同时还需要三个用户按键KEY0&#x2F;1&#x2F;2&#x2F;，因此外设需要初始化KEY0&#x2F;1&#x2F;2、USART1和SPI1</p>
+<p>按键初始化操作请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17938621">STM32CubeMX教程3 GPIO输入 - 按键响应</a>”实验</p>
+<p>单击Pinout &amp; Configuration页面左边Connectivity&#x2F;USART1选项，然后按照“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”实验中将USART1配置为异步通信模式，无需开启中断，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>单击Pinout &amp; Configuration页面左边Connectivity&#x2F;SPI1选项，<font color="#fe2c24"><strong>Mode选择全双工主机模式，不需要硬件片选，时钟分频选择16分频</strong></font>，根据W25Q128的数据手册 <em>（注释3）</em>，读数据指令支持的最高频率为33MHz，因此适当降低频率确保通信不会出现错误，其他参数配置默认即可，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>然后在右边芯片引脚预览Pinout view中找到W25Q128芯片的<font color="#fe2c24"><strong>片选引脚PB14，左键单击并配置其功能为GPIO_Ouput</strong></font>，然后单击System Core&#x2F;GPIO，配置PB14引脚默认输出电平高，推挽输出，无上下拉，IO速度非常高，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-3、外设中断配置"><a href="#3-1-3、外设中断配置" class="headerlink" title="3.1.3、外设中断配置"></a>3.1.3、外设中断配置</h3><p>本实验无需启用中断，如果需要启用SPI1的中断，请单击System Core&#x2F;NVIC，然后根据需求勾选SP1全局中断，并选择合适的中断优先级即可，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.16.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.17.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>在生成的工程代码主函数中新增了MX_SPI1_Init()函数，在该函数中实现了对SPI1的模式及参数配置</p>
+<p>在MX_SPI1_Init()函数中调用了HAL_SPI_Init()函数使用配置的参数对SPI1进行了初始化</p>
+<p>在HAL_SPI_Init()函数中又调用了HAL_SPI_MspInit()函数对SPI1引脚复用设置，SPI1时钟使能，如果开启了中断该函数中还会有中断相关设置及使能</p>
+<p>具体的SPI1初始化函数调用流程如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.18.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-2、外设中断调用流程"><a href="#3-2-2、外设中断调用流程" class="headerlink" title="3.2.2、外设中断调用流程"></a>3.2.2、外设中断调用流程</h3><p>本实验无需中断，因此未启动任何SPI1的中断</p>
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p>需要添加W25Q128的驱动文件，注意本实验只使用而不会介绍W25Q128具体驱动文件的原理，具体源代码如下图所示 <em>（注释4）</em></p>
+<p><strong>w25flash.c文件</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* 文件： w25flash.c</span><br><span class="hljs-comment"> * 功能描述： Flash 存储器W25Q128的驱动程序</span><br><span class="hljs-comment"> * 作者：王维波</span><br><span class="hljs-comment"> * 修改日期：2019-06-05</span><br><span class="hljs-comment"> */</span><br> <br> <br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;w25flash.h&quot;</span></span><br> <br><span class="hljs-meta">#<span class="hljs-keyword">define</span> MAX_TIMEOUT   200		<span class="hljs-comment">//SPI轮询操作时的最大等待时间,ms</span></span><br> <br><span class="hljs-comment">//SPI接口发送一个字节,byteData是需要发送的数据</span><br>HAL_StatusTypeDef	<span class="hljs-title function_">SPI_TransmitOneByte</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>	byteData)</span><br>&#123;<br>	<span class="hljs-keyword">return</span> HAL_SPI_Transmit(&amp;SPI_HANDLE, &amp;byteData, <span class="hljs-number">1</span>, MAX_TIMEOUT);<br>&#125;<br> <br><span class="hljs-comment">//SPI接口发送多个字节, pBuffer是发送数据缓存区指针，byteCount是发送数据字节数，byteCount最大256</span><br>HAL_StatusTypeDef	<span class="hljs-title function_">SPI_TransmitBytes</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>* pBuffer, <span class="hljs-type">uint16_t</span> byteCount)</span><br>&#123;<br>	<span class="hljs-keyword">return</span> HAL_SPI_Transmit(&amp;SPI_HANDLE, pBuffer, byteCount, MAX_TIMEOUT);<br>&#125;<br> <br><span class="hljs-comment">//SPI接口接收一个字节， 返回接收的一个字节数据</span><br><span class="hljs-type">uint8_t</span>	<span class="hljs-title function_">SPI_ReceiveOneByte</span><span class="hljs-params">()</span><br>&#123;<br>	<span class="hljs-type">uint8_t</span>	byteData=<span class="hljs-number">0</span>;<br>	HAL_SPI_Receive(&amp;SPI_HANDLE, &amp;byteData, <span class="hljs-number">1</span>, MAX_TIMEOUT);<br>	<span class="hljs-keyword">return</span>  byteData;<br>&#125;<br> <br><span class="hljs-comment">//SPI接口接收多个字节， pBuffer是接收数据缓存区指针，byteCount是需要接收数据的字节数</span><br>HAL_StatusTypeDef	<span class="hljs-title function_">SPI_ReceiveBytes</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>* pBuffer, <span class="hljs-type">uint16_t</span> byteCount)</span><br>&#123;<br>	<span class="hljs-keyword">return</span> HAL_SPI_Receive(&amp;SPI_HANDLE, pBuffer, byteCount, MAX_TIMEOUT);<br>&#125;<br> <br><span class="hljs-comment">//Command=0x05:  Read Status Register-1,返回寄存器SR1的值</span><br><span class="hljs-type">uint8_t</span> <span class="hljs-title function_">Flash_ReadSR1</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;  <br>	<span class="hljs-type">uint8_t</span> byte=<span class="hljs-number">0</span>;<br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x05</span>); <span class="hljs-comment">//Command=0x05:  Read Status Register-1</span><br>	byte=SPI_ReceiveOneByte();<br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>	<span class="hljs-keyword">return</span> byte;   <br>&#125; <br> <br><span class="hljs-comment">//Command=0x35:  Read Status Register-2,返回寄存器SR2的值</span><br><span class="hljs-type">uint8_t</span> <span class="hljs-title function_">Flash_ReadSR2</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-type">uint8_t</span> byte=<span class="hljs-number">0</span>;<br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x35</span>); <span class="hljs-comment">//Command=0x35:  Read Status Register-2</span><br>	byte=SPI_ReceiveOneByte();	<span class="hljs-comment">//读取一个字节</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>	<span class="hljs-keyword">return</span> byte;<br>&#125;<br> <br> <br><span class="hljs-comment">//Command=0x01:  Write Status Register,	只写SR1的值</span><br><span class="hljs-comment">//耗时大约10-15ms</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_WriteSR1</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> SR1)</span><br>&#123;   <br>	Flash_Write_Enable();       <span class="hljs-comment">//必须使 WEL=1</span><br> <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x01</span>);   <span class="hljs-comment">//Command=0x01:  Write Status Register,	只写SR1的值</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x00</span>);    <span class="hljs-comment">//SR1的值</span><br><span class="hljs-comment">//	SPI_WriteOneByte(0x00);    //SR2的值, 只发送SR1的值，而不发送SR2的值， QE和CMP将自动被清零</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br> <br>	Flash_Wait_Busy(); 	   <span class="hljs-comment">//耗时大约10-15ms</span><br>&#125;  <br> <br>HAL_StatusTypeDef <span class="hljs-title function_">Flash_WriteVolatile_Enable</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>  	<span class="hljs-comment">//Command=0x50: Write Volatile Enable</span><br>&#123;<br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	HAL_StatusTypeDef result=SPI_TransmitOneByte(<span class="hljs-number">0x50</span>);<br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>	<span class="hljs-keyword">return</span> result;<br>&#125;<br> <br> <br><span class="hljs-comment">//Command=0x06: Write Enable,    使WEL=1</span><br>HAL_StatusTypeDef <span class="hljs-title function_">Flash_Write_Enable</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	HAL_StatusTypeDef result=SPI_TransmitOneByte(<span class="hljs-number">0x06</span>);  <span class="hljs-comment">//Command=0x06: Write Enable,    使WEL=1</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>	Flash_Wait_Busy(); 	<span class="hljs-comment">//等待操作完成</span><br>	<span class="hljs-keyword">return</span> result;<br>&#125; <br> <br><span class="hljs-comment">//Command=0x04, Write Disable，	  使WEL=0</span><br>HAL_StatusTypeDef <span class="hljs-title function_">Flash_Write_Disable</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;  <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	HAL_StatusTypeDef result=SPI_TransmitOneByte(<span class="hljs-number">0x04</span>); 	<span class="hljs-comment">//Command=0x04, Write Disable，	  使WEL=0</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>	Flash_Wait_Busy(); 	   <span class="hljs-comment">//</span><br>	<span class="hljs-keyword">return</span> result;<br>&#125; <br> <br><span class="hljs-comment">//根据Block绝对编号获取地址, 共256个Block， BlockNo 取值范围0-255</span><br><span class="hljs-comment">//每个块64K字节，16位地址，块内地址范围0x0000-0xFFFF。</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_byBlock</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>	BlockNo)</span><br>&#123;<br><span class="hljs-comment">//	uint32_t addr=BlockNo*0x10000;</span><br> <br>	<span class="hljs-type">uint32_t</span> addr=BlockNo;<br>	addr=addr&lt;&lt;<span class="hljs-number">16</span>; <span class="hljs-comment">//左移16位，等于乘以0x10000</span><br>	<span class="hljs-keyword">return</span> addr;<br>&#125;<br> <br><span class="hljs-comment">//根据Sector绝对编号获取地址, 共4096个Sector, SectorNo取值范围0-4095</span><br><span class="hljs-comment">//每个扇区4K字节，12位地址，扇区内地址范围0x000-0xFFF</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_bySector</span><span class="hljs-params">(<span class="hljs-type">uint16_t</span>  SectorNo)</span><br>&#123;<br>	<span class="hljs-keyword">if</span> (SectorNo&gt;<span class="hljs-number">4095</span>)	<span class="hljs-comment">//不能超过4095</span><br>		SectorNo=<span class="hljs-number">0</span>;<br><span class="hljs-comment">//	uint32_t addr=SectorNo*0x1000;</span><br> <br>	<span class="hljs-type">uint32_t</span> addr=SectorNo;<br>	addr=addr&lt;&lt;<span class="hljs-number">12</span>;		<span class="hljs-comment">//左移12位,等于乘以0x1000</span><br>	<span class="hljs-keyword">return</span> addr;<br>&#125;<br> <br><span class="hljs-comment">//根据Page绝对编号获取地址，共65536个Page,  PageNo取值范围0-65535</span><br><span class="hljs-comment">//每个页256字节，8位地址，页内地址范围0x00—0xFF</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_byPage</span><span class="hljs-params">(<span class="hljs-type">uint16_t</span>  PageNo)</span><br>&#123;<br><span class="hljs-comment">//	uint32_t addr=PageNo*0x100;</span><br> <br>	<span class="hljs-type">uint32_t</span> addr=PageNo;<br>	addr=addr&lt;&lt;<span class="hljs-number">8</span>;		<span class="hljs-comment">//左移8位，等于乘以0x100</span><br>	<span class="hljs-keyword">return</span> addr;<br>&#125;<br> <br><span class="hljs-comment">//根据Block编号和内部Sector编号计算地址，一个Block有16个Sector</span><br><span class="hljs-comment">//BlockNo取值范围0-255，  内部SubSectorNo取值范围0-15</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_byBlockSector</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> BlockNo, <span class="hljs-type">uint8_t</span> SubSectorNo)</span><br>&#123;<br>	<span class="hljs-keyword">if</span> (SubSectorNo&gt;<span class="hljs-number">15</span>)	 <span class="hljs-comment">//不能超过15</span><br>		SubSectorNo=<span class="hljs-number">0</span>;<br> <br><span class="hljs-comment">//	uint32_t addr=BlockNo*0x10000;	//先计算Block的起始地址</span><br>	<span class="hljs-type">uint32_t</span> addr=BlockNo;<br>	addr=addr&lt;&lt;<span class="hljs-number">16</span>;	<span class="hljs-comment">//先计算Block的起始地址</span><br> <br><span class="hljs-comment">//	uint32_t offset=SubSectorNo*0x1000;	//计算Sector的偏移地址</span><br>	<span class="hljs-type">uint32_t</span> offset=SubSectorNo;	<span class="hljs-comment">//计算Sector的偏移地址</span><br>	offset=offset&lt;&lt;<span class="hljs-number">12</span>;	<span class="hljs-comment">//计算Sector的偏移地址</span><br> <br>	addr += offset;<br> <br>	<span class="hljs-keyword">return</span> addr;<br>&#125;<br> <br><span class="hljs-comment">//根据Block编号，内部Sector编号，内部Page编号获取地址</span><br><span class="hljs-comment">//BlockNo取值范围0-255</span><br><span class="hljs-comment">//一个Block有16个Sector， 内部SubSectorNo取值范围0-15</span><br><span class="hljs-comment">//一个Sector有16个Page , 内部SubPageNo取值范围0-15</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_byBlockSectorPage</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> BlockNo, <span class="hljs-type">uint8_t</span> SubSectorNo, <span class="hljs-type">uint8_t</span>  SubPageNo)</span><br>&#123;<br>	<span class="hljs-keyword">if</span> (SubSectorNo&gt;<span class="hljs-number">15</span>)	<span class="hljs-comment">//不能超过15</span><br>		SubSectorNo=<span class="hljs-number">0</span>;<br> <br>	<span class="hljs-keyword">if</span> (SubPageNo&gt;<span class="hljs-number">15</span>)	<span class="hljs-comment">//不能超过15</span><br>		SubPageNo=<span class="hljs-number">0</span>;<br> <br><span class="hljs-comment">//	uint32_t addr=BlockNo*0x10000;		//先计算Block的起始地址</span><br>	<span class="hljs-type">uint32_t</span> addr=BlockNo;<br>	addr=addr&lt;&lt;<span class="hljs-number">16</span>;		<span class="hljs-comment">//先计算Block的起始地址</span><br> <br><span class="hljs-comment">//	uint32_t offset=SubSectorNo*0x1000;	//计算Sector的偏移地址</span><br>	<span class="hljs-type">uint32_t</span> offset=SubSectorNo;	<span class="hljs-comment">//计算Sector的偏移地址</span><br>	offset=offset&lt;&lt;<span class="hljs-number">12</span>;	<span class="hljs-comment">//计算Sector的偏移地址</span><br>	addr += offset;<br> <br><span class="hljs-comment">//	offset=SubPageNo*0x100;	//计算Page的偏移地址</span><br>	offset=SubPageNo;<br>	offset=offset&lt;&lt;<span class="hljs-number">8</span>;	<span class="hljs-comment">//计算Page的偏移地址</span><br> <br>	addr += offset;		<span class="hljs-comment">//Page的起始地址</span><br>	<span class="hljs-keyword">return</span> addr;<br>&#125;<br> <br><span class="hljs-comment">//将24位地址分解为3个字节</span><br><span class="hljs-comment">//globalAddr是全局24位地址, 返回 addrHigh高字节，addrMid中间字节，addrLow低字节</span><br><span class="hljs-type">void</span>  <span class="hljs-title function_">Flash_SpliteAddr</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr, <span class="hljs-type">uint8_t</span>* addrHigh, <span class="hljs-type">uint8_t</span>* addrMid,<span class="hljs-type">uint8_t</span>* addrLow)</span><br>&#123;<br>	*addrHigh= (globalAddr&gt;&gt;<span class="hljs-number">16</span>);	<span class="hljs-comment">//addrHigh=高字节</span><br> <br>	globalAddr =globalAddr &amp; <span class="hljs-number">0x0000FFFF</span>;	<span class="hljs-comment">//屏蔽高字节</span><br>	*addrMid= (globalAddr&gt;&gt;<span class="hljs-number">8</span>);	<span class="hljs-comment">//addrMid=中间字节</span><br> <br>	*addrLow =globalAddr &amp; <span class="hljs-number">0x000000FF</span>;	<span class="hljs-comment">//屏蔽中间字节， 只剩低字节，addrLow=低字节</span><br>&#125;<br> <br> <br><span class="hljs-comment">//读取芯片ID</span><br><span class="hljs-comment">//返回值如下:				   </span><br><span class="hljs-comment">// 0xEF17,表示芯片型号为W25Q128, Winbond,用过</span><br><span class="hljs-comment">// 0xC817，表示芯片型号为GD25Q128,ELM，用过</span><br><span class="hljs-comment">// 0x1C17，表示芯片型号为EN25Q128,台湾EON</span><br><span class="hljs-comment">// 0xA117，表示芯片型号为FM25Q128，复旦微电子</span><br><span class="hljs-comment">// 0x2018，表示芯片型号为N25Q128，美光</span><br><span class="hljs-comment">// 0x2017，表示芯片型号为XM25QH128，武汉新芯，用过</span><br> <br><span class="hljs-comment">//读取芯片的制造商和器件ID，高字节是Manufacturer ID,低字节是Device ID</span><br><span class="hljs-type">uint16_t</span> <span class="hljs-title function_">Flash_ReadID</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-type">uint16_t</span> Temp = <span class="hljs-number">0</span>;<br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br> <br>	SPI_TransmitOneByte(<span class="hljs-number">0x90</span>);		 <span class="hljs-comment">//指令码，0x90=Manufacturer/Device ID</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x00</span>);		 <span class="hljs-comment">//dummy</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x00</span>);		 <span class="hljs-comment">//dummy</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x00</span>);		 <span class="hljs-comment">//0x00</span><br>	Temp =SPI_ReceiveOneByte()&lt;&lt;<span class="hljs-number">8</span>; <span class="hljs-comment">//Manufacturer ID</span><br>	Temp|=SPI_ReceiveOneByte();	 	 <span class="hljs-comment">//Device ID, 与具体器件相关</span><br> <br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>	<br>	<span class="hljs-keyword">return</span> Temp;<br>&#125;<br> <br><span class="hljs-comment">// 参数High32和Low32分别返回64位序列号的高32位和低32位的值</span><br><span class="hljs-comment">// 函数返回值为64位序列号的值</span><br><span class="hljs-type">uint64_t</span>  <span class="hljs-title function_">Flash_ReadSerialNum</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span>* High32,  <span class="hljs-type">uint32_t</span>* Low32)</span><span class="hljs-comment">//读取64位序列号，</span><br>&#123;<br>	<span class="hljs-type">uint8_t</span> Temp = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">uint64_t</span> SerialNum=<span class="hljs-number">0</span>;<br>	<span class="hljs-type">uint32_t</span> High=<span class="hljs-number">0</span>,Low=<span class="hljs-number">0</span>;<br> <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x4B</span>);		<span class="hljs-comment">//发送指令码, 4B=read Unique ID</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x00</span>);		<span class="hljs-comment">//发送4个Dummy字节数据</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x00</span>);<br>	SPI_TransmitOneByte(<span class="hljs-number">0x00</span>);<br>	SPI_TransmitOneByte(<span class="hljs-number">0x00</span>);<br> <br>	<span class="hljs-keyword">for</span>(<span class="hljs-type">uint8_t</span> i=<span class="hljs-number">0</span>; i&lt;<span class="hljs-number">4</span>; i++)  <span class="hljs-comment">//高32位</span><br>	&#123;<br>		Temp =SPI_ReceiveOneByte();<br>		High = (High&lt;&lt;<span class="hljs-number">8</span>);<br>		High = High | Temp;  <span class="hljs-comment">//按位或</span><br>	&#125;<br> <br>	<span class="hljs-keyword">for</span>(<span class="hljs-type">uint8_t</span> i=<span class="hljs-number">0</span>; i&lt;<span class="hljs-number">4</span>; i++)	<span class="hljs-comment">//低32位</span><br>	&#123;<br>		Temp =SPI_ReceiveOneByte();<br>		Low = (Low&lt;&lt;<span class="hljs-number">8</span>);<br>		Low = Low | Temp;  <span class="hljs-comment">//按位或</span><br>	&#125;<br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br> <br>	*High32 = High;<br>	*Low32=Low;<br> <br>	SerialNum = High;<br>	SerialNum = SerialNum&lt;&lt;<span class="hljs-number">32</span>;  <span class="hljs-comment">//高32位</span><br>	SerialNum=SerialNum | Low;<br> <br>	<span class="hljs-keyword">return</span> SerialNum;<br>&#125;<br> <br> <br><span class="hljs-comment">//在任意地址读取一个字节的数据,返回读取的字节数据</span><br><span class="hljs-comment">// globalAddr是24位全局地址</span><br><span class="hljs-type">uint8_t</span> <span class="hljs-title function_">Flash_ReadOneByte</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr)</span><br>&#123;<br>	<span class="hljs-type">uint8_t</span> byte2, byte3, byte4;<br>	Flash_SpliteAddr(globalAddr, &amp;byte2, &amp;byte3, &amp;byte4);	<span class="hljs-comment">//24位地址分解为3个字节</span><br> <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x03</span>);      <span class="hljs-comment">//Command=0x03, read data</span><br>	SPI_TransmitOneByte(byte2);		<span class="hljs-comment">//发送24位地址</span><br>	SPI_TransmitOneByte(byte3);<br>	SPI_TransmitOneByte(byte4);<br>	byte2 = SPI_ReceiveOneByte();	<span class="hljs-comment">//接收1个字节</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br> <br>	<span class="hljs-keyword">return</span> byte2;<br>&#125;<br> <br> <br><span class="hljs-comment">//从任何地址开始读取指定长度的数据</span><br><span class="hljs-comment">//globalAddr：开始读取的地址(24bit)， pBuffer：数据存储区指针，byteCount:要读取的字节数</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_ReadBytes</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr, <span class="hljs-type">uint8_t</span>* pBuffer, <span class="hljs-type">uint16_t</span> byteCount)</span><br>&#123; <br>	<span class="hljs-type">uint8_t</span> byte2, byte3, byte4;<br>	Flash_SpliteAddr(globalAddr, &amp;byte2, &amp;byte3, &amp;byte4);	<span class="hljs-comment">//24位地址分解为3个字节</span><br> <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x03</span>);      <span class="hljs-comment">//Command=0x03, read data</span><br>	SPI_TransmitOneByte(byte2);		<span class="hljs-comment">//发送24位地址</span><br>	SPI_TransmitOneByte(byte3);<br>	SPI_TransmitOneByte(byte4);<br>	SPI_ReceiveBytes(pBuffer, byteCount);	<span class="hljs-comment">//接收byteCount个字节数据</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>&#125;  <br> <br><span class="hljs-comment">//Command=0x0B,  高速连续读取flash多个字节，任意全局地址， 速度大约是常规读取的2倍</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_FastReadBytes</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr, <span class="hljs-type">uint8_t</span>* pBuffer,  <span class="hljs-type">uint16_t</span> byteCount)</span><br>&#123;<br><span class="hljs-comment">// 	uint16_t i;</span><br>	<span class="hljs-type">uint8_t</span> byte2, byte3, byte4;<br>	Flash_SpliteAddr(globalAddr, &amp;byte2, &amp;byte3, &amp;byte4);	<span class="hljs-comment">//24位地址分解为3个字节</span><br> <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br> <br>	SPI_TransmitOneByte(<span class="hljs-number">0x0B</span>);      <span class="hljs-comment">//Command=0x0B, fast read data</span><br>	SPI_TransmitOneByte(byte2);		<span class="hljs-comment">//发送24位地址</span><br>	SPI_TransmitOneByte(byte3);<br>	SPI_TransmitOneByte(byte4);<br>	SPI_TransmitOneByte(<span class="hljs-number">0x00</span>);		<span class="hljs-comment">//Dummy字节</span><br> <br>	SPI_ReceiveBytes(pBuffer, byteCount);	<span class="hljs-comment">//接收byteCount个字节数据</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br> <br>&#125;<br> <br><span class="hljs-comment">//Command=0xC7: Chip Erase, 擦除整个器件</span><br><span class="hljs-comment">// 擦除后，所有存储区内容为0xFF,耗时大约25秒</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_EraseChip</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;                                   <br>	Flash_Write_Enable();   <span class="hljs-comment">//使 WEL=1</span><br>	Flash_Wait_Busy();   	<span class="hljs-comment">//等待空闲</span><br> <br>	__Select_Flash();		<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0xC7</span>);  <span class="hljs-comment">// Command=0xC7: Chip Erase, 擦除整个器件</span><br>	__Deselect_Flash();		<span class="hljs-comment">//CS=1</span><br> <br>	Flash_Wait_Busy();   <span class="hljs-comment">//等待芯片擦除结束,大约25秒</span><br>&#125;   <br> <br><span class="hljs-comment">// Command=0x02: Page program, 对一个页（256字节）编程, 耗时大约3ms,</span><br><span class="hljs-comment">// globalAddr是写入初始地址，全局地址</span><br><span class="hljs-comment">// pBuffer是要写入数据缓冲区指针，byteCount是需要写入的数据字节数</span><br><span class="hljs-comment">// 写入的Page必须是前面已经擦除过的，如果写入地址超出了page的边界，就从Page的开头重新写</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_WriteInPage</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr, <span class="hljs-type">uint8_t</span>* pBuffer, <span class="hljs-type">uint16_t</span> byteCount)</span><br>&#123;<br>	<span class="hljs-type">uint8_t</span> byte2, byte3, byte4;<br>	Flash_SpliteAddr(globalAddr, &amp;byte2, &amp;byte3, &amp;byte4);	<span class="hljs-comment">//24位地址分解为3个字节</span><br> <br>	Flash_Write_Enable();   <span class="hljs-comment">//SET WEL</span><br> 	Flash_Wait_Busy();<br> <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0x02</span>);      <span class="hljs-comment">//Command=0x02: Page program 对一个扇区编程</span><br>	SPI_TransmitOneByte(byte2);	<span class="hljs-comment">//发送24位地址</span><br>	SPI_TransmitOneByte(byte3);<br>	SPI_TransmitOneByte(byte4);<br>	SPI_TransmitBytes(pBuffer, byteCount); 		<span class="hljs-comment">//发送byteCount个字节的数据</span><br><span class="hljs-comment">//	for(uint16_t i=0; i&lt;byteCount; i++)</span><br><span class="hljs-comment">//	&#123;</span><br><span class="hljs-comment">//		byte2=pBuffer[i];</span><br><span class="hljs-comment">//		SPI_WriteOneByte(byte2);	//要写入的数据</span><br><span class="hljs-comment">//	&#125;</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br> <br>	Flash_Wait_Busy(); 	   <span class="hljs-comment">//耗时大约3ms</span><br>&#125;<br> <br><span class="hljs-comment">//从某个Sector的起始位置开始写数据，数据可能跨越多个Page,甚至跨越Sector,不必提前擦除</span><br><span class="hljs-comment">// globalAddr是写入初始地址，全局地址,是扇区的起始地址，</span><br><span class="hljs-comment">// pBuffer是要写入数据缓冲区指针</span><br><span class="hljs-comment">// byteCount是需要写入的数据字节数，byteCount不能超过64K，也就是一个Block（16个扇区）的大小,但是可以超过一个Sector(4K字节)</span><br><span class="hljs-comment">// 如果数据超过一个Page，自动分成多个Page，调用EN25Q_WriteInPage分别写入</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_WriteSector</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr,  <span class="hljs-type">uint8_t</span>* pBuffer, <span class="hljs-type">uint16_t</span> byteCount)</span><br>&#123;<br><span class="hljs-comment">//需要先擦除扇区，可能是重复写文件</span><br>	<span class="hljs-type">uint8_t</span> secCount= (byteCount / FLASH_SECTOR_SIZE);	<span class="hljs-comment">//数据覆盖的扇区个数</span><br>	<span class="hljs-keyword">if</span> ((byteCount % FLASH_SECTOR_SIZE) &gt;<span class="hljs-number">0</span>)<br>		secCount++;<br> <br>	<span class="hljs-type">uint32_t</span> startAddr=globalAddr;<br>	<span class="hljs-keyword">for</span> (<span class="hljs-type">uint8_t</span> k=<span class="hljs-number">0</span>; k&lt;secCount; k++)<br>	&#123;<br>		Flash_EraseSector(startAddr);	<span class="hljs-comment">//擦除扇区</span><br>		startAddr += FLASH_SECTOR_SIZE;	<span class="hljs-comment">//移到下一个扇区</span><br>	&#125;<br> <br><span class="hljs-comment">//分成Page写入数据,写入数据的最小单位是Page</span><br>	<span class="hljs-type">uint16_t</span>  leftBytes=byteCount % FLASH_PAGE_SIZE;  <span class="hljs-comment">//非整数个Page剩余的字节数，即最后一个Page写入的数据</span><br>	<span class="hljs-type">uint16_t</span>  pgCount=byteCount/FLASH_PAGE_SIZE;  <span class="hljs-comment">//前面整数个Page</span><br>	<span class="hljs-type">uint8_t</span>* buff=pBuffer;<br>	<span class="hljs-keyword">for</span>(<span class="hljs-type">uint16_t</span> i=<span class="hljs-number">0</span>; i&lt;pgCount; i++)	<span class="hljs-comment">//写入前面pgCount个Page的数据，</span><br>	&#123;<br>		Flash_WriteInPage(globalAddr, buff, FLASH_PAGE_SIZE);  <span class="hljs-comment">//写一整个Page的数据</span><br>		globalAddr += FLASH_PAGE_SIZE;	<span class="hljs-comment">//地址移动一个Page</span><br>		buff += FLASH_PAGE_SIZE;		<span class="hljs-comment">//数据指针移动一个Page大小</span><br>	&#125;<br> <br>	<span class="hljs-keyword">if</span> (leftBytes&gt;<span class="hljs-number">0</span>)<br>		Flash_WriteInPage(globalAddr, buff, leftBytes);  <span class="hljs-comment">//最后一个Page，不是一整个Page的数据</span><br>&#125;<br> <br><span class="hljs-comment">//Command=0xD8: Block Erase(64KB) 擦除整个Block, globalAddr是全局地址</span><br><span class="hljs-comment">//清除后存储区内容全部为0xFF,  耗时大概150ms</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_EraseBlock64K</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr)</span><br>&#123;<br> 	Flash_Write_Enable();   <span class="hljs-comment">//SET WEL</span><br> 	Flash_Wait_Busy();<br> <br>	<span class="hljs-type">uint8_t</span> byte2, byte3, byte4;<br>	Flash_SpliteAddr(globalAddr, &amp;byte2, &amp;byte3, &amp;byte4);	<span class="hljs-comment">//24位地址分解为3个字节</span><br> <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br> <br>	SPI_TransmitOneByte(<span class="hljs-number">0xD8</span>);      <span class="hljs-comment">//Command=0xD8, Block Erase(64KB)</span><br>	SPI_TransmitOneByte(byte2);	<span class="hljs-comment">//发送24位地址</span><br>	SPI_TransmitOneByte(byte3);<br>	SPI_TransmitOneByte(byte4);<br> <br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>	Flash_Wait_Busy(); 	   <span class="hljs-comment">//耗时大概150ms</span><br>&#125;<br> <br> <br><span class="hljs-comment">//擦除一个扇区(4KB字节)，Command=0x20, Sector Erase(4KB)</span><br><span class="hljs-comment">//globalAddr: 扇区的绝对地址，24位地址0x00XXXXXX</span><br><span class="hljs-comment">//擦除后，扇区内全部内容为0xFF, 耗时大约30ms，</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_EraseSector</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr)</span><br>&#123;  <br> 	Flash_Write_Enable();   <span class="hljs-comment">//SET WEL</span><br> 	Flash_Wait_Busy();<br>	<span class="hljs-type">uint8_t</span> byte2, byte3, byte4;<br>	Flash_SpliteAddr(globalAddr, &amp;byte2, &amp;byte3, &amp;byte4);	<span class="hljs-comment">//24位地址分解为3个字节</span><br> <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br> <br>	SPI_TransmitOneByte(<span class="hljs-number">0x20</span>);      <span class="hljs-comment">//Command=0x20, Sector Erase(4KB)</span><br>	SPI_TransmitOneByte(byte2);		<span class="hljs-comment">//发送24位地址</span><br>	SPI_TransmitOneByte(byte3);<br>	SPI_TransmitOneByte(byte4);<br> <br>	__Deselect_Flash();		<span class="hljs-comment">//CS=1</span><br>	Flash_Wait_Busy(); 	   <span class="hljs-comment">//大约30ms</span><br>&#125;<br> <br><span class="hljs-comment">//检查寄存器SR1的BUSY位，直到BUSY位为0</span><br><span class="hljs-type">uint32_t</span> <span class="hljs-title function_">Flash_Wait_Busy</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;   <br>	<span class="hljs-type">uint8_t</span>	SR1=<span class="hljs-number">0</span>;<br>	<span class="hljs-type">uint32_t</span>  delay=<span class="hljs-number">0</span>;<br>	SR1=Flash_ReadSR1();	<span class="hljs-comment">//读取状态寄存器SR1</span><br>	<span class="hljs-keyword">while</span>((SR1 &amp; <span class="hljs-number">0x01</span>)==<span class="hljs-number">0x01</span>)<br>	&#123;<br>		HAL_Delay(<span class="hljs-number">1</span>);	<span class="hljs-comment">//延时1ms</span><br>		delay++;<br>		SR1=Flash_ReadSR1();	<span class="hljs-comment">//读取状态寄存器SR1</span><br>	&#125;<br>	<span class="hljs-keyword">return</span> delay;<br>&#125;<br> <br><span class="hljs-comment">//进入掉电模式</span><br><span class="hljs-comment">//Command=0xB9: Power Down</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_PowerDown</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123; <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0xB9</span>);  <span class="hljs-comment">//Command=0xB9: Power Down</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>    HAL_Delay(<span class="hljs-number">1</span>); <span class="hljs-comment">//等待TPD</span><br>&#125;   <br> <br><span class="hljs-comment">//唤醒</span><br><span class="hljs-comment">//Command=0xAB: Release Power Down</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_WakeUp</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;  <br>	__Select_Flash();	<span class="hljs-comment">//CS=0</span><br>	SPI_TransmitOneByte(<span class="hljs-number">0xAB</span>);		<span class="hljs-comment">//Command=0xAB: Release Power Down</span><br>	__Deselect_Flash();	<span class="hljs-comment">//CS=1</span><br>	HAL_Delay(<span class="hljs-number">1</span>);     <span class="hljs-comment">//等待TRES1</span><br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><strong>w25flash.h文件</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* 文件： w25flash.h</span><br><span class="hljs-comment"> * 功能描述： Flash 存储器W25Q128的驱动程序</span><br><span class="hljs-comment"> * 作者：王维波</span><br><span class="hljs-comment"> * 修改日期：2019-06-05</span><br><span class="hljs-comment"> * W25Q128 芯片参数： 16M字节，24位地址线</span><br><span class="hljs-comment"> * 分为256个Block，每个Block 64K字节</span><br><span class="hljs-comment"> * 一个Block又分为16个Sector，共4096个Sector，每个Sector 4K字节</span><br><span class="hljs-comment"> * 一个Sector又分为16个Page，共65536个Page，每个Page 256字节</span><br><span class="hljs-comment"> * 写数据操作的基本单元是Page，一次连续写入操作不能超过一个Page的范围。写的Page必须是擦除过的。</span><br><span class="hljs-comment"> */</span><br> <br><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> _W25FLASH_H</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> _W25FLASH_H</span><br> <br><span class="hljs-meta">#<span class="hljs-keyword">include</span> 	<span class="hljs-string">&quot;stm32f4xx_hal.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span>	<span class="hljs-string">&quot;spi.h&quot;</span>		<span class="hljs-comment">//使用其中的变量 hspi1，表示SPI1接口</span></span><br> <br><span class="hljs-comment">/*  W25Q128硬件接口相关的部分：CS引脚和SPI接口 ，若电路不同，更改这部分配置即可   */</span><br><span class="hljs-comment">// Flash_CS --&gt;PB14, 片选信号CS操作的宏定义函数</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> CS_PORT		GPIOB</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span>	CS_PIN		GPIO_PIN_14</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span>	SPI_HANDLE		hspi1		<span class="hljs-comment">//SPI接口对象，使用spi.h中的变量 hspi1</span></span><br> <br><span class="hljs-meta">#<span class="hljs-keyword">define</span>	__Select_Flash()		HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_RESET)	<span class="hljs-comment">//CS=0</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span>	__Deselect_Flash()		HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_SET)	<span class="hljs-comment">//CS=1</span></span><br> <br><span class="hljs-comment">//===========Flash存储芯片W25Q128的存储容量参数================</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span>		FLASH_PAGE_SIZE			256		<span class="hljs-comment">//一个Page是256字节</span></span><br> <br><span class="hljs-meta">#<span class="hljs-keyword">define</span>		FLASH_SECTOR_SIZE		4096	<span class="hljs-comment">//一个Sector是4096字节</span></span><br> <br><span class="hljs-meta">#<span class="hljs-keyword">define</span>		FLASH_SECTOR_COUNT		4096	<span class="hljs-comment">//总共4096个 Sector</span></span><br> <br><span class="hljs-comment">//=======1. SPI 基本发送和接收函数，阻塞式传输============</span><br>HAL_StatusTypeDef	<span class="hljs-title function_">SPI_TransmitOneByte</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>	byteData)</span>;	<span class="hljs-comment">//SPI接口发送一个字节</span><br>HAL_StatusTypeDef	<span class="hljs-title function_">SPI_TransmitBytes</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>* pBuffer, <span class="hljs-type">uint16_t</span> byteCount)</span>;	<span class="hljs-comment">//SPI接口发送多个字节</span><br> <br><span class="hljs-type">uint8_t</span>	<span class="hljs-title function_">SPI_ReceiveOneByte</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;	<span class="hljs-comment">//SPI接口接收一个字节</span><br>HAL_StatusTypeDef	<span class="hljs-title function_">SPI_ReceiveBytes</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span>* pBuffer, <span class="hljs-type">uint16_t</span> byteCount)</span>;	<span class="hljs-comment">//SPI接口接收多个字节</span><br> <br><span class="hljs-comment">//=========2. W25Qxx 基本控制指令==========</span><br><span class="hljs-comment">// 0xEF17,表示芯片型号为W25Q128, Winbond,用过</span><br><span class="hljs-comment">// 0xC817，表示芯片型号为GD25Q128,ELM，用过</span><br><span class="hljs-comment">// 0x1C17，表示芯片型号为EN25Q128,台湾EON</span><br><span class="hljs-comment">// 0xA117，表示芯片型号为FM25Q128，复旦微电子</span><br><span class="hljs-comment">// 0x2018，表示芯片型号为N25Q128，美光</span><br><span class="hljs-comment">// 0x2017，表示芯片型号为XM25QH128，武汉新芯，用过</span><br> <br><span class="hljs-type">uint16_t</span>  <span class="hljs-title function_">Flash_ReadID</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>; 	<span class="hljs-comment">// Command=0x90, Manufacturer/Device ID</span><br> <br><span class="hljs-type">uint64_t</span>  <span class="hljs-title function_">Flash_ReadSerialNum</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span>* High32,  <span class="hljs-type">uint32_t</span>* Low32)</span>; <span class="hljs-comment">//Command=0x4B, Read Unique ID, 64-bit</span><br> <br>HAL_StatusTypeDef <span class="hljs-title function_">Flash_WriteVolatile_Enable</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;  	<span class="hljs-comment">//Command=0x50: Write Volatile Enable</span><br> <br>HAL_StatusTypeDef <span class="hljs-title function_">Flash_Write_Enable</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;  	<span class="hljs-comment">//Command=0x06: Write Enable,    使WEL=1</span><br>HAL_StatusTypeDef <span class="hljs-title function_">Flash_Write_Disable</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;	<span class="hljs-comment">//Command=0x04, Write Disable，	  使WEL=0</span><br> <br><span class="hljs-type">uint8_t</span>	 <span class="hljs-title function_">Flash_ReadSR1</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;  	<span class="hljs-comment">//Command=0x05:  Read Status Register-1,	返回寄存器SR1的值</span><br><span class="hljs-type">uint8_t</span>	 <span class="hljs-title function_">Flash_ReadSR2</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;  	<span class="hljs-comment">//Command=0x35:  Read Status Register-2,	返回寄存器SR2的值</span><br> <br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_WriteSR1</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> SR1)</span>;  <span class="hljs-comment">//Command=0x01:  Write Status Register,	只写SR1的值,禁止写状态寄存器</span><br> <br><span class="hljs-type">uint32_t</span> <span class="hljs-title function_">Flash_Wait_Busy</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;  	<span class="hljs-comment">//读状态寄存器SR1，等待BUSY变为0,返回值是等待时间</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_PowerDown</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;   		<span class="hljs-comment">//Command=0xB9: Power Down</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_WakeUp</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;  			<span class="hljs-comment">//Command=0xAB: Release Power Down</span><br> <br><span class="hljs-comment">//========3. 计算地址的辅助功能函数========</span><br><span class="hljs-comment">//根据Block  绝对编号获取地址,共256个Block</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_byBlock</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> BlockNo)</span>;<br><span class="hljs-comment">//根据Sector 绝对编号获取地址,共4096个Sector</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_bySector</span><span class="hljs-params">(<span class="hljs-type">uint16_t</span>  SectorNo)</span>;<br><span class="hljs-comment">//根据Page  绝对编号获取地址，共65536个Page</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_byPage</span><span class="hljs-params">(<span class="hljs-type">uint16_t</span>  PageNo)</span>;<br> <br><span class="hljs-comment">//根据Block编号，和内部Sector编号计算地址，一个Block有16个Sector,</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_byBlockSector</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> BlockNo, <span class="hljs-type">uint8_t</span> SubSectorNo)</span>;<br><span class="hljs-comment">//根据Block编号，内部Sector编号，内部Page编号计算地址</span><br><span class="hljs-type">uint32_t</span>	<span class="hljs-title function_">Flash_Addr_byBlockSectorPage</span><span class="hljs-params">(<span class="hljs-type">uint8_t</span> BlockNo, <span class="hljs-type">uint8_t</span> SubSectorNo, <span class="hljs-type">uint8_t</span>  SubPageNo)</span>;<br><span class="hljs-comment">//将24位地址分解为3个字节</span><br><span class="hljs-type">void</span>		<span class="hljs-title function_">Flash_SpliteAddr</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr, <span class="hljs-type">uint8_t</span>* addrHigh, <span class="hljs-type">uint8_t</span>* addrMid,<span class="hljs-type">uint8_t</span>* addrLow)</span>;<br> <br><span class="hljs-comment">//=======4. chip、Block，Sector擦除函数============</span><br><span class="hljs-comment">//Command=0xC7: Chip Erase, 擦除整个器件,大约25秒</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_EraseChip</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br> <br><span class="hljs-comment">//Command=0xD8: Block Erase(64KB) 擦除整个Block, globalAddr是全局地址，耗时大约150ms</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_EraseBlock64K</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr)</span>;<br> <br><span class="hljs-comment">//Command=0x20: Sector Erase(4KB) 扇区擦除, globalAddr是扇区的全局地址，耗时大约30ms</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_EraseSector</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr)</span>;<br> <br><span class="hljs-comment">//=========5. 数据读写函数=============</span><br><span class="hljs-comment">//Command=0x03,  读取一个字节，任意全局地址</span><br><span class="hljs-type">uint8_t</span> <span class="hljs-title function_">Flash_ReadOneByte</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr)</span>;<br> <br><span class="hljs-comment">//Command=0x03,  连续读取多个字节，任意全局地址</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_ReadBytes</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr, <span class="hljs-type">uint8_t</span>* pBuffer,  <span class="hljs-type">uint16_t</span> byteCount)</span>;<br> <br><span class="hljs-comment">//Command=0x0B,  高速连续读取多个字节，任意全局地址， 速度大约是常规读取的2倍</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_FastReadBytes</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr, <span class="hljs-type">uint8_t</span>* pBuffer,  <span class="hljs-type">uint16_t</span> byteCount)</span>;<br> <br><span class="hljs-comment">//Command=0x02: Page program 对一个Page写入数据（最多256字节）, globalAddr是初始位置的全局地址，耗时大约3ms</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_WriteInPage</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr, <span class="hljs-type">uint8_t</span>* pBuffer, <span class="hljs-type">uint16_t</span> byteCount)</span>;<br> <br><span class="hljs-comment">//从某个Sector的起始地址开始写数据，数据可能跨越多个Page,甚至跨越Sector，总字节数byteCount不能超过64K，也就是一个Block的大小</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_WriteSector</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> globalAddr,  <span class="hljs-type">uint8_t</span>* pBuffer, <span class="hljs-type">uint16_t</span> byteCount)</span>;<br> <br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br></code></pre></td></tr></table></figure>
+
+<p>向工程中添加.c&#x2F;.h文件的步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17965519">STM32CubeMX教程19 I2C - MPU6050驱动</a>”实验3.2.3小节</p>
+<p>在主函数中添加操作提示信息和按键操作逻辑程序，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.19.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*主函数主循环外代码*/</span><br><span class="hljs-type">uint16_t</span> ID = Flash_ReadID();<br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;W25Q128 ID:0x%x\r\n&quot;</span>,ID);<br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---------------------\r\n&quot;</span>);<br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;KEY2: Flash_Write\r\n&quot;</span>);<br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;KEY1: Flash_Read\r\n&quot;</span>);<br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;KEY0: Flash_Erase\r\n&quot;</span>);<br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---------------------\r\n&quot;</span>);<br> <br><span class="hljs-comment">/*主函数主循环内代码*/</span><br><span class="hljs-comment">/*按键KEY2被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>&#123;<br>    HAL_Delay(<span class="hljs-number">50</span>);<br>    <span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>    &#123;<br>        Flash_TestWrite();<br>        <span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin));<br>    &#125;<br>&#125;<br><span class="hljs-comment">/*按键KEY1被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin) == GPIO_PIN_RESET)<br>&#123;<br>    HAL_Delay(<span class="hljs-number">50</span>);<br>    <span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin) == GPIO_PIN_RESET)<br>    &#123;<br>        Flash_TestRead();<br>        <span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY1_GPIO_Port,KEY1_Pin));<br>    &#125;<br>&#125;<br><span class="hljs-comment">/*按键KEY0被按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin) == GPIO_PIN_RESET)<br>&#123;<br>    HAL_Delay(<span class="hljs-number">50</span>);<br>    <span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin) == GPIO_PIN_RESET)<br>    &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---------------------\r\n&quot;</span>);<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Erasing Block 0(256 pages)...\r\n&quot;</span>);<br>        <span class="hljs-type">uint32_t</span> globalAddr=<span class="hljs-number">0</span>;<br>        Flash_EraseBlock64K(globalAddr);<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Block 0 is erased.\r\n&quot;</span>);<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---------------------\r\n&quot;</span>);<br>        <span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY0_GPIO_Port,KEY0_Pin));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在spi.c中实现W25Q128的写入&#x2F;读取测试函数Flash_TestWrite()&#x2F;Flash_TestRead()，具体源代码如下所示 <em>（注释4）</em></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*spi.c中包含的头文件*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;w25flash.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;string.h&quot;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&quot;stdio.h&quot;</span></span><br> <br><span class="hljs-comment">/*spi.c中的函数定义*/</span><br><span class="hljs-comment">//测试写入Page0和Page1</span><br><span class="hljs-comment">//注意：一个Page写入之前必须是被擦除过的，写入之后就不能再重复写</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_TestWrite</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-type">uint8_t</span> blobkNo = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">uint16_t</span> sectorNo = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">uint16_t</span> pageNo = <span class="hljs-number">0</span>;<br>	<span class="hljs-type">uint32_t</span> memAddress = <span class="hljs-number">0</span>;<br>	<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---------------------\r\n&quot;</span>);<br>	<span class="hljs-comment">//写入Page0两个字符串</span><br>	memAddress = Flash_Addr_byBlockSectorPage(blobkNo, sectorNo, pageNo);		<span class="hljs-comment">//Page0的地址</span><br>	<span class="hljs-type">uint8_t</span>	bufStr1[] = <span class="hljs-string">&quot;Hello from beginning&quot;</span>;<br>	<span class="hljs-type">uint16_t</span> len = <span class="hljs-number">1</span> + <span class="hljs-built_in">strlen</span>(<span class="hljs-string">&quot;Hello from beginning&quot;</span>); 											<span class="hljs-comment">//包括结束符&#x27;\0&#x27;</span><br>	Flash_WriteInPage(memAddress, bufStr1, len);   													<span class="hljs-comment">//在Page0的起始位置写入数据</span><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Write in Page0:0\r\n%s\r\n&quot;</span>, bufStr1);<br> <br>	<span class="hljs-type">uint8_t</span>	bufStr2[]=<span class="hljs-string">&quot;Hello in page&quot;</span>;<br>	len = <span class="hljs-number">1</span> + <span class="hljs-built_in">strlen</span>(<span class="hljs-string">&quot;Hello in page&quot;</span>); 																			<span class="hljs-comment">//包括结束符&#x27;\0&#x27;</span><br>	Flash_WriteInPage(memAddress+<span class="hljs-number">100</span>, bufStr2, len);   											<span class="hljs-comment">//Page0内偏移100</span><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Write in Page0:100\r\n%s\r\n&quot;</span>, bufStr2);<br> <br>	<span class="hljs-comment">//写入Page1中0-255数字</span><br>	<span class="hljs-type">uint8_t</span>	bufPage[FLASH_PAGE_SIZE];																				<span class="hljs-comment">//EN25Q_PAGE_SIZE=256</span><br>	<span class="hljs-keyword">for</span> (<span class="hljs-type">uint16_t</span> i=<span class="hljs-number">0</span>;i&lt;FLASH_PAGE_SIZE;i++)<br>		bufPage[i] = i;																												<span class="hljs-comment">//准备数据</span><br>	pageNo = <span class="hljs-number">1</span>; 																														<span class="hljs-comment">//Page 1</span><br>	memAddress = Flash_Addr_byBlockSectorPage(blobkNo, sectorNo, pageNo);		<span class="hljs-comment">//page1的地址</span><br>	Flash_WriteInPage(memAddress, bufPage, FLASH_PAGE_SIZE);   							<span class="hljs-comment">//写一个Page</span><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Write 0-255 in Page1\r\n&quot;</span>);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---------------------\r\n&quot;</span>);<br>&#125;<br> <br><span class="hljs-comment">//测试读取Page0 和 Page1的内容</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_TestRead</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>	<span class="hljs-type">uint8_t</span> blobkNo=<span class="hljs-number">0</span>;<br>	<span class="hljs-type">uint16_t</span> sectorNo=<span class="hljs-number">0</span>;<br>	<span class="hljs-type">uint16_t</span> pageNo=<span class="hljs-number">0</span>;<br>	<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---------------------\r\n&quot;</span>);<br>	<span class="hljs-comment">//读取Page0</span><br>	<span class="hljs-type">uint8_t</span> bufStr[<span class="hljs-number">50</span>];																											<span class="hljs-comment">//Page0读出的数据</span><br>	<span class="hljs-type">uint32_t</span> memAddress = Flash_Addr_byBlockSectorPage(blobkNo, sectorNo,pageNo);<br>	Flash_ReadBytes(memAddress, bufStr, <span class="hljs-number">50</span>);																<span class="hljs-comment">//读取50个字符</span><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Read from Page0:0\r\n%s\r\n&quot;</span>,bufStr);<br> <br>	Flash_ReadBytes(memAddress+<span class="hljs-number">100</span>, bufStr, <span class="hljs-number">50</span>);														<span class="hljs-comment">//地址偏移100后的50个字字节</span><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Read from Page0:100\r\n%s\r\n&quot;</span>,bufStr);<br> <br>	<span class="hljs-comment">//读取Page1</span><br>	<span class="hljs-type">uint8_t</span>	randData = <span class="hljs-number">0</span>;<br>	pageNo = <span class="hljs-number">1</span>;<br>	memAddress = Flash_Addr_byBlockSectorPage(blobkNo, sectorNo,pageNo);<br> <br>	randData = Flash_ReadOneByte(memAddress+<span class="hljs-number">12</span>);														<span class="hljs-comment">//读取1个字节数据，页内地址偏移12</span><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Page1[12] = %d\r\n&quot;</span>,randData);<br> <br>	randData = Flash_ReadOneByte(memAddress+<span class="hljs-number">136</span>);														<span class="hljs-comment">//页内地址偏移136</span><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Page1[136] = %d\r\n&quot;</span>,randData);<br> <br>	randData = Flash_ReadOneByte(memAddress+<span class="hljs-number">210</span>);														<span class="hljs-comment">//页内地址偏移210</span><br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Page1[210] = %d\r\n&quot;</span>,randData);<br>	<span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---------------------\r\n&quot;</span>);<br>&#125;<br> <br><span class="hljs-comment">/*spi.h中的函数声明*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_TestWrite</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br><span class="hljs-type">void</span> <span class="hljs-title function_">Flash_TestRead</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<h1 id="4、常用函数"><a href="#4、常用函数" class="headerlink" title="4、常用函数"></a>4、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*SPI发送数据函数*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SPI_Transmit</span><span class="hljs-params">(SPI_HandleTypeDef *hspi, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size, <span class="hljs-type">uint32_t</span> Timeout)</span><br> <br><span class="hljs-comment">/*SPI接收数据函数*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_SPI_Receive</span><span class="hljs-params">(SPI_HandleTypeDef *hspi, <span class="hljs-type">uint8_t</span> *pData, <span class="hljs-type">uint16_t</span> Size, <span class="hljs-type">uint32_t</span> Timeout)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><p>烧录程序，开发板上电后首先读取FLASH芯片的ID，并通过串口显示给用户，然后输出操作提示，按下KEY0按键会擦除块0内容，擦除后按下KEY1按键读取内容会发现全是FF，然后按下KEY2按键将数据写入，此时再按下KEY1按键读取内容会发现和我们写入的内容一致，如下图所示为整个过程串口详细输出信息</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/20.20.gif" srcset="/img/loading.gif" lazyload></div>
+
+<h1 id="6、注释详解"><a href="#6、注释详解" class="headerlink" title="6、注释详解"></a>6、注释详解</h1><p><em>注释1</em>：图片来源<a target="_blank" rel="noopener" href="https://www.emtronix.com/article/article20181111.html" title="多路SPI从设备连接方法--技术天地">多路SPI从设备连接方法–技术天地</a></p>
+<p><em>注释2</em>：<a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UB77e58e05a5ea9" title="图片来源STM32Cube高效开发教程（基础篇）">图片来源STM32Cube高效开发教程（基础篇）</a></p>
+<p><em>注释3</em>：<a target="_blank" rel="noopener" href="https://pdf1.alldatasheet.com/datasheet-pdf/view/506494/WINBOND/W25Q128FV.html" title="W25Q128FV Datasheet">W25Q128FV Datasheet</a></p>
+<p><em>注释4</em>：驱动代码来源<a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UB77e58e05a5ea9" title="STM32Cube高效开发教程（基础篇）">STM32Cube高效开发教程（基础篇）</a></p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UB77e58e05a5ea9" title="STM32Cube高效开发教程（基础篇）">STM32Cube高效开发教程（基础篇）</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程20 SPI - W25Q128驱动</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程20-SPI-W25Q128驱动/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B21-CAN-%E5%8F%8C%E6%9C%BA%E9%80%9A%E4%BF%A1/" title="STM32CubeMX教程21 CAN - 双机通信">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程21 CAN - 双机通信</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B19-I2C-MPU6050%E9%A9%B1%E5%8A%A8/" title="STM32CubeMX教程19 I2C - MPU6050驱动">
+                        <span class="hidden-mobile">STM32CubeMX教程19 I2C - MPU6050驱动</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,809 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） 野火DAP仿真器 keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 CH340G Windows系统驱动程序（CH341SER.EXE） XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置两台STM32F4">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程21 CAN - 双机通信">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B21-CAN-%E5%8F%8C%E6%9C%BA%E9%80%9A%E4%BF%A1/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） 野火DAP仿真器 keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 CH340G Windows系统驱动程序（CH341SER.EXE） XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置两台STM32F4">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.23_add.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.15.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.17.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.18.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.19.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.20.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.21.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.22.gif">
+<meta property="article:published_time" content="2024-01-26T04:05:39.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:11:56.129Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程21 CAN - 双机通信 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程21 CAN - 双机通信"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:05" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          38 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程21 CAN - 双机通信</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p>开发板（<a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a>）</p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html" title="野火DAP仿真器">野火DAP仿真器</a></p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p>CH340G Windows系统驱动程序（<a target="_blank" rel="noopener" href="http://www.wch.cn/downloads/CH341SER_EXE.html" title="CH341SER.EXE">CH341SER.EXE</a>）</p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html" title="XCOM V2.6串口助手">XCOM V2.6串口助手</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置<font color="#fe2c24"><strong>两台STM32F407开发板的CAN1模块实现双机通信</strong></font></p>
+<h1 id="3、实验流程"><a href="#3、实验流程" class="headerlink" title="3、实验流程"></a>3、实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><h3 id="3-0-1、CAN总体概述"><a href="#3-0-1、CAN总体概述" class="headerlink" title="3.0.1、CAN总体概述"></a>3.0.1、CAN总体概述</h3><p>STM32F407内部有两个CAN控制器，其中CAN1做为主CAN拥有所有的权限，而CAN2做为从CAN不能单独设置验证筛选器，每个CAN都有3个发送邮箱和两个接收FIFO，每个接收FIFO可以存储三条完整消息，具体的CAN框图如下图所示 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>CAN的总线网络结构有开环和闭环两种形式</strong></font></p>
+<p>闭环网络结构下，两根信号线H&#x2F;L组成一个环路，在网络环路的两端连接120欧姆的电阻，这种网络是一种高速、短距离的CAN网络，通信速率最高1Mbit&#x2F;s；</p>
+<p>开环网络结构下，两根信号线H&#x2F;L各自独立，在两根信号线上各自串联一个2.2千欧的电阻，这种网络是一种低速、远距离的CAN网络，通信速率最高125kbit&#x2F;s；</p>
+<p>如下图所示为开环&#x2F;闭环的CAN总线网络结构 <em>（注释2）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>不管是开环还是闭环CAN网络结构都可以挂载多个节点，<font color="#fe2c24"><strong>CAN网络上的每个节点由CAN控制器和CAN收发器组成</strong></font>，STM32F407内部集成的是CAN控制器，因此硬件设计时需要外部搭载CAN收发器才可以组成一个完整的CAN节点，如下图所示为笔者使用的开发板上搭载的CAN收发器芯片硬件原理图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>这里CAN收发器芯片的TX&#x2F;RX引脚并没有直接与单片机CAN1控制器的TX&#x2F;RX引脚相连接，而是通过了一个跳线帽来进行调节，<font color="#fe2c24"><strong>读者在做该实验的时候应该注意USB&#x2F;CAN排针座应该利用跳线帽将CAN_TX&#x2F;RX引脚与USB_D+&#x2F;D-进行短接</strong></font>，具体硬件原理图如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.23_add.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-0-2、CAN位时序和波特率"><a href="#3-0-2、CAN位时序和波特率" class="headerlink" title="3.0.2、CAN位时序和波特率"></a>3.0.2、CAN位时序和波特率</h3><p><font color="#fe2c24"><strong>CAN通信是一种异步通信</strong></font>，异步通信的收发双方无时钟同步，因此需要确保收发双方发送&#x2F;接收一帧数据的帧格式和波特率保持一致，这样才能保证收发双方正确的进行通信</p>
+<p>CAN1&#x2F;2挂载在APB1最高42MHz的时钟总线上，其一个<font color="#fe2c24"><strong>时间片</strong></font>的长度由PCLK1频率和CAN分频参数决定，假设PCLK1频率为25MHz，CAN分频参数位5，则一个时间片的长度为5&#x2F;25Mhz&#x3D;0.0000002s&#x3D;0.0002ms&#x3D;0.2us&#x3D;200ns</p>
+<p>CAN网络上一个节点采集一个位数据的时序叫做<font color="#fe2c24"><strong>位时序</strong></font>，位时序由同步段（SYNC_SEG）、位段 1（BS1）和位段2（BS2）三段组成，其中同步段固定为一个时间片，在该段总线上应该发生一次位信号的跳变；位段1定义了采样点的位置，其可以是1-16个时间片；位段2定义了发送点的位置，其可以是1-8个时间片；</p>
+<p>除了上面几个可调节的参数外，CAN还有一个再同步跳转宽度（SJW）参数可以调节，其取值可以是1-4个时间片，通过调节该参数长短决定了CAN再同步时自动调节位段1和位段2长度缩短&#x2F;加长的上限，此处笔者未深究该参数</p>
+<p>通过调节<font color="#fe2c24"><strong>时钟分频、位段1、位段2和再同步跳转宽度SJW</strong></font>四个参数，就可以确定CAN通信的波特率，如下图所示位位序数的结构图 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-0-3、CAN帧格式"><a href="#3-0-3、CAN帧格式" class="headerlink" title="3.0.3、CAN帧格式"></a>3.0.3、CAN帧格式</h3><p><font color="#fe2c24"><strong>CAN通信过程中共有数据帧、遥控帧、错误帧、过载帧和帧间空间五种不同用途的帧</strong></font>，其中数据帧和遥控帧又有标准格式的帧和扩展格式的帧两种，数据帧可以理解为CAN网络上的节点发送消息ID+要发送的数据，遥控帧可以理解为CAN网络上某个节点需要另外一个节点的数据，收到遥控帧的节点就发送对应的数据给请求数据的节点，这里不详细介绍每个帧的格式，想要知道具体帧格式的读者请阅读其他文章，如下图所示为CAN数据&#x2F;遥控帧一帧的结构图 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>在HAL库中有一个CAN发送消息头结构体CAN_TxHeaderTypeDef，以下为结构体内主要定义参数</p>
+<ol>
+<li>IDE（帧格式）：可选参数CAN_ID_STD（标准格式帧）和CAN_ID_EXT（扩展格式帧）</li>
+<li>StdId（标准格式帧ID）：可选值范围0-0x7FF（11位）</li>
+<li>ExtId（扩展格式帧ID）：可选值范围0-0x1FFF FFFF（29位，其中标准11位+扩展18位）</li>
+<li>RTR（帧类型）：可选参数CAN_RTR_DATA（数据帧）和CAN_RTR_REMOTE（遥控帧）</li>
+<li>DLC（发送数据的长度）：可选值范围0-8</li>
+<li>TransmitGlobalTime（传输时间戳使能）：ENABLE&#x2F;DISABLE</li>
+</ol>
+<h3 id="3-0-4、CAN验收筛选器"><a href="#3-0-4、CAN验收筛选器" class="headerlink" title="3.0.4、CAN验收筛选器"></a>3.0.4、CAN验收筛选器</h3><p>CAN网络上的所有节点没有地址的概念，因此当某个节点发送了特定ID的一条数据帧的时候，所有节点都会收到该帧消息，但是该帧应该只被需要接收该帧的节点接收，而其他不需要接收该数据帧的节点应该自动筛除掉该消息，减少资源浪费，<font color="#fe2c24"><strong>那一个节点如何判断是否应该接收该帧呢？</strong></font></p>
+<p><font color="#fe2c24"><strong>配置CAN控制器的验收筛选器</strong></font>，STM32F407的CAN提供了28个可调整&#x2F;可配置的标识符筛选器组，注意CAN1&#x2F;2共用这个标识符筛选器组，而且CAN2不能够单独直接配置，需要使用CAN1来配置，这里的筛选功能为硬件筛选功能，无需软件筛选，可以节省软件筛选所需的CPU资源</p>
+<p><font color="#fe2c24"><strong>筛选器可配置为掩码模式或标识符列表模式</strong></font>，在掩码模式下，标识符寄存器与掩码寄存器关联，用以指示标识符的哪些位“必须匹配”，哪些位“无关”</p>
+<p>在HAL库中有一个CAN过滤器配置结构体CAN_FilterTypeDef用于配置筛选器，以下为结构体内主要定义参数</p>
+<ol>
+<li>FilterMode（筛选器模式）：可选参数CAN_FILTERMODE_IDMASK（掩码模式）和CAN_FILTERMODE_IDLIST（标识符列表模式）</li>
+<li>FilterBank（筛选器组）：指定将初始化的筛选器组，单CAN时参数范围0-13，双CAN时参数范围0-27</li>
+<li>FilterFIFOAssignment（分配给筛选器的FIFO）：指定分配给过筛选器的FIFO0&#x2F;1，可选参数CAN_FILTER_FIFO0（FIFO0）和CAN_FILTER_FIFO1（FIFO1）</li>
+<li>FilterScale（筛选器宽度）：CAN_FILTERSCALE_16BIT（两个16位）和CAN_FILTERSCALE_32BIT（一个32位）</li>
+<li>FilterActivation（筛选器使能）：CAN_FILTER_DISABLE（不使能）和CAN_FILTER_ENABLE（使能）</li>
+<li>FilterIdHigh（CAN_FxR1 的高16位）：在32位的屏蔽位模式下，用于指定这些位的标准值</li>
+<li>FilterIdLow（CAN_FxR1 的低16位）：在32位的屏蔽位模式下，用于指定这些位的标准值</li>
+<li>FilterMaskIdHigh（CAN_FxR2的高16位）：在32位的屏蔽位模式下，用于指定需要关心哪些位</li>
+<li>FilterMaskIdLow（CAN_FxR2的低16位）：在32位的屏蔽位模式下，用于指定需要关心哪些位</li>
+</ol>
+<p>这一部分很重要，不配置筛选器则CAN不能正常接收数据，具体配置请阅读本实验3.2.3小节程序,这里笔者自认为讲的不是很到位，读者可以阅读“<a target="_blank" rel="noopener" href="https://blog.csdn.net/jixiangrurui/article/details/39370027">STM32 CAN 过滤器、滤波屏蔽器配置总结</a>”文章</p>
+<h3 id="3-0-5、CAN工作模式"><a href="#3-0-5、CAN工作模式" class="headerlink" title="3.0.5、CAN工作模式"></a>3.0.5、CAN工作模式</h3><p>CAN1&#x2F;2有工作模式和测试模式两种模式，工作模式中又包括初始化模式、正常模式和睡眠模式三种，测试模式中包括静默模式、环回模式和环回与静默组合模式三种，测试模式主要用于测试单个CAN是否工作正常，本实验主要实现双机通信，因此CAN工作在正常模式即可，由于内容太多这里不再详细介绍，具体内容可参考STM32F4xx 参考手册 RM009，如下图所示为测试模式下结构示意图 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-0-6、CAN发送和接收流程"><a href="#3-0-6、CAN发送和接收流程" class="headerlink" title="3.0.6、CAN发送和接收流程"></a>3.0.6、CAN发送和接收流程</h3><p>CAN1&#x2F;2均有3个邮箱可以发送数据，当用户发送数据时只需要<font color="#fe2c24"><strong>利用CAN_TxHeaderTypeDef结构体生成要发送的帧（具体可阅读本实验3.0.3小节），然后使用HAL_CAN_AddTxMessage()函数将生成的帧添加到邮箱即可</strong></font>，如果此时有空闲邮箱那么邮箱就会被挂起，当该邮箱具有最高优先级的时候就会安排发送出去，发送出去的过程完全由硬件实现，用户只需按要求生成帧，然后放入空闲邮箱即可，如下图所示为发送邮箱状态流程图 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>CAN1&#x2F;2均有两个接收FIFO，每个接收FIFO都有三级深度，通俗理解就是有三个邮箱，可以接收三条信息，当发送的信息通过某个CAN网络上的节点验收筛选器成为一条有效信息时，那么该消息就会被该节点的CAN接收FIFO接收，同时该FIFO的接收0会被挂起，如果持续收到消息，该FIFO的接收1&#x2F;2也会被挂起，直到三个邮箱全部用完，如果开启了CAN RX接收中断，那么当FIFO接收0&#x2F;1&#x2F;2&#x2F;被挂起时会进入对应的中断服务回调函数中，<font color="#fe2c24"><strong>当使用HAL_CAN_GetRxMessage()函数读取掉接收FIFO0&#x2F;1的某级深度的消息时，该级别邮箱将会被释放</strong></font>，方便接收下一条消息，如下图所示为接收FIFO状态流程图 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>值得提醒的是，<font color="#fe2c24"><strong>在本实验中由于笔者使用了两个一摸一样的开发板，因此下面配置的一套程序可以直接烧录到两个开发板上就可以通信</strong></font>，但是如果读者使用了不一样的开发板，每个板子的配置流程和下述流程一模一样，但请注意调节时钟树和CAN的参数配置时将两个开发板的CAN通信波特率调节为一致，两个开发板的连接应该如下图所示连接 <em>（注释4）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>另外就是尽量使用CAN1作为通信CAN，因为在STM32F407的两个CAN中CAN1为主CAN，本实验使用CAN2可能在接收信息时存在问题（大概率笔者没有彻底了解到应该对CAN2如何正确配置），读者可以自行尝试</p>
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>本实验时钟树建议按照下图所示将MCU时钟频率配置为100MHz，APB1时钟频率配置为25MHz，这样设置是为了能够得到一个整数的时间片，当然也可以和之前的实验类似，将所有总线频率均设置为最高频率</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>本实验需要初始化开发板上KEY2用户按键做普通输入，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17938621">STM32CubeMX教程3 GPIO输入 - 按键响应</a>”</p>
+<p>本实验需要需要初始化USART2作为输出信息渠道，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”</p>
+<p>单击Pinout &amp; Configuration页面左边Connectivity&#x2F;CAN1，在Mode中勾选Activated激活CAN1，在其下方的参数配置栏目中按照图示参数配置即可，位时序参数详解可以阅读本实验“3.0.2、CAN位时序和波特率”小节</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.16.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-3、外设中断配置"><a href="#3-1-3、外设中断配置" class="headerlink" title="3.1.3、外设中断配置"></a>3.1.3、外设中断配置</h3><p>在Pinout &amp; Configuration页面左边System Core&#x2F;NVIC中<font color="#fe2c24"><strong>勾选CAN1 TX interrupts和CAN1 RX0 interrupts发送接收两个中断</strong></font>，然后选择合适的中断优先级即可，具体如配置下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.17.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.18.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.19.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>在生成的工程代码中新增加了MX_CAN1_Init()函数，该函数对CAN1的参数进行了配置，并调用了CAN初始化函数HAL_CAN_Init()</p>
+<p>在该CAN初始化函数HAL_CAN_Init()中调用了HAL_CAN_MspInit()函数对外设CAN1所需要的时钟使能，引脚复用和中断进行了配置</p>
+<p>CAN1具体初始化调用流程如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.20.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-2、外设中断调用流程"><a href="#3-2-2、外设中断调用流程" class="headerlink" title="3.2.2、外设中断调用流程"></a>3.2.2、外设中断调用流程</h3><p>在STM32CubeMX中勾选CAN1的TX中断和RX0中断后，会在生成的工程代码stm32f4xx_it.c中新增CAN1_TX_IRQHandler()和CAN1_RX0_IRQHandler()中断服务函数</p>
+<p>这两个中断服务函数均调用了HAL库的CAN中断统一处理函数HAL_CAN_IRQHandler()，在该函数中<font color="#fe2c24"><strong>当CAN1邮箱0发送完成消息后会调用HAL_CAN_TxMailbox0CompleteCallback()函数，当CAN1FIFO0消息挂起时会调用HAL_CAN_RxFifo0MsgPendingCallback()函数</strong></font>，这两个函数均为虚函数，需要用户重新实现</p>
+<p>CAN1接收&#x2F;发送中断具体调用流程如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.21.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p>在can.c中添加FIFO0的消息筛选器函数CAN_SetFilters()，然后添加CAN发送数据测试函数CAN1_Send_Test()，具体源代码如下所示 <em>（注释3）</em></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//设置筛选器,要在完成CAN初始化之后调用此函数</span><br>HAL_StatusTypeDef <span class="hljs-title function_">CAN_SetFilters</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br>    CAN_FilterTypeDef	canFilter;                      <span class="hljs-comment">//筛选器结构体变量</span><br>     <span class="hljs-comment">// Configure the CAN Filter</span><br>    canFilter.FilterBank = <span class="hljs-number">0</span>;		                    <span class="hljs-comment">//筛选器组编号</span><br>    canFilter.FilterMode = CAN_FILTERMODE_IDMASK;	    <span class="hljs-comment">//ID掩码模式</span><br>    canFilter.FilterScale = CAN_FILTERSCALE_32BIT;	    <span class="hljs-comment">//32位长度</span><br>    <span class="hljs-comment">//设置1：接收所有帧</span><br>    <span class="hljs-comment">//  canFilter.FilterIdHigh = 0x0000;		            //CAN_FxR1 的高16位</span><br>    <span class="hljs-comment">//	canFilter.FilterIdLow = 0x0000;			            //CAN_FxR1 的低16位</span><br>    <span class="hljs-comment">//	canFilter.FilterMaskIdHigh = 0x0000;	            //CAN_FxR2的高16位。所有位任意</span><br>    <span class="hljs-comment">//	canFilter.FilterMaskIdLow = 0x0000;		            //CAN_FxR2的低16位，所有位任意</span><br>    <span class="hljs-comment">//设置2：只接收stdID为奇数的帧</span><br>    canFilter.FilterIdHigh = <span class="hljs-number">0x0020</span>;		            <span class="hljs-comment">//CAN_FxR1 的高16位</span><br>    canFilter.FilterIdLow = <span class="hljs-number">0x0000</span>;			            <span class="hljs-comment">//CAN_FxR1 的低16位</span><br>    canFilter.FilterMaskIdHigh = <span class="hljs-number">0x0020</span>;	            <span class="hljs-comment">//CAN_FxR2的高16位</span><br>    canFilter.FilterMaskIdLow = <span class="hljs-number">0x0000</span>;		            <span class="hljs-comment">//CAN_FxR2的低16位</span><br>    <br>    canFilter.FilterFIFOAssignment = CAN_RX_FIFO0;		<span class="hljs-comment">//应用于FIFO0</span><br>    canFilter.FilterActivation = ENABLE;		        <span class="hljs-comment">//使用筛选器</span><br>    canFilter.SlaveStartFilterBank = <span class="hljs-number">14</span>;		        <span class="hljs-comment">//从CAN控制器筛选器起始的Bank</span><br>    HAL_StatusTypeDef result=HAL_CAN_ConfigFilter(&amp;hcan1, &amp;canFilter);<br>    <span class="hljs-keyword">return</span> result;<br>&#125;<br> <br><span class="hljs-comment">/*CAN发送数据测试函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">CAN1_Send_Test</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> msgid, <span class="hljs-type">uint8_t</span> *data)</span><br>&#123;<br>    TxMessage.IDE = CAN_ID_STD;                         <span class="hljs-comment">//设置ID类型</span><br>    TxMessage.StdId = msgid;                            <span class="hljs-comment">//设置ID号</span><br>    TxMessage.RTR = CAN_RTR_DATA;                       <span class="hljs-comment">//设置传送数据帧</span><br>    TxMessage.DLC = <span class="hljs-number">4</span>;                                  <span class="hljs-comment">//设置数据长度</span><br>    <span class="hljs-keyword">if</span>(HAL_CAN_AddTxMessage(&amp;hcan1, &amp;TxMessage, data, &amp;TxMailbox) != HAL_OK) <br>    &#123;<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;CAN send test data fail!\r\n&quot;</span>);<br>        Error_Handler();<br>    &#125;<br>&#125;<br><br>在can.c中重新实现CAN接收/发送中断处理函数，具体源代码如下所示<br><br><span class="hljs-comment">/*CAN接收FIFO0挂起中断处理函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_CAN_RxFifo0MsgPendingCallback</span><span class="hljs-params">(CAN_HandleTypeDef *hcan)</span><br>&#123;<br>    <span class="hljs-type">uint8_t</span>  data[<span class="hljs-number">8</span>];<br>    HAL_StatusTypeDef status;<br>    <span class="hljs-keyword">if</span>(hcan == &amp;hcan1) <br>    &#123;<br>        status = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &amp;RxMessage, data);<br>        <span class="hljs-keyword">if</span> (HAL_OK == status)<br>        &#123;                             <br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---&gt;Data Receieve!\r\n&quot;</span>);<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;RxMessage.StdId is %#x\r\n&quot;</span>, RxMessage.StdId);<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;data[0] is 0x%02x\r\n&quot;</span>, data[<span class="hljs-number">0</span>]);<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;data[1] is 0x%02x\r\n&quot;</span>, data[<span class="hljs-number">1</span>]);<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;data[2] is 0x%02x\r\n&quot;</span>, data[<span class="hljs-number">2</span>]);<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;data[3] is 0x%02x\r\n&quot;</span>, data[<span class="hljs-number">3</span>]);<br>            <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;&lt;---\r\n&quot;</span>);<br>        &#125;<br>    &#125;<br>&#125;<br> <br><span class="hljs-comment">/*CAN发送完成中断处理函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_CAN_TxMailbox0CompleteCallback</span><span class="hljs-params">(CAN_HandleTypeDef *hcan)</span><br>&#123;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---&gt;Into TxMailbox0CompleteCallback Function!\r\n&quot;</span>);<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;---&gt;CAN send test data success!\r\n\r\n&quot;</span>);<br>&#125;<br><br>在main.c主函数中设置CAN接收筛选器，启动CAN，使能中断，然后再主循环中实现按键控制，每当按键KEY2按下时就调用CAN1_Send_Test()函数发送数据<br><br>具体源代码如下所示<br><br><span class="hljs-comment">/*主循环外程序*/</span><br><span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;----- CAN Test Board #1 -----\r\n&quot;</span>);<br><span class="hljs-comment">//设置筛选器</span><br><span class="hljs-keyword">if</span> (CAN_SetFilters() == HAL_OK)   <br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;ID Filter: Only Odd IDs\r\n&quot;</span>);<br><span class="hljs-comment">//启动CAN1模块</span><br><span class="hljs-keyword">if</span> (HAL_CAN_Start(&amp;hcan1) == HAL_OK)  <br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;CAN is started\r\n&quot;</span>);<br><span class="hljs-comment">//启用CAN发送/接收中断</span><br><span class="hljs-keyword">if</span>(HAL_CAN_ActivateNotification(&amp;hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_TX_MAILBOX_EMPTY) != HAL_OK) <br>&#123;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;CAN_IT_RX_FIFO0_MSG_PENDING Enable Fail\r\n&quot;</span>);<br>        Error_Handler();<br>&#125;<br><span class="hljs-type">uint32_t</span> msg_id=<span class="hljs-number">0</span>;<br><span class="hljs-type">uint8_t</span> data[<span class="hljs-number">4</span>] = &#123;<span class="hljs-number">0x01</span>, <span class="hljs-number">0x02</span>, <span class="hljs-number">0x03</span>, <span class="hljs-number">0x04</span>&#125;;<br> <br> <br><span class="hljs-comment">/*主循环内程序*/</span><br><span class="hljs-comment">/*按键KEY2按下*/</span><br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>&#123;<br>    HAL_Delay(<span class="hljs-number">50</span>);<br>    <span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin) == GPIO_PIN_RESET)<br>    &#123;<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">uint16_t</span> i =<span class="hljs-number">0</span>;i&lt;<span class="hljs-number">4</span>;i++)<br>            data[i]++;<br> <br>        CAN1_Send_Test(msg_id++,data);<br>        <span class="hljs-keyword">while</span>(!HAL_GPIO_ReadPin(KEY2_GPIO_Port,KEY2_Pin));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>最后将在can.c中定义的消息筛选器函数、发送数据测试函数在can.h中声明即可，具体源代码如下所示</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*can.h中函数声明*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">CAN1_Send_Test</span><span class="hljs-params">(<span class="hljs-type">uint32_t</span> msgid, <span class="hljs-type">uint8_t</span> *data)</span>;<br>HAL_StatusTypeDef <span class="hljs-title function_">CAN_SetFilters</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<h1 id="4、常用函数"><a href="#4、常用函数" class="headerlink" title="4、常用函数"></a>4、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*CAN开始通信*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_CAN_Start</span><span class="hljs-params">(CAN_HandleTypeDef *hcan)</span><br> <br><span class="hljs-comment">/*CAN停止通信*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_CAN_Stop</span><span class="hljs-params">(CAN_HandleTypeDef *hcan)</span><br> <br><span class="hljs-comment">/*获取当前空闲邮箱数量*/</span><br><span class="hljs-type">uint32_t</span> <span class="hljs-title function_">HAL_CAN_GetTxMailboxesFreeLevel</span><span class="hljs-params">(<span class="hljs-type">const</span> CAN_HandleTypeDef *hcan)</span><br> <br><span class="hljs-comment">/*请求发送相应的邮箱内容*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_CAN_AddTxMessage</span><span class="hljs-params">(CAN_HandleTypeDef *hcan, <span class="hljs-type">const</span> CAN_TxHeaderTypeDef *pHeader,<span class="hljs-type">const</span> <span class="hljs-type">uint8_t</span> aData[], <span class="hljs-type">uint32_t</span> *pTxMailbox)</span><br> <br><span class="hljs-comment">/*获取FIFO中挂起的消息数*/</span><br><span class="hljs-type">uint32_t</span> <span class="hljs-title function_">HAL_CAN_GetRxFifoFillLevel</span><span class="hljs-params">(<span class="hljs-type">const</span> CAN_HandleTypeDef *hcan, <span class="hljs-type">uint32_t</span> RxFifo)</span><br> <br><span class="hljs-comment">/*读取FIFI中挂起的消息信息并释放邮箱*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_CAN_GetRxMessage</span><span class="hljs-params">(CAN_HandleTypeDef *hcan, <span class="hljs-type">uint32_t</span> RxFifo,CAN_RxHeaderTypeDef *pHeader, <span class="hljs-type">uint8_t</span> aData[])</span><br> <br><span class="hljs-comment">/*CAN发送完成中断处理函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_CAN_TxMailbox0CompleteCallback</span><span class="hljs-params">(CAN_HandleTypeDef *hcan)</span><br> <br><span class="hljs-comment">/*CAN接收中断处理函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_CAN_RxFifo0MsgPendingCallback</span><span class="hljs-params">(CAN_HandleTypeDef *hcan)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><p>烧录程序，开发板1&#x2F;2上电后均显示CAN初始化成功可以开始通信</p>
+<p>当第一次按下开发板1的KEY2按键，此时串口输出进入CAN发送完成中断处理函数中并成功发送信息的提示，但是开发板2并没有接收消息（因为开发板1&#x2F;2均设置了只接收stdID为奇数的帧）</p>
+<p>当第二次按下开发板1的KEY2按键时，可以发现开发板2收到了消息，并将接收到的消息打印了出来，具体实验现象如下图所示（左边为开发板1，右边为开发板2）</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/21.22.gif" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h1 id="6、注释详解"><a href="#6、注释详解" class="headerlink" title="6、注释详解"></a>6、注释详解</h1><p><em>注释1</em>：图片来源 STM32F4xx 中文参考手册 RM009</p>
+<p><em>注释2</em>：图片来源 <a target="_blank" rel="noopener" href="https://www.cnblogs.com/Xa-L/p/15155158.html" title="通信——CAN总线基础介绍">通信——CAN总线基础介绍</a></p>
+<p><em>注释3</em>：在CAN发送测试函数末尾不要使用printf输出，如果非要使用请在使用前进行1ms延时，否则可能进不去发送完成函数HAL_CAN_TxMailbox0CompleteCallback中</p>
+<p><em>注释4</em>：图片来源 <a target="_blank" rel="noopener" href="http://news.eeworld.com.cn/mcu/ic543344.html" title="STM32CubeMX | 36 - 使用CAN总线进行双板通信（TJA1050）">STM32CubeMX | 36 - 使用CAN总线进行双板通信（TJA1050）</a></p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UB77e58e05a5ea9">STM32Cube高效开发教程（基础篇）</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程21 CAN - 双机通信</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程21-CAN-双机通信/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B22-FSMC-8080%E5%B9%B6%E8%A1%8C%E6%8E%A5%E5%8F%A3TFT-LCD%E9%A9%B1%E5%8A%A8/" title="STM32CubeMX教程22 FSMC - 8080并行接口TFT-LCD驱动">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程22 FSMC - 8080并行接口TFT-LCD驱动</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B20-SPI-W25Q128%E9%A9%B1%E5%8A%A8/" title="STM32CubeMX教程20 SPI - W25Q128驱动">
+                        <span class="hidden-mobile">STM32CubeMX教程20 SPI - W25Q128驱动</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,796 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板实现RTC周期唤醒、闹钟A&#x2F;B事件功能，具体为在周期唤">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程10 RTC 实时时钟 - 周期唤醒、闹钟AB事件和备份寄存器">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B10-RTC-%E5%AE%9E%E6%97%B6%E6%97%B6%E9%92%9F-%E5%91%A8%E6%9C%9F%E5%94%A4%E9%86%92%E3%80%81%E9%97%B9%E9%92%9FAB%E4%BA%8B%E4%BB%B6%E5%92%8C%E5%A4%87%E4%BB%BD%E5%AF%84%E5%AD%98%E5%99%A8/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料开发板（正点原子stm32f407探索者开发板V2.4） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 野火DAP仿真器 XCOM V2.6串口助手 2、实验目标使用STM32CubeMX软件配置STM32F407开发板实现RTC周期唤醒、闹钟A&#x2F;B事件功能，具体为在周期唤">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.15.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.17.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.18.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.19.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.20.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.21.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.22.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.23.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.24.png">
+<meta property="article:published_time" content="2024-01-26T04:04:21.000Z">
+<meta property="article:modified_time" content="2024-01-26T04:08:01.586Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程10 RTC 实时时钟 - 周期唤醒、闹钟AB事件和备份寄存器 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程10 RTC 实时时钟 - 周期唤醒、闹钟AB事件和备份寄存器"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 12:04" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          22 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程10 RTC 实时时钟 - 周期唤醒、闹钟AB事件和备份寄存器</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p>开发板（<a target="_blank" rel="noopener" href="http://47.111.11.73/docs/boards/stm32/zdyz_stm32f407_explorerV3.html">正点原子stm32f407探索者开发板V2.4</a>）</p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.embedfire.com/stm32_products/must_read/zh/latest/doc/quickstart/DAP/DAP.html">野火DAP仿真器</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.openedv.com/docs/tool/ruanjian/ATK-XCOM.html">XCOM V2.6串口助手</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板<font color="#fe2c24"><strong>实现RTC周期唤醒、闹钟A&#x2F;B事件功能</strong></font>，具体为在周期唤醒时利用串口输出当前RTC记录时间，当闹钟A&#x2F;B事件发生时利用串口输出闹钟A&#x2F;B事件发生提示</p>
+<h1 id="3、实验流程"><a href="#3、实验流程" class="headerlink" title="3、实验流程"></a>3、实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>RTC的时钟可以由外部低速时钟LSE、外部高速时钟HSE经过2-31分频和内部RC振荡LSI三种时钟来源提供，<font color="#fe2c24"><strong>但是一般我们都选择使用32.768kHz的LSE作为RTC的时钟源，因为32.768kHz的时钟频率可以经过128次分频，然后再经过256次分频得到一个较为精确的1Hz信号</strong></font>，此信号1s脉动一次，可以方便的用于更新日历，如下图所示 <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>另外RTC还有两个可编程的闹钟A&#x2F;B</strong></font>，如果设置了闹钟A&#x2F;B的时间，则闹钟A&#x2F;B设定时间会和当前日历时间对比，如果时间相等，会产生ALRA&#x2F;BF事件</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>周期唤醒可以使用RTC内部一个16位唤醒自动重载寄存器来实现，周期唤醒的时钟信号可以来自于更新日历的1Hz（ck_spre）信号，也可以使用RTC时钟的2&#x2F;4&#x2F;8&#x2F;16分频后的时钟，设置该自动重载寄存器的值，<font color="#fe2c24"><strong>根据时钟频率向上计数，当计数溢出时发生周期唤醒事件</strong></font></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p><font color="#fe2c24"><strong>闹钟A&#x2F;B，周期唤醒产生的 ALRAF、 ALRBF和WUTF事件均可以输出到复用引脚RTC_AF1（PC13）</strong></font></p>
+<p><font color="#fe2c24"><strong>STM32F407的RTC还有20个32位的备份寄存器，其名字从RTC_BKP_DR0到RTC_BKP_DR19</strong></font>，定义在stm32f4xx_hal_rtc_ex.h文件中，RTC和备份寄存器均由单片机的备用电源VBAT提供，主电源VDD&#x2F;VDDA断开不影响备份寄存器内容存储及RTC的正常运行</p>
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1-、时钟树配置"><a href="#3-1-1-、时钟树配置" class="headerlink" title="3.1.1 、时钟树配置"></a>3.1.1 、时钟树配置</h3><p><font color="#fe2c24"><strong>本文实验中RTC时钟信号源选择为外部32.768kHz的低速时钟LSE</strong></font>，首先需要在Pinout &amp; Configuration页面左边System Core&#x2F;RCC中将原来Disable状态的Low Speed Clock(LSE)选择为Crystal&#x2F;Ceramic Resonator，表示外部低速时钟LSE由32.768kHz的晶振提供，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>然后还是在这个页面，<font color="#fe2c24"><strong>在Timers&#x2F;RTC中单击Activate Clock Source</strong></font>，激活时钟源之后才可以对Clock Configuration页面的时钟修改，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>最后<font color="#fe2c24"><strong>在Clock Configuration页面将输出到RTC时钟的时钟源选择为LSE</strong></font>，此时就已经配置好了RTC的输入时钟为32.768kHz的LSE，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>本实验需要需要初始化USART1作为信息输出渠道，具体配置步骤请阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17950348">STM32CubeMX教程9 USART&#x2F;UART 异步通信</a>”</p>
+<p>单击Pinout &amp; Configuration页面左边<font color="#fe2c24"><strong>Timers&#x2F;RTC，在该页面中间单击Activate Calendar激活日历</strong></font></p>
+<p>这里Alarm A、Alarm B和WakeUp均有Disable、Internal Alarm&#x2F;WakeUp 和 Routed to AF1三个选项，分别表示不使用、单纯内部使用和输出到复用引脚AF1（PC13）</p>
+<p><font color="#fe2c24"><strong>注意由于AF1只有一个所以一旦某一个选择输出到了复用引脚AF1，其他便不可以设置</strong></font>，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>然后对启用的日历、Alarm A、Alarm B和WakeUp参数做不同的配置，这里比较通俗易懂，具体配置请看下图</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-3-、外设中断配置"><a href="#3-1-3-、外设中断配置" class="headerlink" title="3.1.3 、外设中断配置"></a>3.1.3 、外设中断配置</h3><p>在Pinout &amp; Configuration页面左边System Core&#x2F;NVIC中<font color="#fe2c24"><strong>勾选闹钟A&#x2F;B中断及周期唤醒中断</strong></font>，然后选择合适的中断优先级即可，另外串口中断可以不打开，本节实验输出采用阻塞传输数据的方式输出RTC时间</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化函数调用流程"><a href="#3-2-1、外设初始化函数调用流程" class="headerlink" title="3.2.1、外设初始化函数调用流程"></a>3.2.1、外设初始化函数调用流程</h3><p>主函数中调用MX_RTC_Init()函数对RTC基本参数及日历时间、日历日期、闹钟A定时时间、闹钟B定时时间和周期唤醒等参数初始化&#x2F;使能</p>
+<p>在初始化RTC的函数HAL_RTC_Init()中调用了HAL_RTC_MspInit()函数完成了对RTC时钟使能，NVIC使能，NVIC优先级设置</p>
+<p>如下图所示为上述的函数调用流程</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.16.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-2、外设中断函数调用流程"><a href="#3-2-2、外设中断函数调用流程" class="headerlink" title="3.2.2、外设中断函数调用流程"></a>3.2.2、外设中断函数调用流程</h3><p>在stm32f4xx_it.c文件中新增了周期唤醒中断服务函数RTC_WKUP_IRQHandler()</p>
+<p>在该RTC_WKUP_IRQHandler()函数中调用了HAL_RTCEx_WakeUpTimerIRQHandler()函数处理周期回调事件</p>
+<p><font color="#fe2c24"><strong>最终调用了虚函数HAL_RTCEx_WakeUpTimerEventCallback()，该函数需要用户重新实现</strong></font></p>
+<p>如下图所示为周期唤醒中断函数调用流程</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.17.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>同时在stm32f4xx_it.c文件中新增了RTC闹钟A&#x2F;B事件中断服务函数RTC_Alarm_IRQHandler()</p>
+<p>在该RTC_Alarm_IRQHandler()函数中调用了HAL_RTC_AlarmIRQHandler()函数处理闹钟A&#x2F;B事件</p>
+<p><font color="#fe2c24"><strong>最后在该函数中调用了虚函数HAL_RTC_AlarmAEventCallback()处理闹钟A事件，调用虚函数HAL_RTCEx_AlarmBEventCallback()处理闹钟B事件</strong></font></p>
+<p>如下图所示为RTC闹钟A&#x2F;B事件中断函数调用流程</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.18.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-2-3、添加其他必要代码"><a href="#3-2-3、添加其他必要代码" class="headerlink" title="3.2.3、添加其他必要代码"></a>3.2.3、添加其他必要代码</h3><p>重新实现周期唤醒中断回调函数HAL_RTCEx_WakeUpTimerEventCallback()在rtc.c中，具体实现代码如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.19.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*周期唤醒回调函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_RTCEx_WakeUpTimerEventCallback</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc)</span><br>&#123;<br>    RTC_TimeTypeDef sTime;<br>    RTC_DateTypeDef sDate;<br>    <span class="hljs-keyword">if</span>(HAL_RTC_GetTime(hrtc, &amp;sTime, RTC_FORMAT_BIN) == HAL_OK)<br>    &#123;<br>        HAL_RTC_GetDate(hrtc, &amp;sDate,  RTC_FORMAT_BIN);<br>        <span class="hljs-type">char</span> str[<span class="hljs-number">22</span>];<br>        <span class="hljs-built_in">sprintf</span>(str,<span class="hljs-string">&quot;RTC Time= %2d:%2d:%2d\r\n&quot;</span>,sTime.Hours,sTime.Minutes,sTime.Seconds);<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s&quot;</span>, str);<br>    &#125;<br>    HAL_GPIO_TogglePin(RED_LED_GPIO_Port,RED_LED_Pin);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>重新实现闹钟A&#x2F;B事件中断回调函数HAL_RTC_AlarmAEventCallback()和HAL_RTCEx_AlarmBEventCallback()在rtc.c中，具体代码如下所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.20.png" srcset="/img/loading.gif" lazyload ></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*闹钟A事件回调函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_RTC_AlarmAEventCallback</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc)</span><br>&#123;<br>    <span class="hljs-type">char</span> infoA[]=<span class="hljs-string">&quot;Alarm A(xx:xx:15) trigger: \r\n&quot;</span>;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s&quot;</span>, infoA);<br>    HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port,GREEN_LED_Pin);<br>&#125;<br> <br><span class="hljs-comment">/*闹钟B事件回调函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_RTCEx_AlarmBEventCallback</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc)</span><br>&#123;<br>    <span class="hljs-type">char</span> infoB[]=<span class="hljs-string">&quot;Alarm B(xx:0:30) trigger: \r\n&quot;</span>;<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%s&quot;</span>, infoB);<br>    HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port,GREEN_LED_Pin);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>此时的代码可以正常运行，<font color="#fe2c24"><strong>但存在一个问题，复位后重新执行RTC初始化函数会对RTC时间强制初始化为0：0：0，日期也会强制初始化</strong></font>，而我们想要设定的是当我们需要其初始化时就初始化，当一次初始化完毕之后，我不希望每次单片机复位时重新初始化</p>
+<p><font color="#fe2c24"><strong>因此我们可以通过上述介绍的备份寄存器修复此BUG</strong></font>，我们在RTC通用初始化结束之后，RTC日期和时间初始化之前处，添加判断RTC备份寄存器是否已被写入1来决定是否需要初始化时间和日期，如果已被写入1，则表示之前已完成日期和时间初始化，不需要再次重新初始化，因此启动周期唤醒后直接退出函数，如下图代码所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.21.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//读取备份寄存R0</span><br><span class="hljs-type">uint32_t</span> iniRTC=HAL_RTCEx_BKUPRead(&amp;hrtc, RTC_BKP_DR0);	<br><span class="hljs-comment">//非零</span><br><span class="hljs-keyword">if</span>((iniRTC &amp; <span class="hljs-number">0x01</span>))  <br>&#123;<br>    <span class="hljs-comment">//使能周期唤醒</span><br>    <span class="hljs-keyword">if</span>(HAL_RTCEx_SetWakeUpTimer_IT(&amp;hrtc, <span class="hljs-number">0</span>, RTC_WAKEUPCLOCK_CK_SPRE_16BITS) != HAL_OK)<br>        Error_Handler();<br> <br>    <span class="hljs-comment">//提前退出函数,不初始化时间和日期</span><br>    <span class="hljs-keyword">return</span>;  <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><font color="#fe2c24"><strong>何时改变&#x2F;写入RTC备份寄存器中的值呢？</strong></font></p>
+<p>这里笔者使用按键来控制，当按下WK_UP按键时，就翻转备份寄存器RTC_BKP_DR0中存储的值，也就是说按下一次WK_UP按键，备份寄存器RTC_BKP_DR0中的值会在0&#x2F;1之间改变，如下图所示为主循环中的按键扫描程序</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.22.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">uint32_t</span> iniRTC = HAL_RTCEx_BKUPRead(&amp;hrtc,RTC_BKP_DR0);<br>iniRTC = !iniRTC;<br> <br><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == <span class="hljs-number">1</span>)<br>&#123;<br>    HAL_Delay(<span class="hljs-number">50</span>);<br>    <span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin) == <span class="hljs-number">1</span>)<br>    &#123;<br>        HAL_RTCEx_BKUPWrite(&amp;hrtc,RTC_BKP_DR0, iniRTC);<br>        <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Write RTC_BKP_DR0 %d\r\n&quot;</span>, iniRTC);<br>        <span class="hljs-keyword">while</span>(HAL_GPIO_ReadPin(WK_UP_GPIO_Port,WK_UP_Pin));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="4、常用函数"><a href="#4、常用函数" class="headerlink" title="4、常用函数"></a>4、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*RTC周期回调中断服务函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_RTCEx_WakeUpTimerEventCallback</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc)</span><br> <br><span class="hljs-comment">/*RTC闹钟A中断服务函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_RTC_AlarmAEventCallback</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc)</span><br> <br><span class="hljs-comment">/*RTC闹钟B中断服务函数*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_RTCEx_AlarmBEventCallback</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc)</span><br> <br><span class="hljs-comment">/*查询RTC时间*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_RTC_GetTime</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime, <span class="hljs-type">uint32_t</span> Format)</span><br> <br><span class="hljs-comment">/*查询RTC日期*/</span><br>HAL_StatusTypeDef <span class="hljs-title function_">HAL_RTC_GetDate</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc, RTC_DateTypeDef *sDate, <span class="hljs-type">uint32_t</span> Format)</span><br> <br><span class="hljs-comment">/*读RTC备份寄存器的值*/</span><br><span class="hljs-type">uint32_t</span> <span class="hljs-title function_">HAL_RTCEx_BKUPRead</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc, <span class="hljs-type">uint32_t</span> BackupRegister)</span><br> <br><span class="hljs-comment">/*写RTC备份寄存器的值*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_RTCEx_BKUPWrite</span><span class="hljs-params">(RTC_HandleTypeDef *hrtc, <span class="hljs-type">uint32_t</span> BackupRegister, <span class="hljs-type">uint32_t</span> Data)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><p>烧录程序，通过串口助手观察串口输出信息，每隔1秒，串口助手收到开发板传来的RTC时间信息，并且红色LED每一秒状态翻转一次</p>
+<p>当时间到达0：0：15时，闹钟A触发，此时绿色LED灯状态翻转被点亮</p>
+<p>随着时间继续流逝，当时间到达0：0：30时，闹钟B触发，此时此时绿色LED灯状态翻转被熄灭</p>
+<p>此后每分钟的第15秒闹钟A会触发一次，每小时的0分30秒闹钟B会触发一次，具体串口输出信息如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.23.png" srcset="/img/loading.gif" lazyload></div>
+
+<p>按下WK_UP按键可以翻转备份寄存器RTC_BKP_DR0内存储的值，当备份寄存器RTC_BKP_DR0的值为1时，复位之后RTC的时间不会重置为0；</p>
+<p>而当备份寄存器RTC_BKP_DR0的值为0时，复位之后RTC的时间会被重新初始化为0：0：0，串口输出信息如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/10.24.png" srcset="/img/loading.gif" lazyload></div>
+
+<p><font color="#fe2c24"><strong>为什么上图中RTC时间为0：0：15时刻的闹钟A没有响应？</strong></font></p>
+<p>这是因为备份寄存器RTC_BKP_DR0的值为1时，我们在MX_RTC_Init初始化函数中初始化完毕RTC之后直接启动了周期唤醒然后整个函数就退出了，并没有对RTC的闹钟A&#x2F;B进行初始化，如果你想兼顾两者功能，也可以编写程序不直接退出，而是绕过RTC时间和日期赋初值的代码，然后执行RTC的闹钟A&#x2F;B的初始化</p>
+<h1 id="6、注释详解"><a href="#6、注释详解" class="headerlink" title="6、注释详解"></a>6、注释详解</h1><p><em>注释1</em>：图片来源STM32F4xx中文参考手册 RM0090</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.epubit.com/bookDetails?id=UB77e58e05a5ea9">STM32Cube高效开发教程（基础篇）</a></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程10 RTC 实时时钟 - 周期唤醒、闹钟AB事件和备份寄存器</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程10-RTC-实时时钟-周期唤醒、闹钟AB事件和备份寄存器/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B11-RTC-%E5%AE%9E%E6%97%B6%E6%97%B6%E9%92%9F-%E5%85%A5%E4%BE%B5%E6%A3%80%E6%B5%8B%E5%92%8C%E6%97%B6%E9%97%B4%E6%88%B3/" title="STM32CubeMX教程11 RTC 实时时钟 - 入侵检测和时间戳">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程11 RTC 实时时钟 - 入侵检测和时间戳</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B9-USART-UART-%E5%BC%82%E6%AD%A5%E9%80%9A%E4%BF%A1/" title="STM32CubeMX教程9 USART UART 异步通信">
+                        <span class="hidden-mobile">STM32CubeMX教程9 USART UART 异步通信</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
