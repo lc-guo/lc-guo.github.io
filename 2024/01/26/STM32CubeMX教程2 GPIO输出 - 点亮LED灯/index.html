@@ -1,0 +1,702 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 2、实验目标使用STM32CubeMX软件配置STM32F407开发板点亮LED灯 3、实验流程3.0、前提知识笔者使用的STM32F407G-DISC1开发板主控制器为STM32F407VGT">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程2 GPIO输出 - 点亮LED灯">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B2%20GPIO%E8%BE%93%E5%87%BA%20-%20%E7%82%B9%E4%BA%AELED%E7%81%AF/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 2、实验目标使用STM32CubeMX软件配置STM32F407开发板点亮LED灯 3、实验流程3.0、前提知识笔者使用的STM32F407G-DISC1开发板主控制器为STM32F407VGT">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.15.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.16.gif">
+<meta property="article:published_time" content="2024-01-26T03:07:16.000Z">
+<meta property="article:modified_time" content="2024-01-26T03:07:10.619Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程2 GPIO输出 - 点亮LED灯 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程2 GPIO输出 - 点亮LED灯"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 11:07" pubdate>
+          2024年1月26日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          14 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程2 GPIO输出 - 点亮LED灯</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p>开发板（<a target="_blank" rel="noopener" href="https://www.st.com/en/evaluation-tools/stm32f4discovery.html">STM32F407G-DISC1</a>）</p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板点亮LED灯</p>
+<h1 id="3、实验流程"><a href="#3、实验流程" class="headerlink" title="3、实验流程"></a>3、实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>笔者使用的STM32F407G-DISC1开发板主控制器为STM32F407VGT6，该MCU封装为LQFP 100，一共100个引脚，除去16个POWER引脚、1个NRST引脚和一个BOOT0引脚外，还剩余82个引脚，剩下的这些引脚均可以作为GPIO输入输出引脚使用，这些引脚分为6组，分别为GPIOA、GPIOB、GPIOC、GPIOD、GPIOE和GPIOH，除GPIOH只有2个引脚外，其余5组均为16个引脚，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.1.png" srcset="/img/loading.gif" lazyload ></div>
+
+<p>在编程语言学习的过程中，一般学习者初始程序大多选择输出“Hello World!”，而在嵌入式单片机的学习中，一般学习者初始程序大多为“点亮LED灯”，笔者使用的开发板上拥有四个不同颜色的LED灯，其硬件原理图如下图所示，从电路连接上可以看出，<font color="#fe2c24"><strong>从上到下绿橙红蓝四个LED灯分别由单片机的PD12、PD13、PD14和PD15四个引脚控制，当这四个引脚输出高电平时，相应的LED则会被点亮</strong></font></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.2.png" srcset="/img/loading.gif" lazyload></div>
+
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>系统时钟使用8MHz外部高速时钟HSE，HCLK、PCLK1和PCLK2均设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>在Pinout ＆ Configuration页面右边单片机引脚预览Pinout view中，寻找需要设置的具体GPIO，这里我们选择PD12、PD13、PD14和PD15四个引脚，左键单击引脚可以对引脚功能进行设置，<font color="#fe2c24"><strong>统一选择为GPIO_Output</strong></font></p>
+<p>在页面左边单片机功能分类栏目中选择GPIO，然后在页面中间栏目GPIO Mode and Configuration中可以看到所有使用到的具体GPIO及其相关配置，单击某个GPIO可以对其配置进行修改</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>当引脚选择GPIO Output时，GPIO mode有推挽输出和开漏输出两种，GPIO Pull-up&#x2F;Pull-down可以选择无上&#x2F;下拉、上拉和下拉其中的几种，<font color="#fe2c24"><strong>需要注意的是开漏输出无法真正输出高电平，即高电平时没有驱动能力，需要借助外部上拉电阻完成对外驱动</strong></font> <em>（注释1）</em></p>
+<p>当GPIO mode设置为推挽输出时，此时上&#x2F;下拉只有在没有输出时才有作用，也就是说，推挽输出状态下，如果控制输出高电平那IO状态就为高电平，若控制输出低电平那IO状态就为低电平，此时与上&#x2F;下拉无关，而当没有控制输出时，此时IO的状态由上&#x2F;下拉决定 <em>（注释2）</em></p>
+<p>当GPIO mode设置为开漏输出时，如果控制输出低电平那IO状态就为低电平；若控制输出高电平，此时输出指令就不会起到作用，IO状态由上&#x2F;下拉决定</p>
+<p>因此<font color="#fe2c24"><strong>PD12、PD13、PD14和PD15四个引脚模式选择推挽输出，无上下拉</strong></font>，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.9.png" srcset="/img/loading.gif" lazyload></div>
+
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>打开工程，在main.c主函数中可以看到初始化部分多了MX_GPIO_Init()函数，此函数即初始化4个LED引脚为输出的函数</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>右键单击函数，单击Go To Definition Of ‘MX_GPlO_Init’ 定位<em>（注释3）</em>到函数定义所在的文件gpio.c<em>（注释4）</em>中，可以看到初始化函数中所做的设置正是我们在STM32CubeMX中所做的设置</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>此时如果不增加任何代码，编译整个工程应该是可以正常编译通过，0错误和0警告</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.14.png" srcset="/img/loading.gif" lazyload></div>
+
+<h3 id="3-2-2、添加其他必要代码"><a href="#3-2-2、添加其他必要代码" class="headerlink" title="3.2.2、添加其他必要代码"></a>3.2.2、添加其他必要代码</h3><p>然后我们就可以添加我们自己的功能代码，在主函数初始化LED的引脚之后，将引脚输出为高电平即可点亮LED，还可以在主循环中每隔一定时间翻转LED引脚的输出电平，形成LED闪烁的状态，添加代码如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*点亮四个LED灯*/</span><br>HAL_GPIO_WritePin(GREEN_LED_GPIO_Port,GREEN_LED_Pin,GPIO_PIN_SET);<br>HAL_GPIO_WritePin(ORANGE_LED_GPIO_Port,ORANGE_LED_Pin,GPIO_PIN_SET);<br>HAL_GPIO_WritePin(RED_LED_GPIO_Port,RED_LED_Pin,GPIO_PIN_SET);<br>HAL_GPIO_WritePin(BLUE_LED_GPIO_Port,BLUE_LED_Pin,GPIO_PIN_SET);<br><br><span class="hljs-comment">/*每隔100ms翻转绿色LED灯状态*/</span><br>HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin) ;<br>HAL_Delay(<span class="hljs-number">100</span>);<br></code></pre></td></tr></table></figure>
+
+<h1 id="4、常用函数"><a href="#4、常用函数" class="headerlink" title="4、常用函数"></a>4、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/**</span><br><span class="hljs-comment">  * @brief  设置某个GPIO固定输出高电平或低电平</span><br><span class="hljs-comment">  * @param  GPIOx：引脚组别（GPIOA - GPIOI）</span><br><span class="hljs-comment">  * @param  GPIO_Pin：引脚（GPIO_PIN_0 - GPIO_PIN_15）</span><br><span class="hljs-comment">  * @param  PinState：低电平（GPIO_PIN_RESET）、高电平（GPIO_PIN_SET）</span><br><span class="hljs-comment">  * @retval None</span><br><span class="hljs-comment">    */</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_GPIO_WritePin</span><span class="hljs-params">(GPIO_TypeDef* GPIOx, <span class="hljs-type">uint16_t</span> GPIO_Pin, GPIO_PinState PinState)</span>;<br><br><span class="hljs-comment">/*设置PA0引脚输出高电平*/</span><br>HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment">  * @brief  设置某个GPIO的输出电平翻转</span><br><span class="hljs-comment">  * @param  GPIOx：引脚组别（GPIOA - GPIOI）</span><br><span class="hljs-comment">  * @param  GPIO_Pin：引脚（GPIO_PIN_0 - GPIO_PIN_15）</span><br><span class="hljs-comment">  * @retval None</span><br><span class="hljs-comment">    */</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_GPIO_TogglePin</span><span class="hljs-params">(GPIO_TypeDef* GPIOx, <span class="hljs-type">uint16_t</span> GPIO_Pin)</span>;<br><br><span class="hljs-comment">/*翻转PA0引脚输出电平*/</span><br>HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_0);<br></code></pre></td></tr></table></figure>
+
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><h2 id="5-1、具体步骤"><a href="#5-1、具体步骤" class="headerlink" title="5.1、具体步骤"></a>5.1、具体步骤</h2><p>“初始化LED引脚为输出 -&gt; 使用HAL库函数设置LED引脚输出高电平 -&gt; 引脚对应的LED点亮”</p>
+<h2 id="5-2、实验现象"><a href="#5-2、实验现象" class="headerlink" title="5.2、实验现象"></a>5.2、实验现象</h2><p>烧录程序，然后观察开发板上LED灯的闪烁状态，发现开发板上电后4个LED均被点亮，其中GREEN_LED每隔一段时间闪烁一次</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/2.16.gif" srcset="/img/loading.gif" lazyload></div>
+
+<h1 id="6、注释解析"><a href="#6、注释解析" class="headerlink" title="6、注释解析"></a>6、注释解析</h1><p><em>注释1</em>：参看文章“<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44788542/article/details/115303125">GPIO推挽输出和开漏输出模式区别详解</a>”</p>
+<p><em>注释2</em>：参看文章“<a target="_blank" rel="noopener" href="https://shequ.stmicroelectronics.cn/thread-632277-1-1.html">STM32F4 GPIO八种模式及工作原理详解</a>”</p>
+<p><em>注释3</em>：需要在keil软件魔术手Options for Target‘GPIO’&#x2F;Output中勾选Browse Infomation，然后编译整个工程才可以跳转</p>
+<p><em>注释4</em>：如果在STM32CubeMX的Project Manager&#x2F;Code Generator&#x2F;Generated files中没有勾选Generate peripheral initialization as a pair of ‘c&#x2F;.h’ files per peripheral，则所有生成的代码都会在main.c中实现，而不是每个外设分成.c&#x2F;.h的形式</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程2 GPIO输出 - 点亮LED灯</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程2 GPIO输出 - 点亮LED灯/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>John Doe</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B1%20%E5%B7%A5%E7%A8%8B%E5%BB%BA%E7%AB%8B/" title="STM32CubeMX教程1 工程建立">
+                        <span class="hidden-mobile">STM32CubeMX教程1 工程建立</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
