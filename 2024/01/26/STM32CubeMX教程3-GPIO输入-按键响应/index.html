@@ -17,39 +17,36 @@
   <meta name="author" content="OSnotes">
   <meta name="keywords" content="">
   
-    <meta name="description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 2、实验目标使用STM32CubeMX软件建立一个STM32F407的空工程 3、建立流程3.1、打开STM32CubeMX软件如下图所示为STM32CubeMX软件主界面   3.2、开始建立">
+    <meta name="description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 2、实验目标使用STM32CubeMX软件配置STM32F407开发板的按键作为输入，利用按键输入使LED灯产生响应 3、实验流程3.0、前提知识对于所有的GPIO来说都是既可以作为输出引脚也可">
 <meta property="og:type" content="article">
-<meta property="og:title" content="STM32CubeMX教程1 工程建立">
-<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B1%20%E5%B7%A5%E7%A8%8B%E5%BB%BA%E7%AB%8B/index.html">
+<meta property="og:title" content="STM32CubeMX教程3 GPIO输入 - 按键响应">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B3-GPIO%E8%BE%93%E5%85%A5-%E6%8C%89%E9%94%AE%E5%93%8D%E5%BA%94/index.html">
 <meta property="og:site_name" content="OSnotes">
-<meta property="og:description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 2、实验目标使用STM32CubeMX软件建立一个STM32F407的空工程 3、建立流程3.1、打开STM32CubeMX软件如下图所示为STM32CubeMX软件主界面   3.2、开始建立">
+<meta property="og:description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 2、实验目标使用STM32CubeMX软件配置STM32F407开发板的按键作为输入，利用按键输入使LED灯产生响应 3、实验流程3.0、前提知识对于所有的GPIO来说都是既可以作为输出引脚也可">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.1.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.2.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.3.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.4.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.5.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.6.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.7.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.8.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.9.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.10.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.11.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.12.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.13.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.14.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.15.png">
-<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.16.png">
-<meta property="article:published_time" content="2024-01-26T02:46:16.000Z">
-<meta property="article:modified_time" content="2024-01-26T02:47:41.997Z">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.13.gif">
+<meta property="article:published_time" content="2024-01-26T03:52:16.000Z">
+<meta property="article:modified_time" content="2024-01-26T03:55:07.389Z">
 <meta property="article:author" content="OSnotes">
 <meta property="article:tag" content="STM32CubeMX">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.1.png">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.1.png">
   
   
   
-  <title>STM32CubeMX教程1 工程建立 - OSnotes</title>
+  <title>STM32CubeMX教程3 GPIO输入 - 按键响应 - OSnotes</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -244,7 +241,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="STM32CubeMX教程1 工程建立"></span>
+            <span id="subtitle" data-typed-text="STM32CubeMX教程3 GPIO输入 - 按键响应"></span>
           
         </div>
 
@@ -255,8 +252,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2024-01-26 10:46" pubdate>
-          2024年1月26日 上午
+        <time datetime="2024-01-26 11:52" pubdate>
+          2024年1月26日 中午
         </time>
       </span>
     
@@ -267,7 +264,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          798 字
+          1k 字
         
       </span>
     
@@ -278,7 +275,7 @@
         
         
         
-          7 分钟
+          9 分钟
         
       </span>
     
@@ -315,7 +312,7 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">STM32CubeMX教程1 工程建立</h1>
+            <h1 id="seo-header">STM32CubeMX教程3 GPIO输入 - 按键响应</h1>
             
             
               <div class="markdown-body">
@@ -324,62 +321,56 @@
 <p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
 <p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
 <p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
-<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件<font color="#fe2c24"><strong>建立一个STM32F407的空工程</strong></font></p>
-<h1 id="3、建立流程"><a href="#3、建立流程" class="headerlink" title="3、建立流程"></a>3、建立流程</h1><h2 id="3-1、打开STM32CubeMX软件"><a href="#3-1、打开STM32CubeMX软件" class="headerlink" title="3.1、打开STM32CubeMX软件"></a>3.1、打开STM32CubeMX软件</h2><p>如下图所示为STM32CubeMX软件主界面</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板的按键作为输入，利用按键输入使LED灯产生响应</p>
+<h1 id="3、实验流程"><a href="#3、实验流程" class="headerlink" title="3、实验流程"></a>3、实验流程</h1><h2 id="3-0、前提知识"><a href="#3-0、前提知识" class="headerlink" title="3.0、前提知识"></a>3.0、前提知识</h2><p>对于所有的GPIO来说都是既可以作为输出引脚也可以作为输入引脚使用，本开发板上有一个用户按键，可以作为本次实验的输入，如下图所示为用户按键的电路原理图，<font color="#fe2c24"><strong>当松开按键时，PA0为低电平；当按下按键时，PA0为高电平</strong></font> <em>（注释1）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
-<h2 id="3-2、开始建立工程"><a href="#3-2、开始建立工程" class="headerlink" title="3.2、开始建立工程"></a>3.2、开始建立工程</h2><p>单击ACCESS TO MCU SELECTOR</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+<h2 id="3-1、CubeMX相关配置"><a href="#3-1、CubeMX相关配置" class="headerlink" title="3.1、CubeMX相关配置"></a>3.1、CubeMX相关配置</h2><h3 id="3-1-0、工程基本配置"><a href="#3-1-0、工程基本配置" class="headerlink" title="3.1.0、工程基本配置"></a>3.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
-<h2 id="3-3、选择MCU"><a href="#3-3、选择MCU" class="headerlink" title="3.3、选择MCU"></a>3.3、选择MCU</h2><p>在弹出的MCU选择界面，搜索工程使用的MCU型号，然后选中该MCU，单击界面右上角Start Project</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
-<h2 id="3-4、进行必要配置"><a href="#3-4、进行必要配置" class="headerlink" title="3.4、进行必要配置"></a>3.4、进行必要配置</h2><h3 id="3-4-1、Pinout-＆-Configuration页面配置"><a href="#3-4-1、Pinout-＆-Configuration页面配置" class="headerlink" title="3.4.1、Pinout ＆ Configuration页面配置"></a>3.4.1、Pinout ＆ Configuration页面配置</h3><p>进入Pinout ＆ Configuration页面中，如下图所示，<font color="#fe2c24"><strong>对于空工程来说只需在Pinout ＆ Configuration页面中配置RCC和SYS</strong></font>，RCC中主要配置高速外部时钟HSE和低速外部时钟LSE，SYS中主要配置单片机的Debug模式</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="3-1-1、时钟树配置"><a href="#3-1-1、时钟树配置" class="headerlink" title="3.1.1、时钟树配置"></a>3.1.1、时钟树配置</h3><p>系统时钟使用8MHz外部高速时钟HSE，HCLK、PCLK1和PCLK2均设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
-<p><font color="#fe2c24"><strong>如果使用高速外部时钟HSE，则需要单片机PH0-OSC_IN和PH0-OSC_OUT两个引脚接入一颗4MHz~16MHz的陶瓷晶振</strong></font></p>
-<p><font color="#fe2c24"><strong>如果使用低速外部时钟LSE，则一般需要单片机PC14-OSC32_IN和PC15-OSC32_OUT两个引脚接入一颗32.768kHz的陶瓷晶振</strong></font></p>
-<p>如果开发板单片机的引脚PH0-OSC_IN和PH0-OSC_OUT在原理图上连接了一颗4MHz~16MHz晶体 &#x2F; 陶瓷晶振，那么HSE就选择Crystal&#x2F;Ceramic Resonator，否则就选择Disable</p>
-<p>同理如果PC14-OSC32_IN和PC15-OSC32_OUT两个引脚连接了一颗32.768kHz的晶体&#x2F;陶瓷晶振，那么LSE也选择Crystal&#x2F;Ceramic Resonator，否则一般直接选Disable即可</p>
-<p>笔者使用的开发板HSE外部接入了一颗8MHz的陶瓷晶振，LSE未接入任何晶振，因此配置如下图所示</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.5.png" srcset="/img/loading.gif" lazyload></div>
+<h3 id="3-1-2、外设参数配置"><a href="#3-1-2、外设参数配置" class="headerlink" title="3.1.2、外设参数配置"></a>3.1.2、外设参数配置</h3><p>在Pinout ＆ Configuration页面右边单片机引脚预览Pinout view中，寻找需要设置的具体GPIO，这里我们选择用户按键的PA0引脚，<font color="#fe2c24"><strong>左键单击引脚将引脚功能设置为GPIO_Input</strong></font></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
-<p><font color="#fe2c24"><strong>SYS中Debug模式表示MCU使用的下载调试模式，一般烧录程序会使用STLINK&#x2F;JTAG&#x2F;DAP等</strong></font>，按照自己的模式选择即可，笔者这里开发板板载了STLINK下载器，因此选择Serial Wire即可</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.6.png" srcset="/img/loading.gif" lazyload ></div>
+<p>当<font color="#be191c" style="background: #fef2f0"> GPIO mode </font>选择Input mode时，<font color="#be191c" style="background: #fef2f0"> GPIO Pull-up&#x2F;Pull-down </font>可以选择无上&#x2F;下拉、上拉和下拉</p>
+<p>无上&#x2F;下拉表示引脚输入状态完全由外部输入决定，称为浮空输入</p>
+<p>上拉表示当无外部输入时，此时引脚的状态被上拉至高电平</p>
+<p>同理，下拉表示当无外部输入时，此时引脚的状态被下拉至低电平</p>
+<p>根据用户按键的硬件原理图可以知道，该用户按键已经通过电阻进行外部下拉，因此无需我们软件配置上下拉（实际是否需要配置上&#x2F;下拉根据读者开发板按键硬件原理图决定）</p>
+<p>这里我们<font color="#fe2c24"><strong>选择输入模式，无上&#x2F;下拉</strong></font>，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.8.png" srcset="/img/loading.gif" lazyload ></div>
 
-<h3 id="3-4-2、Clock-Configuration页面配置"><a href="#3-4-2、Clock-Configuration页面配置" class="headerlink" title="3.4.2、Clock Configuration页面配置"></a>3.4.2、Clock Configuration页面配置</h3><p>参考下图调节即可</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+<h2 id="3-2、生成代码"><a href="#3-2、生成代码" class="headerlink" title="3.2、生成代码"></a>3.2、生成代码</h2><h3 id="3-2-0、配置Project-Manager页面"><a href="#3-2-0、配置Project-Manager页面" class="headerlink" title="3.2.0、配置Project Manager页面"></a>3.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
-<h3 id="3-4-3、Project-Manager页面配置"><a href="#3-4-3、Project-Manager页面配置" class="headerlink" title="3.4.3、Project Manager页面配置"></a>3.4.3、Project Manager页面配置</h3><p>主要设置工程名称，存储位置，工具链&#x2F;IDE</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="3-2-1、外设初始化调用流程"><a href="#3-2-1、外设初始化调用流程" class="headerlink" title="3.2.1、外设初始化调用流程"></a>3.2.1、外设初始化调用流程</h3><p>从生成的代码工程目录中打开keil工程，在MX_GPIO_Init(void)函数中会发现我们新添加的USER_KEY按键初始化代码，其模式为输入模式</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
-<h2 id="3-5、生成代码"><a href="#3-5、生成代码" class="headerlink" title="3.5、生成代码"></a>3.5、生成代码</h2><p>单击页面右上角GENERATE CODE生成代码，提示生成代码成功</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.10.png" srcset="/img/loading.gif" lazyload ></div>
+<h3 id="3-2-2、添加其他必要代码"><a href="#3-2-2、添加其他必要代码" class="headerlink" title="3.2.2、添加其他必要代码"></a>3.2.2、添加其他必要代码</h3><p>在主函数的主循环中添加按键扫描及响应函数，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
 
-<p>找到生成代码目录下MDK-ARM里的.uvprojx结尾的keil工程文件，双击打开，编译工程</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+<p>源代码如下 </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(USER_KEY_GPIO_Port,USER_KEY_Pin) == GPIO_PIN_SET)<br>&#123;<br>    HAL_Delay(<span class="hljs-number">10</span>);<br>    <span class="hljs-keyword">if</span>(HAL_GPIO_ReadPin(USER_KEY_GPIO_Port,USER_KEY_Pin) == GPIO_PIN_SET)<br>    &#123;<br>        HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin) ;<br>        <span class="hljs-keyword">while</span>(HAL_GPIO_ReadPin(USER_KEY_GPIO_Port,USER_KEY_Pin) == GPIO_PIN_SET);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
-<p>生成的工程代码结构主要有①单片机的启动文件②用户核心应用文件③HAL库驱动文件④单片机系统初始化文件</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.12.png" srcset="/img/loading.gif" lazyload ></div>
+<h1 id="4、常用函数"><a href="#4、常用函数" class="headerlink" title="4、常用函数"></a>4、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/**</span><br><span class="hljs-comment">  * @brief  读取某个GPIO当前的状态</span><br><span class="hljs-comment">  * @param  GPIOx：引脚组别（GPIOA - GPIOI）</span><br><span class="hljs-comment">  * @param  GPIO_Pin：引脚（GPIO_PIN_0 - GPIO_PIN_15）</span><br><span class="hljs-comment">  * @retval GPIO_PinState：低电平（GPIO_PIN_RESET）、高电平（GPIO_PIN_SET）</span><br><span class="hljs-comment">  */</span><br>GPIO_PinState <span class="hljs-title function_">HAL_GPIO_ReadPin</span><span class="hljs-params">(GPIO_TypeDef* GPIOx, <span class="hljs-type">uint16_t</span> GPIO_Pin)</span><br> <br><span class="hljs-comment">/*读取PA0当前状态并存储到Now_PinState变量中*/</span><br>Now_PinState = HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0);<br></code></pre></td></tr></table></figure>
 
-<p><font color="#fe2c24"><strong>用户添加代码需要在代码注释中指定的BEGIN和END之间，否则使用CubeMX重新构建工程之后，添加的代码会消失</strong></font></p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+<h1 id="5、烧录验证"><a href="#5、烧录验证" class="headerlink" title="5、烧录验证"></a>5、烧录验证</h1><p>烧录程序，当开发板上电后，四个颜色的LED全部点亮，然后每按下一次用户按键，绿色LED灯状态会发生翻转</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/3.13.gif" srcset="/img/loading.gif" lazyload></div>
 
-<h1 id="4、烧录验证"><a href="#4、烧录验证" class="headerlink" title="4、烧录验证"></a>4、烧录验证</h1><p>将开发板利用调试器与电脑连接，确保调试器驱动已安装，可以通过设备管理器查看驱动，如下图所示</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
-
-<p>单击魔术手，选择对应调试器并配置</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
-
-<p>单击LOAD，烧录程序</p>
-<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/1.16.png" srcset="/img/loading.gif" lazyload></div>
-
-<h1 id="5、小结"><a href="#5、小结" class="headerlink" title="5、小结"></a>5、小结</h1><p>当创建好空工程后，以后需要使用到MCU的什么功能，就可以重新打开这个STM32CubeMX工程，然后主要是在软件Pinout ＆ Configuration页面对功能进行配置，需要修改时钟在Clock Configuration页面配置，需要修改生成的工程及代码可以在Project Manager页面进行配置。</p>
-<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a target="_blank" rel="noopener" href="https://www.st.com/resource/zh/user_manual/um1718-stm32cubemx-for-stm32-configuration-and-initialization-c-code-generation-stmicroelectronics.pdf">um1718-stm32cubemx-for-stm32-configuration-and-initialization-c-code-generation-stmicroelectronics.pdf</a></p>
+<h1 id="6、注释解析"><a href="#6、注释解析" class="headerlink" title="6、注释解析"></a>6、注释解析</h1><p><em>注释1</em>：首先忽视掉R38和C38，因为笔者开发板上未焊接C38。当松开按键时，按键处相当于断路，此时PA0引脚经过R35、R39下拉至地，状态为低电平；当按下按键时，按键处相当于短路，此时PA0引脚经过R35被上拉至VDD，状态为高电平；</p>
 
                 
               </div>
@@ -404,8 +395,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>STM32CubeMX教程1 工程建立</div>
-      <div>http://example.com/2024/01/26/STM32CubeMX教程1 工程建立/</div>
+      <div>STM32CubeMX教程3 GPIO输入 - 按键响应</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程3-GPIO输入-按键响应/</div>
     </div>
     <div class="license-meta">
       
@@ -449,15 +440,21 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B2-GPIO%E8%BE%93%E5%87%BA-%E7%82%B9%E4%BA%AELED%E7%81%AF/" title="STM32CubeMX教程2 GPIO输出 - 点亮LED灯">
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B4-EXTI-%E6%8C%89%E9%94%AE%E5%A4%96%E9%83%A8%E4%B8%AD%E6%96%AD/" title="STM32CubeMX教程4 EXTI 按键外部中断">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">STM32CubeMX教程2 GPIO输出 - 点亮LED灯</span>
+                        <span class="hidden-mobile">STM32CubeMX教程4 EXTI 按键外部中断</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
                   </article>
                   <article class="post-next col-6">
                     
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B2-GPIO%E8%BE%93%E5%87%BA-%E7%82%B9%E4%BA%AELED%E7%81%AF/" title="STM32CubeMX教程2 GPIO输出 - 点亮LED灯">
+                        <span class="hidden-mobile">STM32CubeMX教程2 GPIO输出 - 点亮LED灯</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
                     
                   </article>
                 </div>

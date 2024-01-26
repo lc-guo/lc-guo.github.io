@@ -1,0 +1,760 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-site-verification" content="a48pLOiiu4De489Jmr-sGfeIVI9LPCKPyVz6FuaaUIs" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="OSnotes">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 2、实验目标使用STM32CubeMX软件配置STM32F407开发板通过用户按键产生外部中断，然后在中断中翻转绿色LED灯的状态 3、中断系统概述3.1、中断向量表STM32F4系列有10个系">
+<meta property="og:type" content="article">
+<meta property="og:title" content="STM32CubeMX教程4 EXTI 按键外部中断">
+<meta property="og:url" content="http://example.com/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B4-EXTI-%E6%8C%89%E9%94%AE%E5%A4%96%E9%83%A8%E4%B8%AD%E6%96%AD/index.html">
+<meta property="og:site_name" content="OSnotes">
+<meta property="og:description" content="1、准备材料开发板（STM32F407G-DISC1） STM32CubeMX软件（Version 6.10.0） keil µVision5 IDE（MDK-Arm） ST-LINK&#x2F;V2驱动 2、实验目标使用STM32CubeMX软件配置STM32F407开发板通过用户按键产生外部中断，然后在中断中翻转绿色LED灯的状态 3、中断系统概述3.1、中断向量表STM32F4系列有10个系">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.1.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.2.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.3.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.4.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.5.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.6.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.7.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.8.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.9.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.10.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.11.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.12.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.13.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.14.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.15.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.16.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.17.png">
+<meta property="og:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.18.gif">
+<meta property="article:published_time" content="2024-01-26T03:55:31.000Z">
+<meta property="article:modified_time" content="2024-01-26T03:55:45.389Z">
+<meta property="article:author" content="OSnotes">
+<meta property="article:tag" content="STM32CubeMX">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.1.png">
+  
+  
+  
+  <title>STM32CubeMX教程4 EXTI 按键外部中断 - OSnotes</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":"imOwOY39l0KJ0u0REQt9v0sM-gzGzoHsz","app_key":"PBtaRKGDHiHzGwgwnyI6a8N8","server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+    <!-- Google tag (gtag.js) -->
+    <script async>
+      if (!Fluid.ctx.dnt) {
+        Fluid.utils.createScript("https://www.googletagmanager.com/gtag/js?id=", function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          gtag('js', new Date());
+          gtag('config', '');
+        });
+      }
+    </script>
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>OSnotes</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="STM32CubeMX教程4 EXTI 按键外部中断"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-01-26 11:55" pubdate>
+          2024年1月26日 中午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          16 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">STM32CubeMX教程4 EXTI 按键外部中断</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="1、准备材料"><a href="#1、准备材料" class="headerlink" title="1、准备材料"></a>1、准备材料</h1><p>开发板（<a target="_blank" rel="noopener" href="https://www.st.com/en/evaluation-tools/stm32f4discovery.html">STM32F407G-DISC1</a>）</p>
+<p>STM32CubeMX软件（<a target="_blank" rel="noopener" href="https://www.st.com/en/development-tools/stm32cubemx.html">Version 6.10.0</a>）</p>
+<p>keil µVision5 IDE（<a target="_blank" rel="noopener" href="https://www.keil.com/download/product/">MDK-Arm</a>）</p>
+<p><a target="_blank" rel="noopener" href="https://www.st.com/zh/development-tools/stsw-link009.html">ST-LINK&#x2F;V2驱动</a></p>
+<h1 id="2、实验目标"><a href="#2、实验目标" class="headerlink" title="2、实验目标"></a>2、实验目标</h1><p>使用STM32CubeMX软件配置STM32F407开发板<font color="#fe2c24"><strong>通过用户按键产生外部中断</strong></font>，然后在中断中翻转绿色LED灯的状态</p>
+<h1 id="3、中断系统概述"><a href="#3、中断系统概述" class="headerlink" title="3、中断系统概述"></a>3、中断系统概述</h1><h2 id="3-1、中断向量表"><a href="#3-1、中断向量表" class="headerlink" title="3.1、中断向量表"></a>3.1、中断向量表</h2><p>STM32F4系列有10个系统中断和82个可屏蔽的外部中断 <em>（注释1）</em>，除系统Reset中断外每个中断均有对应的中断服务函数，如下图所示为中断向量表</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.1.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="3-2、中断优先级"><a href="#3-2、中断优先级" class="headerlink" title="3.2、中断优先级"></a>3.2、中断优先级</h2><p>嵌套向量中断控制器（NVIC）采用4位二进制数表示中断优先级，<font color="#fe2c24"><strong>这4位二进制数表示的中断优先级又分为了抢占优先级和次优先级</strong></font>，其中根据抢占优先级所使用的二进制位数分成了5个组，分为NVIC_PRIORITYGROUP_0 ~ NVIC_PRIORITYGROUP_4，分别表示抢占优先级使用0~4位二进制数表示，具体规则如下几点所述：</p>
+<ol>
+<li>高抢占优先级的中断可以打断低抢占优先级的中断</li>
+<li>抢占优先级和次优先级均相同的两个中断谁先发生谁就先执行</li>
+<li>抢占优先级相同但次优先级不同的两个中断，后触发的中断需要等待先触发的中断执行完毕才可以执行</li>
+</ol>
+<h1 id="4、实验流程"><a href="#4、实验流程" class="headerlink" title="4、实验流程"></a>4、实验流程</h1><h2 id="4-0、前提知识"><a href="#4-0、前提知识" class="headerlink" title="4.0、前提知识"></a>4.0、前提知识</h2><p>STM32F407一共有23个外部中断，其中包含16个外部中断（EXTI0~EXTI15）和7个对应不同的事件的中断，如下表所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.2.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>每一组GPIO的0号引脚均可以作为EXTI0的输入，同理，每一组GPIO的15号引脚均可以作为EXTI15的输入，具体映射如下图所示 <em>（注释2）</em></p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.3.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="4-1、CubeMX相关配置"><a href="#4-1、CubeMX相关配置" class="headerlink" title="4.1、CubeMX相关配置"></a>4.1、CubeMX相关配置</h2><h3 id="4-1-0、工程基本配置"><a href="#4-1-0、工程基本配置" class="headerlink" title="4.1.0、工程基本配置"></a>4.1.0、工程基本配置</h3><p>打开STM32CubeMX软件，单击ACCESS TO MCU SELECTOR选择开发板MCU（选择你使用开发板的主控MCU型号），选中MCU型号后单击页面右上角Start Project开始工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.4.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.5.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>开始工程之后在配置主页面System Core&#x2F;RCC中配置HSE&#x2F;LSE晶振，在System Core&#x2F;SYS中配置Debug模式，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.6.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.7.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细工程建立内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”</p>
+<h3 id="4-1-1、时钟树配置"><a href="#4-1-1、时钟树配置" class="headerlink" title="4.1.1、时钟树配置"></a>4.1.1、时钟树配置</h3><p>系统时钟使用8MHz外部高速时钟HSE，HCLK、PCLK1和PCLK2均设置为STM32F407能达到的最高时钟频率，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.8.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="4-1-2、外设参数配置"><a href="#4-1-2、外设参数配置" class="headerlink" title="4.1.2、外设参数配置"></a>4.1.2、外设参数配置</h3><p>在Pinout ＆ Configuration页面右边单片机引脚预览Pinout view中，寻找需要设置的具体GPIO，这里我们仍然<font color="#fe2c24"><strong>选择用户按键的PA0引脚，但是右键单击将其配置为GPIO_EXTI0</strong></font></p>
+<p>在页面的中间GPIO Mode and Configuration栏中选中PA0引脚，然后在下方对其引脚进行配置，外部中断主要配置<font color="#be191c" style="background: #fef2f0">   GPIO mode </font>和<font color="#be191c" style="background: #fef2f0"> GPIO Pull-up&#x2F;Pull-down </font></p>
+<p><font color="#be191c" style="background: #fef2f0"> GPIO mode </font>：有外部中断上升沿、下降沿、上&#x2F;下降沿触发、外部事件上升沿、下降沿和上&#x2F;下降沿触发共计6种模式</p>
+<p><font color="#be191c" style="background: #fef2f0"> GPIO Pull-up&#x2F;Pull-down </font>：选择无上&#x2F;下拉，根据“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17938621">STM32CubeMX教程3 GPIO输入 - 按键响应</a>”实验“3.1.2、外设参数配置”小节可知开发板上的按键已经使用电阻进行外部下拉</p>
+<p>我们使用的是外部中断，并且在按键按下松开时既会产生上升沿也会产生下降沿，因此笔者这里<font color="#fe2c24"><strong>选择下降沿触发，无上&#x2F;下拉的外部中断模式</strong></font>，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.9.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="4-1-3、外设中断配置"><a href="#4-1-3、外设中断配置" class="headerlink" title="4.1.3、外设中断配置"></a>4.1.3、外设中断配置</h3><p>将引脚配置为中断模式后，还需要<font color="#fe2c24"><strong>在NVIC中启动其具体的中断</strong></font>，单击页面左侧的NVIC配置，选择合适的中断优先级组，然后启动对应的中断，这里即用户按键引脚PA0的中断EXTline0 interrupt，具体配置如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.10.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h2 id="4-2、生成代码"><a href="#4-2、生成代码" class="headerlink" title="4.2、生成代码"></a>4.2、生成代码</h2><h3 id="4-2-0、配置Project-Manager页面"><a href="#4-2-0、配置Project-Manager页面" class="headerlink" title="4.2.0、配置Project Manager页面"></a>4.2.0、配置Project Manager页面</h3><p>单击进入Project Manager页面，在左边Project分栏中修改工程名称、工程目录和工具链，然后在Code Generator中勾选“Gnerate peripheral initialization as a pair of ‘c&#x2F;h’ files per peripheral”，最后单击页面右上角GENERATE CODE生成工程，具体如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.11.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.12.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>详细Project Manager配置内容读者可以阅读“<a target="_blank" rel="noopener" href="https://www.cnblogs.com/lc-guo/p/17937268">STM32CubeMX教程1 工程建立</a>”实验3.4.3小节</p>
+<h3 id="4-2-1、外设初始化调用流程"><a href="#4-2-1、外设初始化调用流程" class="headerlink" title="4.2.1、外设初始化调用流程"></a>4.2.1、外设初始化调用流程</h3><p>当仅仅配置了引脚为外部中断模式，而不启动对应的外部中断时，在生成的代码引脚初始化函数MX_GPIO_Init中只会增加如下图框中所示的代码，此时由于未使能中断，因此中断不能正常响应，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.13.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="4-2-2、外设中断调用流程"><a href="#4-2-2、外设中断调用流程" class="headerlink" title="4.2.2、外设中断调用流程"></a>4.2.2、外设中断调用流程</h3><p>当配置了引脚为外部中断模式，且使能了引脚对应的中断，首先会在HAL_Init(void)函数中设置中断优先级组（系统默认开启了一些中断，因此即使我们不使能外部中断该函数也会被其他开启的中断调用从而设置中断优先级组），如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.14.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>另外除了上述的引脚模式设置代码外，还会在引脚初始化函数MX_GPIO_Init中新增加中断优先级设置及对应中断使能的函数，如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.15.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<p>然后在stm32f4xx_it.c文件中会出现对应的中断服务子函数void EXTI0_IRQHandler(void) <em>（注释3）</em>，中断服务子函数中调用了HAL_GPIO_EXTI_IRQHandler(GPIO_Pin)函数，跳转过去在函数内部执行了</p>
+<ol>
+<li>检测该中断线是否有挂起的外部中断</li>
+<li>如果有则清除挂起的外部中断线</li>
+<li>然后调用外部中断回调函数HAL_GPIO_EXTI_Callback(GPIO_Pin)（此函数为虚函数，可由用户自定义）</li>
+</ol>
+<p>具体流程如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.16.png" srcset="/img/loading.gif" lazyload width = "700"></div>
+
+<h3 id="4-2-3、添加其他必要代码"><a href="#4-2-3、添加其他必要代码" class="headerlink" title="4.2.3、添加其他必要代码"></a>4.2.3、添加其他必要代码</h3><p>此时<font color="#fe2c24"><strong>用户只需要重新实现HAL_GPIO_EXTI_Callback(GPIO_Pin)函数即可</strong></font>，在该函数体内可以实现中断触发后想要实现的功能代码，笔者将该函数重新实现在了gpio.c中</p>
+<p>值得注意的是在外部中断回调函数中使用到了HAL库延时函数来对按键消抖，此处可能会存在严重的问题 <em>（注释4）</em></p>
+<p>具体代码如下图所示</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.17.png" srcset="/img/loading.gif" lazyload></div>
+
+<p>​源代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_GPIO_EXTI_Callback</span><span class="hljs-params">(<span class="hljs-type">uint16_t</span> GPIO_Pin)</span><br>&#123;<br>    <span class="hljs-keyword">if</span>(GPIO_Pin == USER_KEY_Pin)<br>    &#123;<br>        HAL_Delay(<span class="hljs-number">10</span>);<br>        HAL_GPIO_TogglePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="5、常用函数"><a href="#5、常用函数" class="headerlink" title="5、常用函数"></a>5、常用函数</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*所有外部中断触发回调服务子函数，通过GPIO_Pin判断是哪个中断线，然后在函数体内做相应动作*/</span><br><span class="hljs-type">void</span> <span class="hljs-title function_">HAL_GPIO_EXTI_Callback</span><span class="hljs-params">(<span class="hljs-type">uint16_t</span> GPIO_Pin)</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="6、烧录验证"><a href="#6、烧录验证" class="headerlink" title="6、烧录验证"></a>6、烧录验证</h1><p>烧录程序，然后可以观察到当开发板上电后，四个颜色LED全部点亮，然后每按下一次用户按键，绿色LED灯状态均会发生翻转</p>
+<div align=center><img src="https://blog-picture-240114.oss-cn-beijing.aliyuncs.com/STM32CubeMX/4.18.gif" srcset="/img/loading.gif" lazyload ></div>
+
+<h1 id="7、注释解析"><a href="#7、注释解析" class="headerlink" title="7、注释解析"></a>7、注释解析</h1><p><em>注释1</em>：具体的中断向量表可以在keil工程目录启动文件startup_stm32f407xx.s中查看，这里的中断数量笔者是根据启动文件中的数量计算的，其中Reserved的中断向量未计数</p>
+<p><em>注释2</em>：图片来自STM32F4xx中文参考手册.pdf</p>
+<p><em>注释3</em>：以后对于每一个外设中断，启用后都会在stm32f4xx_it.c文件中找到对应的中断服务函数</p>
+<p><em>注释4</em>：<font color="#fe2c24">HAL库延时函数HAL_Delay使用的是系统滴答定时器作为时间基准，而系统滴答定时器同为中断，在外部中断中触发系统滴答定时器中断会涉及中断优先级的问题</font>，此时需保证滴答定时器的抢占优先级高于我们所使用的外部中断，否则会出现卡死的现象发生</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/STM32CubeMX/" class="print-no-link">#STM32CubeMX</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>STM32CubeMX教程4 EXTI 按键外部中断</div>
+      <div>http://example.com/2024/01/26/STM32CubeMX教程4-EXTI-按键外部中断/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>OSnotes</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2024年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B5-TIM-%E5%AE%9A%E6%97%B6%E5%99%A8%E6%A6%82%E8%BF%B0%E5%8F%8A%E5%9F%BA%E6%9C%AC%E5%AE%9A%E6%97%B6%E5%99%A8/" title="STM32CubeMX教程5 TIM 定时器概述及基本定时器">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">STM32CubeMX教程5 TIM 定时器概述及基本定时器</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/01/26/STM32CubeMX%E6%95%99%E7%A8%8B3-GPIO%E8%BE%93%E5%85%A5-%E6%8C%89%E9%94%AE%E5%93%8D%E5%BA%94/" title="STM32CubeMX教程3 GPIO输入 - 按键响应">
+                        <span class="hidden-mobile">STM32CubeMX教程3 GPIO输入 - 按键响应</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
